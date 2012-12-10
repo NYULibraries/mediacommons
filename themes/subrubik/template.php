@@ -31,7 +31,3 @@ function subrubik_preprocess_button(&$vars) {
   }
   
 }
-
-function subrubik_preprocess_field(&$variables, $hook) {
-  die('here');
-}
