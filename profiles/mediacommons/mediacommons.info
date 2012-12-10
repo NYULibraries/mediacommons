@@ -1,0 +1,69 @@
+name = MediaCommons
+description = Installation Profile for MediaCommons
+core = 7.x
+dependencies[] = block
+dependencies[] = color
+dependencies[] = comment
+dependencies[] = contextual
+dependencies[] = dashboard
+dependencies[] = locale
+dependencies[] = node
+dependencies[] = text
+dependencies[] = help
+dependencies[] = user
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = dblog
+dependencies[] = search
+dependencies[] = shortcut
+dependencies[] = toolbar
+dependencies[] = overlay
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = rdf
+
+dependencies[] = ctools
+dependencies[] = diff
+dependencies[] = features
+dependencies[] = libraries
+dependencies[] = transliteration
+dependencies[] = rules
+dependencies[] = autosave
+dependencies[] = entity
+dependencies[] = entity_token
+dependencies[] = edit
+dependencies[] = fape
+dependencies[] = imagemagick
+dependencies[] = transliteration
+dependencies[] = realname
+dependencies[] = token
+
+dependencies[] = views
+dependencies[] = views_ui
+
+dependencies[] = apachesolr
+dependencies[] = apachesolr_search
+
+dependencies[] = date
+dependencies[] = date_api
+dependencies[] = date_popup
+dependencies[] = date_views
+
+dependencies[] = link
+dependencies[] = field_group
+dependencies[] = references
+dependencies[] = node_reference
+dependencies[] = user_reference
+dependencies[] = imagefield_crop
+
+dependencies[] = tao
+dependencies[] = rubik
+dependencies[] = subrubik
+dependencies[] = nodeformcols
+
+files[] = mediacommons.profile

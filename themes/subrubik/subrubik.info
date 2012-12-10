@@ -1,0 +1,15 @@
+name = Sub Rubik
+description = Clean admin theme.
+base theme = rubik
+core = 7.x
+engine = phptemplate
+
+regions[content] = Content
+regions[help] = Help
+regions[page_top] = Page top
+regions[page_bottom] = Page bottom
+
+scripts[] = js/subrubik.js
+
+; Support shortcut module links
+settings[shortcut_module_link] = 1
