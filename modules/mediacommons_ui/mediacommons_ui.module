@@ -1,0 +1,125 @@
+<?php
+
+// http://drupal.stackexchange.com/questions/30232/how-to-theme-a-radio-button-field-on-node-edit-form
+
+/**
+ * Implementation of hook_perm().
+ */
+function mediacommons_ui_permission() {
+  return array(
+    'access mediacommons content' => array(
+      'title' => t('Access mediacommons content'),
+      'description' => t(''), 
+    ),
+    'contribute content' => array(
+      'title' => t('Contribute content'),
+      'description' => t(''), 
+    ),
+    'contribute content cluster' => array(
+      'title' => t('Contribute cluster'),
+      'description' => t(''), 
+    ),
+    'promote cluster content' => array(
+      'title' => t('Promote cluster'),
+      'description' => t(''), 
+    ),
+    'set current cluster' => array(
+      'title' => t('Set current cluster'),
+      'description' => t(''), 
+    ),
+    'set upcoming cluster' => array(
+      'title' => t('Set upcoming cluster'),
+      'description' => t(''), 
+    ),
+    'admin contributors content' => array(
+      'title' => t('Admin contributors content'),
+      'description' => t(''), 
+    ),
+    'access mediacommons dashboard' => array(
+      'title' => t('Access mediacommons dashboard'),
+      'description' => t(''), 
+    ),
+  );
+}
+
+function mediacommons_ui_menu() {
+
+  $items['contribute'] = array(
+    'title' => t('Contribute'),
+    'page callback' => 'mediacommons_ui_contribute_page',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'weight' => 1,
+    'file' => 'inc/mediacommons_ui.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['contribute/dashboard'] = array(
+    'title' => t('Administrate site'),
+    'description' => 'Manage users, set current cluster and upcoming clusters.',
+    'page callback' => 'mediacommons_ui_admin_page',
+    'page arguments' => array(1),
+    'access arguments' => array('access dashboard'),
+    'weight' => 3,
+    'file' => 'inc/mediacommons_ui.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['contribute/dashboard/set-current-cluster'] = array(
+    'title' => 'Set current cluster',
+    'description' => 'Set current cluster, selected item will be displayed in the frontpage.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mediacommons_ui_set_current_cluster'),
+    'access arguments' => array('set current cluster'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'inc/mediacommons_ui.pages.inc',
+  );
+
+  $items['contribute/dashboard/set-upcoming-cluster'] = array(
+    'title' => 'Set upcoming cluster',
+    'description' => 'Selected item will be display as upcoming cluster in frontpage',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mediacommons_ui_page_set_upcoming_cluster'),
+    'access arguments' => array('set upcoming cluster'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'inc/mediacommons_ui.pages.inc',
+  );
+
+  return $items;
+
+}
+
+function mediacommons_ui_preprocess_button(&$variables) {
+  $element = &$variables['element'];
+  if (isset($element['#value']) && isset($element['#name'])) {    
+    switch ($element['#name']) {
+      case 'field_contributed_piece_add_more' :
+        $element['#value'] = t('Add another contributed piece');
+        break;
+
+      case 'field_contributors_add_more' :
+        $element['#value'] = t('Add another contributor');
+        break;
+
+      case 'field_additional_authors_add_more' :
+        $element['#value'] = t('Add another author');
+        break;
+
+      case 'field_clusters_add_more' :
+        $element['#value'] = t('Add another cluster');
+        break;
+    }
+  }
+}
+
+function mediacommons_ui_preprocess_textfield(&$variables) {
+  $element = &$variables['element'];
+  if ($element['#name'] == 'title') {
+    $element['#attributes']['placeholder'] = t('Untitled');
+  }
+}
+
+function mediacommons_ui_form_alter(&$form, &$form_state, $form_id) {
+	// dpm($form_id);
+	// dpm($form);
+}
