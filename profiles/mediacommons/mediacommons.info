@@ -27,6 +27,8 @@ dependencies[] = field_ui
 dependencies[] = file
 dependencies[] = rdf
 
+dependencies[] = mediacommons_feature
+
 dependencies[] = ctools
 dependencies[] = diff
 dependencies[] = features
