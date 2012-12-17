@@ -2,6 +2,63 @@
 
 // http://drupal.stackexchange.com/questions/30232/how-to-theme-a-radio-button-field-on-node-edit-form
 
+function mediacommons_ui_init() {
+  
+  $path_is_admin = path_is_admin(current_path());
+  
+  if ($path_is_admin) {
+    global $user;
+    
+    $menu_object = menu_get_object();
+    
+    $user->contribute = array(
+      'clusters_can_contribute' => mediacommons_ui_clusters_user_can_contribute(),
+      'contributed_piece_can_contribute' => mediacommons_ui_additional_authors(),        
+    );
+    
+    if (isset($menu_object)) {
+      
+      $user->contribute += array(
+        'current_nid' => $menu_object->nid,
+        'current_uid' => $menu_object->uid,
+        'current_title' => $menu_object->title,
+        'type' => $menu_object->type,
+        'path_is_admin' => $path_is_admin,
+      );
+      
+      /** primary author */
+      if ($user->uid == $menu_object->uid) {
+        $user->contribute += array(
+          'contributor' => TRUE,
+          'role' => 'primary author',
+        );
+      }
+      /** admin, additional author or no privileges */
+      else {
+        /** Check if user is admin or an additional author **/
+        if (in_array('administrator', $user->roles)) {
+          $user->contribute += array(
+            'contributor' => TRUE,
+            'role' => 'administrator',
+          );
+        }
+        else if (in_array($user->contribute['current_nid'], $user->contribute['contributed_piece_can_contribute'])) {
+          $user->contribute += array(
+            'contributor' => TRUE,
+            'role' => 'additional author',
+          );
+        }
+        else {
+          $user->contribute += array(
+            'contributor' => FALSE,
+            'role' => 'no-privilege',
+          );
+        }
+      }
+    }
+  }
+}
+
 /**
  * Implementation of hook_perm().
  */
@@ -44,7 +101,7 @@ function mediacommons_ui_permission() {
 
 function mediacommons_ui_menu() {
 
-  $items['contribute'] = array(
+  $items['admin/contribute'] = array(
     'title' => t('Contribute'),
     'page callback' => 'mediacommons_ui_contribute_page',
     'page arguments' => array(1),
@@ -54,7 +111,7 @@ function mediacommons_ui_menu() {
     'type' => MENU_LOCAL_TASK,
   );
 
-  $items['contribute/dashboard'] = array(
+  $items['admin/contribute/dashboard'] = array(
     'title' => t('Administrate site'),
     'description' => 'Manage users, set current cluster and upcoming clusters.',
     'page callback' => 'mediacommons_ui_admin_page',
@@ -65,7 +122,7 @@ function mediacommons_ui_menu() {
     'type' => MENU_LOCAL_TASK,
   );
 
-  $items['contribute/dashboard/set-current-cluster'] = array(
+  $items['admin/contribute/dashboard/set-current-cluster'] = array(
     'title' => 'Set current cluster',
     'description' => 'Set current cluster, selected item will be displayed in the frontpage.',
     'page callback' => 'drupal_get_form',
@@ -75,7 +132,7 @@ function mediacommons_ui_menu() {
     'file' => 'inc/mediacommons_ui.pages.inc',
   );
 
-  $items['contribute/dashboard/set-upcoming-cluster'] = array(
+  $items['admin/contribute/dashboard/set-upcoming-cluster'] = array(
     'title' => 'Set upcoming cluster',
     'description' => 'Selected item will be display as upcoming cluster in frontpage',
     'page callback' => 'drupal_get_form',
@@ -89,37 +146,199 @@ function mediacommons_ui_menu() {
 
 }
 
+function mediacommons_ui_additional_authors() {
+  global $user;
+
+  $mediacommons_ui_additional_author = &drupal_static(__FUNCTION__, array());
+
+  $query = new EntityFieldQuery;
+
+  $result = $query
+  ->entityCondition('entity_type', 'node')
+  ->fieldCondition('field_additional_authors', 'uid', $user->uid, '=')
+  ->execute();
+
+  if (isset($result['node'])) {
+    $mediacommons_ui_additional_author = array_keys($result['node']);
+  }
+
+  return $mediacommons_ui_additional_author;
+
+}
+
+function mediacommons_ui_clusters_user_can_contribute() {
+  global $user;
+
+  $clusters_user_can_contribute = &drupal_static(__FUNCTION__, array());
+
+  $query = new EntityFieldQuery;
+
+  $result = $query
+  ->entityCondition('entity_type', 'node')
+  ->entityCondition('bundle', 'cluster')
+  ->fieldCondition('field_contributors', 'uid', $user->uid, '=')
+  ->execute();
+
+  if (isset($result['node'])) {
+    $clusters_user_can_contribute = array_keys($result['node']);
+  }
+
+  return $clusters_user_can_contribute;
+
+}
+
 function mediacommons_ui_preprocess_button(&$variables) {
-  $element = &$variables['element'];
-  if (isset($element['#value']) && isset($element['#name'])) {    
-    switch ($element['#name']) {
-      case 'field_contributed_piece_add_more' :
-        $element['#value'] = t('Add another contributed piece');
-        break;
+  
+  global $user;
+  
+  if (isset($user->contribute)) {
 
-      case 'field_contributors_add_more' :
-        $element['#value'] = t('Add another contributor');
-        break;
+    $element = &$variables['element'];
+    
+    if (
+        $element['#type'] == 'submit' /** submit buttons */
+        && 
+        isset($user->contribute['current_nid']) /** is a node */ 
+        && 
+        $user->uid != $user->contribute['current_uid'] /** not the primary contributor */
+        &&
+        !in_array('administrator', $user->roles) /** not an administrator */
+        &&
+        !in_array($user->contribute['current_nid'], $user->contribute['contributed_piece_can_contribute']) /** not a additional contributor */        
+    ) {
+      
+      $element['#attributes'] = array(
+        'disabled' => 'disabled',
+        'class' => array('no-contributor-permission element-invisible')
+      );
 
-      case 'field_additional_authors_add_more' :
-        $element['#value'] = t('Add another author');
-        break;
+    }
+    
+    if (isset($element['#value']) && isset($element['#name'])) {    
+      switch ($element['#name']) {
+        case 'field_contributed_piece_add_more' :
+          $element['#value'] = t('Add another contributed piece');
+          break;
 
-      case 'field_clusters_add_more' :
-        $element['#value'] = t('Add another cluster');
-        break;
+        case 'field_contributors_add_more' :
+          $element['#value'] = t('Add another contributor');
+          break;
+
+        case 'field_additional_authors_add_more' :
+          $element['#value'] = t('Add another author');
+          break;
+
+        case 'field_clusters_add_more' :
+          $element['#value'] = t('Add another cluster');
+          break;
+      }
+    }
+    
+  }
+}
+
+function mediacommons_ui_preprocess_container(&$variables) {
+  global $user;
+  
+  if (isset($user->contribute)) {
+    $element = &$variables['element'];
+    if (isset($element['#id'])) {
+      switch ($element['#id']) {
+        case 'edit-field-video-embed-link' :
+        case 'edit-field-representative-image' :
+        case 'edit-field-tease-image' :
+          $element['#attributes']['class'][] = 'invisible-element';
+          break;
+      }
     }
   }
 }
 
 function mediacommons_ui_preprocess_textfield(&$variables) {
-  $element = &$variables['element'];
-  if ($element['#name'] == 'title') {
-    $element['#attributes']['placeholder'] = t('Untitled');
+  global $user;
+  
+  if (isset($user->contribute)) {
+    $element = &$variables['element'];
+	  if ($element['#name'] == 'title') {
+      $element['#attributes']['placeholder'] = t('Untitled');
+    }
   }
 }
 
-function mediacommons_ui_form_alter(&$form, &$form_state, $form_id) {
-	// dpm($form_id);
-	// dpm($form);
+function mediacommons_ui_preprocess_checkbox(&$variables) {
+  global $user;
+  
+  if (isset($user->contribute) && !in_array('administrator', $user->roles)) { 
+    $element = &$variables['element'];
+    
+    if (isset($element['#parents']) && isset($element['#parents'][0]) && $element['#parents'][0] == 'field_clusters') {
+      /** user have permission to add piece to this cluster */
+      if (isset($element['#return_value']) && !in_array($element['#return_value'], $user->contribute['clusters_can_contribute'])) {
+        
+        $element['#attributes'] = array(
+          'disabled' => 'disabled',
+          'class' => array('no-contributor-permission')
+        );
+      }
+
+      /** if is already checked and user is not the cluster manager; disable the field and mark as readonly */
+      if ($element['#checked']) {
+        $element['#attributes'] = array(
+          'disabled' => 'disabled',
+          'class' => array('disabled')
+        );
+      }
+    }
+  }
+}
+
+function mediacommons_ui_add_assets() {
+	$module_path = drupal_get_path('module', 'mediacommons_ui');
+  drupal_add_css( $module_path . '/mediacommons_ui.css', 'module');
+  drupal_add_js( $module_path . '/js/mediacommons_ui.js', 'file');	
+}
+
+function mediacommons_ui_form_cluster_node_form_alter(&$form, &$form_state, $form_id) {
+  
+  /** Add CSS and JS files */
+	mediacommons_ui_add_assets();
+	
+  $field = field_get_items('node', $form['#node'], 'field_type');
+
+  if (isset($field[0])) {
+    switch ($field[0]['value']) {
+      case 0 :
+        $form['#attributes']['class'][] = 'node-cluster-type-video';          
+        break;
+          
+      case 1 :
+        $form['#attributes']['class'][] = 'node-cluster-type-image';
+        break;
+    }
+  }
+}
+
+/** See: http://api.drupal.org/api/drupal/modules%21node%21node.module/function/template_preprocess_node/7 */
+function mediacommons_ui_preprocess_node(&$variables) {
+  /** dpm($variables); */
+}
+
+function mediacommons_ui_form_contributed_piece_node_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+
+  mediacommons_ui_add_assets();
+  
+  /** indication of that this form was process by the editoriar workflow module */
+  $form['#attributes']['class'][] = 'contributor';
+  
+  if (isset($user->contribute['contributor'])) {
+    $form['#attributes']['class'][] = $user->contribute['role'];
+    if ($user->contribute['contributor']) {
+      drupal_set_message(t('Contributing as @contributor.', array('@contributor' => $user->contribute['role'])), 'status');
+    }
+    else {
+      drupal_set_message(t('You are not allow to edit @title. If you are a contributor to this piece ask the primary author to add you as an additional author.', array('@title' => $user->contribute['current_title'])), 'warning');      
+    }
+  }
+
 }

@@ -1,0 +1,24 @@
+.invisible-element {
+  display: none;
+}
+
+.contributor.no-privilege #edit-actions {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+}
+
+.page-node-add-cluster .field-name-field-representative-image,
+.node-cluster-type-video .field-name-field-video-embed-link,
+.node-cluster-type-video field-name-field-tease-image, 
+.node-cluster-type-image .field-name-field-representative-image
+{
+  display: block;
+}
+
+.tao #edit-field-document-textarea-body label,
+.tao  #edit-field-document-textarea-body-und-0-format,
+.tao .field-name-field-period .date-float,
+.tao .field-name-field-period .description
+  display: none;
+  visibility: hidden;
+}

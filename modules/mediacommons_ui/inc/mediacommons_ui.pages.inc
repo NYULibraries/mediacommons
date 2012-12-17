@@ -5,12 +5,21 @@ function mediacommons_ui_contribute_page() {
 
   global $user;
 
-  $output = '';
+  $output = NULL;
+   
+  $pattern = $replacement = $items = array(); 
   
   $types = node_type_get_types();
-
-  $pattern = $replacement = array(); 
-  $output .= t('<h2 class="title">Create New Content</h2>');
+  
+  $output .= theme('html_tag', array(
+    'element' => array(
+      '#tag' => 'h2',
+      '#attributes' => array(
+        'class' => 'title',
+        ),
+      '#value' => t('Create New Content'),
+    ),
+  ));
 
   foreach( (array)$types as $type ) {   
     if (user_access('create ' . $type->type . ' content')) {
@@ -43,7 +52,6 @@ function mediacommons_ui_contribute_page() {
 
   if (user_access('contribute content cluster')) {
 
-    $output .= t('<h2 class="title">Clusters I Can Contribute To</h2>');
     /**
     $query = "SELECT
                   node.nid AS nid,
