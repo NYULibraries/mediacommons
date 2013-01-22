@@ -3,7 +3,7 @@
 // http://drupal.stackexchange.com/questions/30232/how-to-theme-a-radio-button-field-on-node-edit-form
 
 function mediacommons_ui_init() {
-  
+	
   $path_is_admin = path_is_admin(current_path());
   
   if ($path_is_admin) {
@@ -13,7 +13,7 @@ function mediacommons_ui_init() {
     
     $user->contribute = array(
       'clusters_can_contribute' => mediacommons_ui_clusters_user_can_contribute(),
-      'contributed_piece_can_contribute' => mediacommons_ui_additional_authors(),        
+      'contributed_piece_can_contribute' => mediacommons_ui_additional_authors(),
     );
     
     if (isset($menu_object)) {
@@ -152,10 +152,10 @@ function mediacommons_ui_additional_authors() {
   $mediacommons_ui_additional_author = &drupal_static(__FUNCTION__, array());
 
   $query = new EntityFieldQuery;
-
+  
   $result = $query
   ->entityCondition('entity_type', 'node')
-  ->fieldCondition('field_additional_authors', 'uid', $user->uid, '=')
+  ->fieldCondition('field_additional_authors', 'target_id', $user->uid, '=')
   ->execute();
 
   if (isset($result['node'])) {
@@ -295,7 +295,8 @@ function mediacommons_ui_preprocess_checkbox(&$variables) {
 function mediacommons_ui_add_assets() {
 	$module_path = drupal_get_path('module', 'mediacommons_ui');
   drupal_add_css( $module_path . '/mediacommons_ui.css', 'module');
-  drupal_add_js( $module_path . '/js/mediacommons_ui.js', 'file');	
+  // drupal_add_js( $module_path . '/js/jquery.event.drag-2.2.js', array('type' => 'file', 'group' => JS_DEFAULT,));
+  drupal_add_js( $module_path . '/js/mediacommons_ui.js', array('type' => 'file', 'group' => JS_DEFAULT,));
 }
 
 function mediacommons_ui_form_cluster_node_form_alter(&$form, &$form_state, $form_id) {
@@ -317,15 +318,13 @@ function mediacommons_ui_form_cluster_node_form_alter(&$form, &$form_state, $for
     }
   }
 }
-
-/** See: http://api.drupal.org/api/drupal/modules%21node%21node.module/function/template_preprocess_node/7 */
-function mediacommons_ui_preprocess_node(&$variables) {
-  /** dpm($variables); */
+function mediacommons_ui_preprocess_image_widget(&$variables) {
+  $element = &$variables['element'];
 }
 
 function mediacommons_ui_form_contributed_piece_node_form_alter(&$form, &$form_state, $form_id) {
   global $user;
-
+  
   mediacommons_ui_add_assets();
   
   /** indication of that this form was process by the editoriar workflow module */
