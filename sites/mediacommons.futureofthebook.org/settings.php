@@ -195,19 +195,15 @@ $databases = array (
       'driver' => 'mysql',
       'prefix' => array(
         'default'   => 'mediacommons.',
-        'users'     => 'shared.',
-        'sessions'  => 'shared.',
-        'role'      => 'shared.',
-        'authmap'   => 'shared.',
-        'users_roles' => 'shared.',
-        'profile' => 'shared.',
-        'profile_type' => 'shared.',
-        'field_data_field_professional_title' => 'shared.',
-        'field_revision_field_professional_title' => 'shared.',        
-        
-        // 'profile_fields' => 'shared.',
-        // 'profile_values' => 'shared.',
-
+        'users'     => 'shared_local.',
+        'sessions'  => 'shared_local.',
+        'role'      => 'shared_local.',
+        'authmap'   => 'shared_local.',
+        'users_roles' => 'shared_local.',
+        'profile' => 'shared_local.',
+        'profile_type' => 'shared_local.',
+        'field_data_field_professional_title' => 'shared_local.',
+        'field_revision_field_professional_title' => 'shared_local.',        
       ),
       'collation' => 'utf8_general_ci',
 
