@@ -1,0 +1,22 @@
+name = MediaaCommons Profile
+description = MediaCommons Profile.
+base theme = mediacommons_base
+core = 7.x
+engine = phptemplate
+version = 1.x
+screenshot = screenshot.png
+
+stylesheets[all][] = css/mediacommons_profile.css
+
+regions[header] = Header
+regions[search] = Search
+regions[content] = Content
+regions[left] = Left Sidebar
+regions[right] = Right Sidebar
+regions[network] = Network
+
+features[] = logo
+features[] = name
+features[] = search
+features[] = favicon
+

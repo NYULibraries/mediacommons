@@ -1,0 +1,124 @@
+<?php
+
+/**
+ * @file
+ * dlts_image core hooks and menu callbacks.
+ */
+
+module_load_include('inc', 'mediacommons_image_extended', 'includes/mediacommons_image_extended.field');
+module_load_include('inc', 'mediacommons_image_extended', 'includes/mediacommons_image_extended.views');
+
+/** Implements hook_permission(). */
+function mediacommons_image_extended_permission() {
+  return array(
+    'administer mediacommons' => array(
+      'title' => t('Administer MediaCommons'),
+      'description' => t('Administer the settings for the MediaCommons Image widgets and formatters, including the location of the Djatoka server.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function mediacommons_image_extended_menu() {
+  return array(
+    'admin/config/media/mediacommons' => array(
+      'title' => t('Image extended'),
+      'description' => t('Provides an extended Image Field for controling display, support for high-resolution images and set default representation for attached images.'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('mediacommons_image_extended_admin'),
+      'access arguments' => array('administer dlts'),
+      'file' => 'includes/mediacommons_image_extended.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function mediacommons_image_extended_theme($existing, $type, $theme, $path) {
+  return array(
+    'mediacommons_image_extended_hires' => array(
+      'variables' => array(
+        'file' => NULL,
+      ),
+      'file' => 'includes/mediacommons_image_extended.theme.inc',
+    ),
+    'mediacommons_image_extended_admin_thumbnail' => array(
+      'variables' => array(
+        'file' => NULL,
+      ),
+      'file' => 'includes/mediacommons_image_extended.theme.inc',
+    ),
+    'mediacommons_image_extended_thumbnail' => array(
+      'variables' => array(
+        'file' => NULL,
+      ),
+      'file' => 'includes/mediacommons_image_extended.theme.inc',
+    ),
+    'mediacommons_image_extended_thumbnail_nodelink' => array(
+      'variables' => array(
+        'file' => NULL,
+      ),
+      'file' => 'includes/mediacommons_image_extended.theme.inc',
+    ),
+    'mediacommons_image_extended_original' => array(
+      'variables' => array(
+        'file' => NULL,
+      ),
+      'file' => 'includes/mediacommons_image_extended.theme.inc',
+    ),
+    'mediacommons_image_extended_representative_image' => array(
+      'variables' => array(
+        'file' => NULL,
+      ),
+      'file' => 'includes/mediacommons_image_extended.theme.inc',
+    ),
+    'mediacommons_image_extended_widget' => array(
+      'render element' => 'element',
+      'file' => 'includes/mediacommons_image_extended.theme.inc',
+    ),      
+  );
+}
+
+function mediacommons_image_extended_image_default_styles() {
+  return array(
+    'thumbnail_imageextended' => array(
+      'effects' => array(
+        array(
+          'name' => 'mediacommons_image_extended_tojpg',
+          'data' => array(),
+          'weight' => 0,
+        ),
+      ),
+    ),
+  );
+}
+
+function mediacommons_image_extended_image_effect_info() {
+  return array(
+    'mediacommons_image_extended_tojpg' => array(
+      'label' => t('Image to JPG'),
+      'help' => t('Transform image to a JPG.'),
+      'effect callback' => 'mediacommons_image_extended_tojpg',
+    ),
+  );
+}
+
+function mediacommons_image_extended_tojpg($image, $x, $y, $width, $height) {
+  
+  dpm('mediacommons_image_extended_tojpg');
+  
+  $aspect = $image->info['height'] / $image->info['width'];
+  if (empty($height)) {
+    $height = $width / $aspect;
+  }
+  if (empty($width)) {
+    $width = $height * $aspect;
+  }
+  $width = (int) round($width);
+  $height = (int) round($height);
+  return image_toolkit_invoke('crop', $image, array($x, $y, $width, $height));
+
+}

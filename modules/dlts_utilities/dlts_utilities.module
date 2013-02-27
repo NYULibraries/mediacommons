@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Implementation of hook_menu
+ * http://api.drupal.org/api/drupal/developer--hooks--core.php/function/hook_menu/7
+ */
+function dlts_utilities_menu() {
+  return array(
+    'admin/config/system/site-metadata' => array(
+      'title'              => 'DLTS Site Metadata',
+      'description'        => 'Configure site-level metadata',
+      'page callback'      => 'drupal_get_form',
+      'page arguments'     => array('dlts_utilities_metadata_settings'),
+      'access arguments'   => array('administer dlts utilities'),
+      'file'               => 'inc/dlts_utilities.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_permission
+ * http://api.drupal.org/api/drupal/modules--system--system.api.php/function/hook_permission/7
+ */
+function dlts_utilities_permission() {
+  return array(
+    'administer dlts utilities' => array(
+      'title' => t('Administer DLTS Utilities'), 
+      'description' => t('Perform administration tasks for DLTS Utilities.'),
+    ),
+  );
+}
+
+/**
+ * Adds common utilities functionallities
+ */
+module_load_include('inc', 'dlts_utilities', 'inc/dlts_utilities.common');
+
+/**
+ * Getters for site site-specific metadata
+ */
+module_load_include('inc', 'dlts_utilities', 'inc/dlts_utilities.metadata');
+
+/**
+ * Text filters for DLTS use cases such as publishing content in EAD markup
+ */
+module_load_include('inc', 'dlts_utilities', 'inc/dlts_utilities.filters');
+
+/**
+ * Adds the ability to include any type of <script> file, setting, or inline code to the page
+ */
+module_load_include('inc', 'dlts_utilities', 'inc/dlts_utilities.script');

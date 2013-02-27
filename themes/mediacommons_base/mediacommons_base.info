@@ -1,0 +1,26 @@
+name = MediaaCommons Base
+description = MediaaCommons Base provides a base theme for all of MediaCommons Network sites.
+core = 7.x
+engine = phptemplate
+version = 1.x
+screenshot = screenshot.png
+
+stylesheets[all][] = css/mediacommons_base.css
+
+regions[header] = Header
+regions[search] = Search
+regions[content] = Content
+regions[left] = Left Sidebar
+regions[right] = Right Sidebar
+regions[network] = Network
+regions[spokes] = Spokes
+regions[hubs] = Hubs
+regions[footer] = Footer
+
+features[] = logo
+features[] = name
+features[] = search
+features[] = favicon
+
+settings[mediacommons_base_toggle_breadcrumb] = '0'
+settings[mediacommons_base_toggle_page_tabs] = '0'

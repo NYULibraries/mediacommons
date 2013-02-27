@@ -1,0 +1,116 @@
+/** JOKE FILE */
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background:#8a8a8a url(http://mediacommons.futureofthebook.org/tne/sites/mediacommons.futureofthebook.org.tne/themes/the_new_everyday/images/background.jpg) 0 0 repeat-x;
+  background-image:-webkit-gradient(linear,left top,left bottom,color-stop(0,rgb(201,201,201)),color-stop(0.5,rgb(148,148,148)),color-stop(0.75,rgb(138,138,138)));
+  background-image:-moz-linear-gradient(center top,rgb(201,201,201) 0%,rgb(148,148,148) 50%,rgb(138,138,138) 75%);
+  min-width: 960px;
+  height: 100%; /** 13px */   
+  font-family: "Helvetica Neue",Helvetica,Arial,Verdana,"Bitstream Vera Sans",sans-serif;  
+  line-height: 1.4286em;
+}
+
+.yui3-skin-sam {
+  min-width: 960px;
+  margin:auto; /* center in viewport */
+}
+
+.pane.page {
+  background: #fff;
+  width: 976px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 30px;
+  box-shadow: 0px 5px 20px #333;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.page-inner {
+  border: 0;
+  margin-bottom: 0;
+  padding: 0 18px;  
+  border-top: 9px solid #1bb6b8;
+}
+
+.tease {
+  width: 645px;
+}
+
+.description {  
+  width: 295px;
+}
+
+.thumbnail {
+  width: 100px;
+}
+
+.node-teaser.node-spoke {
+  width: 460px;
+}
+
+.teaser {
+  width: 360px;
+  margin-left:5px;
+}
+
+h1.title, .field-label {
+  font-size: 167%;
+  margin-top: 1em;
+}
+
+.field-name-field-cluster-tags .yui3-u {
+  display: inline;
+  margin: 0 .25em;
+}
+
+.field-name-field-cluster-tags, 
+.field-name-field-cluster-tags .field-label {
+  font-size: 100%;
+  margin-top: 0;  
+}
+
+.contributors .yui3-u {
+  width: 278px;
+  margin: 5px 15px 12px 0;
+  padding: 10px;
+  height: 60px;
+  background: #f0f0f0;
+  background: -moz-radial-gradient(center,ellipse,#f0f0f0 55%,#e0e0e0);
+  background: -webkit-gradient(radial,center center,0,center center,150,from(#f0f0f0),to(#e0e0e0));
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  border-radius: 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #ddd #bbb #bbb #ddd;
+  box-shadow: 2px 2px 4px #aaa;
+}
+
+.contributors h3 {
+  display: none;
+  visivility: hidden;
+}
+
+.contributors .profile {
+  position: relative;
+  top: -15px;
+  right: 5px; 
+}
+
+.contributors .profile img {
+  margin: 0;
+  max-width: 60px;
+  max-height: 60px;
+  box-shadow: 2px 2px 4px #aaa;
+}
+
+.contributors .profile dl {
+  margin: 0 1.5em 1.5em 1.5em;
+}

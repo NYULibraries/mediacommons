@@ -79,15 +79,11 @@ function mediacommons_ui_contribute_page() {
 
 }
 
-function tne_page_content() {
+function mediacommons_ui_page_set_upcoming_hub() {
   return;
 }
 
-function mediacommons_ui_page_set_upcoming_cluster() {
-  return;
-}
-
-function mediacommons_ui_set_current_cluster() {
+function mediacommons_ui_set_current_hub() {
   return;
 }
 
@@ -101,12 +97,12 @@ function mediacommons_ui_admin_page() {
     $items[] = l('Administer users', 'admin/people');
   }
   
-  if (user_access('set current cluster')) {
-    $items[] = l('Set current cluster', 'user/admin/set-current-cluster', array('query' => array('destination' => 'contribute/dashboard')));
+  if (user_access('set current hub')) {
+    $items[] = l('Set current hub', 'user/admin/set-current-cluster', array('query' => array('destination' => 'contribute/dashboard')));
   }
 
-  if (user_access('set upcoming cluster')) {
-    $items[] = l('Set upcoming cluster', 'user/admin/set-upcoming-cluster', array('query' => array('destination' => 'contribute/dashboard')));
+  if (user_access('set upcoming hub')) {
+    $items[] = l('Set upcoming hub', 'user/admin/set-upcoming-hub', array('query' => array('destination' => 'contribute/dashboard')));
   }
 
   $output .= theme('item_list', array('items' => $items));
