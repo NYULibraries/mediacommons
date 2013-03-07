@@ -1,7 +1,5 @@
-mediacommons
-============
-
 MediaCommons
+============
 
 Sites folder can be found in our SVN repo at:
 
