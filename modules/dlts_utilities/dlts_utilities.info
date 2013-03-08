@@ -1,9 +1,0 @@
-name = DLTS Utilities
-description = DLTS utilities. Tools improve DLTS developers experience. This modulue does not provied any functionality by itself.
-package = DLTS
-core = 7.x
-
-files[] = dlts_utilities.metadata.inc
-files[] = dlts_utilities.filters.inc
-files[] = dlts_utilities.script.inc
-files[] = dlts_utilities.admin.inc
