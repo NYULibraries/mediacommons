@@ -1,0 +1,7 @@
+SELECT n.nid, n.vid, n.type, n.language title, n.uid, n.status, n.created, n.changed, n.comment, fdfd.field_description_value, fdfd.field_description_format, GROUP_CONCAT(fdfc.field_contributors_uid SEPARATOR ', ') AS contributors
+FROM `node` n 
+LEFT JOIN `field_data_field_description` fdfd
+ON fdfd.entity_id=n.nid
+LEFT JOIN `field_data_field_contributors` fdfc
+ON fdfc.entity_id=n.nid
+WHERE n.type = 'hub'
