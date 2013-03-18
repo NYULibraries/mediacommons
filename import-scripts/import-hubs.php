@@ -46,15 +46,24 @@ if (($handle = fopen("/Applications/MAMP/htdocs/mcd7temp/mediacommons/import-scr
     $form_state = array();
     $form_state['values']['status'] = $data[$c]['status'];
     $form_state['values']['title'] = $data[$c]['title'];   // the node's title
-    //$form_state['values']['body'] = 'just my test node'; // the body, not required
-    $node->field_contributors[$node->language][]['value'] = $data[$c]['contributors'];
+    $form_state['values']['body'] = 'just my test node'; // the body, not required
+    $array = explode(", ", $data[$c]['contributors']);
+    foreach ($array as $key => $value) {
+      # code...
+
+    $form_state['values']['field_contributors'][$node->language][$key]['uid'] = (int)$value;
+    //$form_state['values']['field_contributors'][$node->language][$key]['_weight'] = $key;
+    } 
     //$form_state['values']['promote'] = 1; //promote all imported nodes
     $form_state['values']['sticky'] = 0; //remove sticky from imported nodes
     //$form_state['values']['image'] = array();
-    $form_state['values']['name'] = 'reilly';
+    //$form_state['values']['name'] = 'reilly';
+    $form_state['values']['uid'] = $data[$c]['uid'];
     $form_state['values']['op'] = t('Save');  // this seems to be a required value
-    drupal_form_submit("{$node->type}_node_form", $form_state, $node);
+    var_dump($form_state);
     
+    drupal_form_submit("{$node->type}_node_form", $form_state, $node);
+    var_dump($node);
     //$node->title = $data[$c]['title'];
     // $node->uid = $data[$c]['uid'];
     //   $node->status = $data[$c]['status'];
@@ -73,12 +82,11 @@ if (($handle = fopen("/Applications/MAMP/htdocs/mcd7temp/mediacommons/import-scr
       // if($node = node_submit($node)) { // Prepare node for saving
       //                                                     node_save($node);
       //                                                     echo "Node with nid " . $node->nid . " saved!\n";
-                                    }
+                                    //}
       // node_save($node);
       // print_r($node);
 
-
-    }
+     }
      fclose($handle);
   }
 
