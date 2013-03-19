@@ -4,18 +4,33 @@ if (!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 
 ini_set('memory_limit', '512M');
 
+/** We don't need no education */
 function mediacommons_populate_delete_users($role = NULL) {
+  
   /** find users */
-  $users_roles = db_query("SELECT DISTINCT uid FROM {users} WHERE uid <> 0 AND uid <> 1", array());
+  $query = db_query("SELECT DISTINCT uid FROM {users} WHERE uid <> 0 AND uid <> 1", array());
+  
   /** fetch users */
-  $users = $users_roles->fetchAll();
+  $users = $query->fetchAll();
+  
   foreach ($users as $user) {
     user_delete($user->uid);
   }
+  
 }
 
-function mediacommons_populate_delete_content() {
+/** Kill 'em all */
+function mediacommons_populate_delete_content($ype = NULL) {
   
+  /** find all hubs and spokes */
+  $query = db_query("SELECT DISTINCT nid FROM {node} WHERE type = 'spoke' OR type = 'hub'", array());
+  
+  /** fetch nid */
+  $nodes = $query->fetchAll();
+
+  foreach ($nodes as $node) {
+    node_delete($node->nid);
+  }
 }
 
 function mediacommons_populate_generate_users($new_users_per_rol = 3) {
