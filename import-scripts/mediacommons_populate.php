@@ -1,8 +1,22 @@
 <?php
 
-if (!defined('__DIR__') ) define('__DIR__', dirname(__FILE__));
+if (!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 
 ini_set('memory_limit', '512M');
+
+function mediacommons_populate_delete_users($role = NULL) {
+  /** find users */
+  $users_roles = db_query("SELECT DISTINCT uid FROM {users} WHERE uid <> 0 AND uid <> 1", array());
+  /** fetch users */
+  $users = $users_roles->fetchAll();
+  foreach ($users as $user) {
+    user_delete($user->uid);
+  }
+}
+
+function mediacommons_populate_delete_content() {
+  
+}
 
 function mediacommons_populate_generate_users($new_users_per_rol = 3) {
 
@@ -132,6 +146,16 @@ function mediacommons_populate_run($task) {
       drush_print('Genereting hubs and spokes');
       mediacommons_populate_generate_hubs();
       break;
+      
+    case 3 :
+      drush_print('Deleting users');
+      mediacommons_populate_delete_users();
+      break;
+      
+    case 4 :
+      drush_print('Deleting all hubs and spokes');
+      mediacommons_populate_delete_content();
+      break;
 
     default : 
       drush_print('');
@@ -144,9 +168,11 @@ function mediacommons_populate_run($task) {
 
 function mediacommons_populate_show_help() {
   drush_print('');
-  drush_print('[0] Do all');
+  drush_print('[0] Run all the steps');
   drush_print('[1] Step 1: Generate users');
-  drush_print('[2] Step 2: Generate content');  
+  drush_print('[2] Step 2: Generate content'); 
+  drush_print('[3] Delete users');
+  drush_print('[4] Delete content');
   drush_print('');
 }
 
