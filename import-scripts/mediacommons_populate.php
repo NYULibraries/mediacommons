@@ -47,7 +47,7 @@ function mediacommons_populate_generate_users($new_users_per_rol = 3) {
 
   drush_set_option('password', 'dlts2010'); 
   
-  /** make sure we can user the same email */
+  /** make sure we can used the same email address */
   if ( !module_exists('sharedemail') ) {
     drush_print('Will try to enable sharedemail module. Remember to disable/uninstall and remove module before going to production.');
     module_enable(array('sharedemail'));
@@ -144,21 +144,21 @@ function mediacommons_populate_run($task) {
   switch ($task) {
 
     case 0 :
-      drush_print('Genereting users (password for each user will be dlts2010');
+      drush_print('Generating users (password for each user will be dlts2010');
       mediacommons_populate_generate_users();
-      drush_print('Genereting hubs and spokes');
+      drush_print('Generating hubs and spokes');
       mediacommons_populate_generate_hubs();
       drush_print('Password for each user will be dlts2010)'); 
       break;
 
     case 1 :
-      drush_print('Genereting users');
+      drush_print('Generating users');
       mediacommons_populate_generate_users();
       drush_print('Password for each user will be dlts2010');       
       break;
       
     case 2 :
-      drush_print('Genereting hubs and spokes');
+      drush_print('Generating hubs and spokes');
       mediacommons_populate_generate_hubs();
       break;
       
