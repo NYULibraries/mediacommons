@@ -25,7 +25,7 @@ GROUP BY n.nid
 
 
 /// Drupal 6
-SELECT n.`nid`, n.`type`, n.`uid`, n.`title`, n.`uid`, n.`status`, n.`created`, n.`changed`, n.`comment`, GROUP_CONCAT(cfc.`field_contributors_uid` SEPARATOR ', ') AS `contributors`, GROUP_CONCAT(cfc.`delta` SEPARATOR ', ') AS `contributor_order`, ctc.`field_description_value`, ctc.`field_period_value`, ctc.`field_period_value2`, ctc.`field_cluster_type_value`, f.`filename` AS `image`, ctc.`field_video_embed_link_embed`, GROUP_CONCAT(t.`tid` SEPARATOR ', ') AS `terms`
+SELECT n.`nid`, n.`type`, n.`uid`, n.`title`, n.`status`, n.`created`, n.`changed`, n.`comment`, GROUP_CONCAT(DISTINCT cfc.`field_contributors_uid` SEPARATOR ', ') AS `contributors`, GROUP_CONCAT(DISTINCT cfc.`delta` SEPARATOR ', ') AS `contributor_order`, ctc.`field_description_value`, ctc.`field_period_value`, ctc.`field_period_value2`, ctc.`field_cluster_type_value`, f.`filename` AS `filename`, ctc.`field_video_embed_link_embed`, GROUP_CONCAT(DISTINCT t.`tid` SEPARATOR ', ') AS `terms`
 FROM `tne_node` n
 JOIN `tne_content_field_contributors` cfc
 ON n.`nid` = cfc.`nid`

@@ -7,7 +7,7 @@ $script_path = "/Applications/MAMP/htdocs/mcd7temp/mediacommons/" . $script_fold
 
 $image_source = '/images/teaser-images/';
 $image_destination = '/images/teaser-images/';
-$csv_file = 'export-hub-3-21-13-2-39 PM.csv';
+$csv_file = 'export-hub-3-21-13-4-19 PM.csv';
 
 $row = 0;
 $header = NULL;
@@ -58,9 +58,9 @@ if (($handle = fopen($script_path . $csv_file, "r")) !== FALSE) {
       $node->field_video_embed_link[$node->language][0]['video_url'] = $data[$c]['field_video_embed_link_embed'];
     }
     //representative image
-    if(($data[$c]['image'] != 'NULL')){
+    if(($data[$c]['filename'] != 'NULL')){
       // Some file on our system
-      $file_path = $script_path . $image_source . $data[$c]['image'];
+      $file_path = $script_path . $image_source . $data[$c]['filename'];
       
       $file = (object) array(
               'uid' => (int)$data[$c]['uid'],
