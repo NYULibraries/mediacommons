@@ -1,0 +1,39 @@
+//  Drupal 7 on dev
+SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, contributors, contributor_order, fd.field_description_value, fd.field_description_format, GROUP_CONCAT(fcp.field_contributed_piece_nid SEPARATOR ', ') AS contributed_pieces, GROUP_CONCAT(fcp.delta SEPARATOR ', ') AS contributed_pieces_order, ffp.field_field_period_value, ffp.field_field_period_value2, ft.field_type_value, fvel.field_video_embed_link_video_url, fvel.field_video_embed_link_thumbnail_path, fri.field_representative_image_fid, GROUP_CONCAT(DISTINCT fct.field_cluster_tags_tid SEPARATOR ', ') AS tags
+FROM (SELECT entity_id, 
+      GROUP_CONCAT(field_contributors_uid SEPARATOR ', ') AS contributors, 
+      GROUP_CONCAT(delta SEPARATOR ', ') AS contributor_order 
+      FROM field_data_field_contributors
+      GROUP BY entity_id) fc
+JOIN `node` n
+ON (n.nid) = (fc.entity_id)
+LEFT JOIN `field_data_field_description` fd
+ON fd.entity_id=n.nid
+LEFT JOIN `field_data_field_contributed_piece` fcp
+ON fcp.entity_id=n.nid
+LEFT JOIN `field_data_field_field_period` ffp
+ON ffp.entity_id=n.nid
+LEFT JOIN `field_data_field_type` ft
+ON ft.entity_id=n.nid
+LEFT JOIN `field_data_field_video_embed_link` fvel
+ON fvel.entity_id=n.nid
+LEFT JOIN `field_data_field_representative_image` fri
+ON fri.entity_id=n.nid
+LEFT JOIN `field_data_field_cluster_tags` fct
+ON fct.entity_id=n.nid
+GROUP BY n.nid
+
+
+/// Drupal 6
+SELECT n.`nid`, n.`type`, n.`uid`, n.`title`, n.`status`, n.`created`, n.`changed`, n.`comment`, GROUP_CONCAT(DISTINCT cfc.`field_contributors_uid` SEPARATOR ', ') AS `contributors`, GROUP_CONCAT(DISTINCT cfc.`delta` SEPARATOR ', ') AS `contributor_order`, ctc.`field_description_value`, ctc.`field_period_value`, ctc.`field_period_value2`, ctc.`field_cluster_type_value`, f.`filename` AS `filename`, ctc.`field_video_embed_link_embed`, GROUP_CONCAT(DISTINCT t.`tid` SEPARATOR ', ') AS `terms`
+FROM `tne_node` n
+JOIN `tne_content_field_contributors` cfc
+ON n.`nid` = cfc.`nid`
+LEFT JOIN `tne_content_type_cluster` ctc
+ON n.`nid` = ctc.`nid`
+LEFT JOIN `tne_files` f
+ON ctc.`field_image_fid`=f.`fid`
+LEFT JOIN `tne_term_node` t
+ON n.`nid`=t.`nid`
+GROUP BY n.`nid`
+ORDER BY n.`nid`
