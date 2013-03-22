@@ -5,9 +5,9 @@ $repo_path = "/Applications/MAMP/htdocs/mcd7temp/mediacommons/";
 $script_folder = 'import-scripts/';
 $script_path = "/Applications/MAMP/htdocs/mcd7temp/mediacommons/" . $script_folder;
 
-$image_source = '/images/teaser-images/';
-$image_destination = '/images/teaser-images/';
-$csv_file = '.csv';
+$image_source = '/images/contributed-pieces/';
+$image_destination = '/images/contributed-pieces/';
+$csv_file = 'export-spokes-3-22-13-5-14 PM.csv';
 
 $row = 0;
 $header = NULL;
@@ -39,16 +39,18 @@ if (($handle = fopen($script_path . $csv_file, "r")) !== FALSE) {
     //$node->changed = $data[$c]['changed'];
     $node->comment = $data[$c]['comment'];
     // additonal_authors
-    if(($data[$c]['additonal_authors'] != 'NULL'))
+    if(($data[$c]['additonal_authors'] != 'NULL')) {
       $array = explode(", ", $data[$c]['additonal_authors']);
       foreach ($array as $key => $value) {
         $node->field_additonal_authors[$node->language][$key]['uid'] = (int)$value;
       }
     }
-    // contributor_order
-    $array = explode(", ", $data[$c]['contributor_order']);
-    foreach ($array as $key => $value) {
-      $node->field_contributors[$node->language][$key]['_weight'] = (int)$value;
+    // cluster_nid
+    if(($data[$c]['cluster_nid'] != 'NULL')) {
+      $array = explode(", ", $data[$c]['cluster_nid']);
+      foreach ($array as $key => $value) {
+        $node->field_part_of_hub[$node->language][$key]['nid'] = (int)$value;
+      }
     }
     // description
     $node->field_description[$node->language][0]['value'] = $data[$c]['field_description_value'];
