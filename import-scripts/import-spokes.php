@@ -27,7 +27,7 @@ if (($handle = fopen($script_path . $csv_file, "r")) !== FALSE) {
     $node = new StdClass();
     //$node = node_load($nid);
     //$node->type = $data[$c]['type'];
-    $node->type = 'hub';
+    $node->type = 'spoke';
     $node->language = LANGUAGE_NONE;
     $node->status = $data[$c]['status'];
     $node->promote = 0;
@@ -38,10 +38,12 @@ if (($handle = fopen($script_path . $csv_file, "r")) !== FALSE) {
     //$node->created = (int)$data[$c]['created'];
     //$node->changed = $data[$c]['changed'];
     $node->comment = $data[$c]['comment'];
-    // contributors
-    $array = explode(", ", $data[$c]['contributors']);
-    foreach ($array as $key => $value) {
-      $node->field_contributors[$node->language][$key]['uid'] = (int)$value;
+    // additonal_authors
+    if(($data[$c]['additonal_authors'] != 'NULL'))
+      $array = explode(", ", $data[$c]['additonal_authors']);
+      foreach ($array as $key => $value) {
+        $node->field_additonal_authors[$node->language][$key]['uid'] = (int)$value;
+      }
     }
     // contributor_order
     $array = explode(", ", $data[$c]['contributor_order']);
