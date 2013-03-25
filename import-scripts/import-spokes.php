@@ -42,7 +42,7 @@ if (($handle = fopen($script_path . $csv_file, "r")) !== FALSE) {
     if(($data[$c]['additonal_authors'] != 'NULL')) {
       $array = explode(", ", $data[$c]['additonal_authors']);
       foreach ($array as $key => $value) {
-        $node->field_additonal_authors[$node->language][$key]['uid'] = (int)$value;
+        $node->field_contributors[$node->language][$key]['uid'] = (int)$value;
       }
     }
     // cluster_nid
@@ -53,13 +53,13 @@ if (($handle = fopen($script_path . $csv_file, "r")) !== FALSE) {
       }
     }
     // description
-    $node->field_description[$node->language][0]['value'] = $data[$c]['field_description_value'];
-    $node->field_description[$node->language][0]['format'] = 'filtered_html';
-    // choose media type
-    $node->field_type[$node->language][0]['value'] = $data[$c]['field_cluster_type_value'];
-    // video
-    if(($data[$c]['field_video_embed_link_embed'] != 'NULL')){
-      $node->field_video_embed_link[$node->language][0]['video_url'] = $data[$c]['field_video_embed_link_embed'];
+    $node->field_body[$node->language][0]['value'] = $data[$c]['field_document_textarea_body_value'];
+    $node->field_body[$node->language][0]['format'] = 'filtered_html';
+    // publication status
+    if(($data[$c]['field_video_embed_link_embed'] != 'NULL') || ($data[$c]['field_pubstat_value'] == 'Published')) {
+      $node->field_pubstat[$node->language][0]['value'] = 1;
+    } elseif(($data[$c]['field_video_embed_link_embed'] != 'NULL') || ($data[$c]['field_pubstat_value'] == 'Unpublished'))  {
+      $node->field_pubstat[$node->language][0]['value'] = 0;
     }
     //representative image
     if(($data[$c]['filename'] != 'NULL')){
@@ -85,9 +85,6 @@ if (($handle = fopen($script_path . $csv_file, "r")) !== FALSE) {
     foreach ($array as $key => $value) {
       $node->field_spokes[$node->language][$key]['_weight'] = (int)$value;
     }
-    // dates
-    $node->field_field_period[$node->language][0]['value'] = $data[$c]['field_period_value'];
-    $node->field_field_period[$node->language][0]['value2'] = $data[$c]['field_period_value2'];
     // taxonomy
     $array = explode(", ", $data[$c]['terms']);
     foreach ($array as $key => $value) {
