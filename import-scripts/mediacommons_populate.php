@@ -5,21 +5,39 @@ if (!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 ini_set('memory_limit', '512M');
 
 /** We don't need no education */
-function mediacommons_populate_delete_users($role = NULL) {
+function mediacommons_populate_delete_users($roles = array()) {
   
   /** find users */
+<<<<<<< HEAD
   $query = db_query("SELECT DISTINCT uid FROM {users} WHERE uid <> 0 AND uid <> 1", array());
   
   /** fetch users */
+=======
+
+  $query = db_query("SELECT DISTINCT uid FROM {users} WHERE uid <> 0 AND uid <> 1", array());
+  
+  /** fetch users */
+
+>>>>>>> Not much
   $users = $query->fetchAll();
   
   foreach ($users as $user) {
     user_delete($user->uid);
   }
+}
+
+function mediacommons_populate_find_nodes($type) {
+
+  /** find all */
+  $query = db_query("SELECT DISTINCT nid FROM {node} WHERE type = :type", array('type' => $type));
+  
+  /** return nids */
+  return $query->fetchAll();
   
 }
 
 /** Kill 'em all */
+<<<<<<< HEAD
 function mediacommons_populate_delete_content($ype = NULL) {
   
   /** find all hubs and spokes */
@@ -27,10 +45,30 @@ function mediacommons_populate_delete_content($ype = NULL) {
   
   /** fetch nid */
   $nodes = $query->fetchAll();
+=======
+function mediacommons_populate_delete_content($ype = 'all') {
 
+  $nodes = array();
+  
+  switch ($ype) {
+
+    case 'hub' :
+      $nodes += mediacommons_populate_find_nodes('hub');
+      break;
+        
+      case 'spoke' :
+        $nodes += mediacommons_populate_find_nodes('spoke');
+        break;
+>>>>>>> Not much
+
+      default : /** same as all */
+        $nodes += array_merge(mediacommons_populate_find_nodes('hub'), mediacommons_populate_find_nodes('spoke'));
+  }
+  
   foreach ($nodes as $node) {
     node_delete($node->nid);
   }
+
 }
 
 function mediacommons_populate_generate_users($new_users_per_rol = 3) {
@@ -77,14 +115,14 @@ function mediacommons_populate_generate_hubs($new_hubs = 4) {
   // http://digg.com/rss/popular.rss
   
   $feed = 'http://digg.com/rss/popular.rss';
+  $feed = __DIR__ . "/top.rss";
 
   /** find users */
   $user_roles = db_query("SELECT DISTINCT uid FROM {users_roles} WHERE uid <> 1 AND (rid <> 1 OR rid <> 2)", array());
 
   /** fetch users */
   $user = $user_roles->fetchAll();
-  
-  //$xml = simplexml_load_file(__DIR__ . "/top.rss");
+
   $xml = simplexml_load_file($feed);  
   
   $hubs_count = count($xml->channel->item);
@@ -163,6 +201,7 @@ function mediacommons_populate_run($task) {
       break;
       
     case 3 :
+<<<<<<< HEAD
       drush_print('Deleting users');
       mediacommons_populate_delete_users();
       break;
@@ -170,6 +209,21 @@ function mediacommons_populate_run($task) {
     case 4 :
       drush_print('Deleting all hubs and spokes');
       mediacommons_populate_delete_content();
+=======
+
+      drush_print('Deleting users');
+
+      mediacommons_populate_delete_users();
+
+      break;
+      
+    case 4 :
+
+      drush_print('Deleting all hubs and spokes');
+
+      mediacommons_populate_delete_content();
+
+>>>>>>> Not much
       break;
 
     default : 
