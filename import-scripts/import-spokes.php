@@ -7,7 +7,7 @@ $script_path = "/Applications/MAMP/htdocs/mcd7temp/mediacommons/" . $script_fold
 
 $image_source = '/images/contributed-pieces/';
 $image_destination = '/images/contributed-pieces/';
-$csv_file = 'export-spokes-3-22-13-5-14 PM.csv';
+$csv_file = 'export-spokes-4-11-13-8-15 AM.csv';
 
 $row = 0;
 $header = NULL;
