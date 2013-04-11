@@ -8,17 +8,10 @@ ini_set('memory_limit', '512M');
 function mediacommons_populate_delete_users($roles = array()) {
   
   /** find users */
-<<<<<<< HEAD
-  $query = db_query("SELECT DISTINCT uid FROM {users} WHERE uid <> 0 AND uid <> 1", array());
-  
-  /** fetch users */
-=======
 
   $query = db_query("SELECT DISTINCT uid FROM {users} WHERE uid <> 0 AND uid <> 1", array());
   
   /** fetch users */
-
->>>>>>> Not much
   $users = $query->fetchAll();
   
   foreach ($users as $user) {
@@ -37,15 +30,6 @@ function mediacommons_populate_find_nodes($type) {
 }
 
 /** Kill 'em all */
-<<<<<<< HEAD
-function mediacommons_populate_delete_content($ype = NULL) {
-  
-  /** find all hubs and spokes */
-  $query = db_query("SELECT DISTINCT nid FROM {node} WHERE type = 'spoke' OR type = 'hub'", array());
-  
-  /** fetch nid */
-  $nodes = $query->fetchAll();
-=======
 function mediacommons_populate_delete_content($ype = 'all') {
 
   $nodes = array();
@@ -59,7 +43,6 @@ function mediacommons_populate_delete_content($ype = 'all') {
       case 'spoke' :
         $nodes += mediacommons_populate_find_nodes('spoke');
         break;
->>>>>>> Not much
 
       default : /** same as all */
         $nodes += array_merge(mediacommons_populate_find_nodes('hub'), mediacommons_populate_find_nodes('spoke'));
@@ -201,7 +184,6 @@ function mediacommons_populate_run($task) {
       break;
       
     case 3 :
-<<<<<<< HEAD
       drush_print('Deleting users');
       mediacommons_populate_delete_users();
       break;
@@ -209,21 +191,6 @@ function mediacommons_populate_run($task) {
     case 4 :
       drush_print('Deleting all hubs and spokes');
       mediacommons_populate_delete_content();
-=======
-
-      drush_print('Deleting users');
-
-      mediacommons_populate_delete_users();
-
-      break;
-      
-    case 4 :
-
-      drush_print('Deleting all hubs and spokes');
-
-      mediacommons_populate_delete_content();
-
->>>>>>> Not much
       break;
 
     default : 
