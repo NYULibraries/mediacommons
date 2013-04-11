@@ -1,0 +1,13 @@
+{
+    "name": "mediacommons_tne_import",
+    "version": "0.0.1",
+    "environment" : "local",
+    "dependencies": {},
+    "settings" : {
+        "local" : {
+            "image_source" : "images/teaser-images",
+            "image_destination" : "images/teaser-images",
+            "csv_directory" : "include/data"
+        }
+    }
+}
