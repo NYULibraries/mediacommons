@@ -1,4 +1,6 @@
 .DS_Store
 .project
 .svn
+.buildpath
+.settings
 import-scripts/images/*
