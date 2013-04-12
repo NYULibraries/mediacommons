@@ -328,6 +328,120 @@ function mediacommons_import_d6_users_list() {
     
 }
 
+function mediacommons_import_d6_hub_list() {
+  
+  global $databases;
+  
+  $hubs = array();
+
+  $query = "
+  SELECT
+    DISTINCT n.nid,
+    n.type,
+    n.uid,
+    n.title,
+    n.status,
+    n.created,
+    n.changed,
+    n.comment,
+    GROUP_CONCAT(DISTINCT cfc.field_contributors_uid SEPARATOR ', ') AS contributors,
+    GROUP_CONCAT(DISTINCT cfc.delta SEPARATOR ', ') AS contributor_order,
+    ctc.field_description_value,
+    ctc.field_period_value,
+    ctc.field_period_value2,
+    ctc.field_cluster_type_value,
+    f.filename AS filename,
+    ctc.field_video_embed_link_embed,
+    GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
+  FROM
+    tne_node n
+  JOIN tne_content_field_contributors cfc
+    ON n.nid = cfc.nid
+  LEFT JOIN tne_content_type_cluster ctc
+    ON n.nid = ctc.nid
+  LEFT JOIN tne_files f
+    ON ctc.field_image_fid=f.fid
+  LEFT JOIN tne_term_node t
+    ON n.nid=t.nid
+   WHERE n.type = 'cluster' AND n.status = 1
+  GROUP BY n.nid
+  ORDER BY n.nid";
+  
+  if (!isset($databases['drupal6'])) {
+    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
+    drush_die();
+  }
+  
+  /** Create a database connection to the source (d6) database */
+  $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+
+  foreach ($result as $record) {
+    $hubs[] = $record;
+  }
+  
+  return $hubs;
+  
+}
+
+function mediacommons_import_d6_spoke_list() {
+
+  global $databases;
+
+  $spokes = array();
+
+  $query = "
+    SELECT
+      DISTINCT n.nid,
+      n.type,
+      n.language,
+      n.title,
+      n.uid,
+      n.status,
+      n.created,
+      n.changed,
+      n.comment,
+      n.promote,
+      n.moderate,
+      n.sticky,
+      ctcp.field_document_textarea_body_value,
+      ctcp.field_tagline_value,
+      ctcp.field_pubstat_value,
+      GROUP_CONCAT(DISTINCT ctcp.field_thumbnail_fid SEPARATOR ', ') AS thumbnail_fid,
+      GROUP_CONCAT(DISTINCT cfaa.field_additional_authors_uid) AS additonal_authors,
+      GROUP_CONCAT(DISTINCT cfaa.delta) AS additonal_authors_delta,
+      GROUP_CONCAT(DISTINCT cfcl.field_cluster_nid) AS cluster_nid,
+      GROUP_CONCAT(DISTINCT cfcl.delta) AS cluster_delta,
+      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
+    FROM tne_node n
+      LEFT JOIN tne_content_type_contributed_pieces ctcp  
+        ON n.nid = ctcp.nid
+      LEFT JOIN tne_content_field_additional_authors cfaa
+        ON n.nid = cfaa.nid
+      LEFT JOIN tne_content_field_cluster cfcl
+        ON n.nid = cfcl.nid
+      LEFT JOIN tne_term_node t
+        ON n.nid = t.nid
+    WHERE n.type = 'contributed_pieces' AND n.status = 1
+    GROUP BY n.nid
+    ORDER BY n.nid";
+    // LIMIT 10
+  
+  if (!isset($databases['drupal6'])) {
+    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
+    drush_die();
+  }
+  
+  /** Create a database connection to the source (d6) database */
+  $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+  
+  foreach ($result as $record) {
+    $spokes[] = $record;
+  }
+  
+  return $spokes;  
+
+}
+
 function mediacommons_import_initialize_schema($module, &$schema) {
   // Set the name and module key for all tables.
   foreach ($schema as $name => $table) {
@@ -341,13 +455,17 @@ function mediacommons_import_initialize_schema($module, &$schema) {
 }
 
 function mediacommons_import_generate_spokes() {
+  
   /** Promt user which CSV file he want to use */
-  $csv_filepath = mediacommons_import_select_csv_file('spoke');
+  // $csv_filepath = mediacommons_import_select_csv_file('spoke');
   
   /** Load user selected CSV file */
-  if ($csv_filepath) {
-    $data = mediacommons_import_load_cvs_file($csv_filepath);
-  }
+  //if ($csv_filepath) {
+    //$data = mediacommons_import_load_cvs_file($csv_filepath);
+  //}
+  
+  /** Load data, this will take time; go get yourself a coffee */
+  $data = mediacommons_import_d6_spoke_list();
   
   /** Get a list of all the D6 users */
   $d6_users = mediacommons_import_d6_users_list();
@@ -358,20 +476,22 @@ function mediacommons_import_generate_spokes() {
     foreach ($data as $key => $spoke) {
       
       /** Find out if user is already in the system */
-      $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $spoke['nid']));
+      $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $spoke->nid));
 
       if (!$node_exist->rowCount()) {
 
         /** This node defualt configuration */
         $node = mediacommons_import_setup_node('spoke');
         
-        $node->title = $spoke['title'];
+        drush_print('Creating ' . $spoke->title . "\n");
+        
+        $node->title = $spoke->title;
         
         /** Find out if user is already in the system */
-        $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $spoke['uid']));
+        $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $spoke->uid));
       
-        if (!$author_result->rowCount() && isset($d6_users[$spoke['uid']])) {
-          $author_record = mediacommons_import_generate_user($d6_users[$spoke['uid']]);
+        if (!$author_result->rowCount() && isset($d6_users[$spoke->uid])) {
+          $author_record = mediacommons_import_generate_user($d6_users[$spoke->uid]);
           if ($author_record) {
             db_insert('mediacommons_import_user_map')
               ->fields(array(
@@ -388,21 +508,29 @@ function mediacommons_import_generate_spokes() {
         /** Node author */
         $node->uid = (int)$author_record->uid;
         
-        $node->created = (int)$spoke['created'];
+        $node->created = (int)$spoke->created;
         
-        $node->changed = (int)$spoke['changed'];
+        $node->changed = (int)$spoke->changed;
         
-        $node->comment = (int)$spoke['comment'];
+        $node->comment = (int)$spoke->comment;
+        
+        $node->status = (int)$spoke->status;
+
+        $node->status = (int)$spoke->status;        
+        
+        $node->promote = (int)$spoke->promote;
+        
+        $node->moderate = (int)$spoke->moderate;
+        
+        $node->sticky = (int)$spoke->sticky;        
         
         /** Additonal authors */
-        
-        
-        if ($spoke['additonal_authors']) {
+        if ($spoke->additonal_authors) {
           /** Contributors */
-          $spoke_contributors = explode(', ', $spoke['additonal_authors']);
+          $spoke_contributors = explode(', ', $spoke->additonal_authors);
         
           /** Contributor order */
-          // $contributor_order = explode(', ', $value['contributor_order']);
+          $contributor_order = explode(', ', $spoke->additonal_authors_delta);
         
           /** Find out if user is already in the system */
           foreach ($spoke_contributors as $key => $contributor) {
@@ -424,7 +552,7 @@ function mediacommons_import_generate_spokes() {
         
             $node->field_contributors[$node->language][$key] = array(
               'uid' => (int)$record->uid,
-              //'_weight' => (int)$contributor_order[$key],
+              '_weight' => (int)$contributor_order[$key],
             );
         
           }
@@ -432,7 +560,7 @@ function mediacommons_import_generate_spokes() {
         
         /** Description */
         $node->field_body[$node->language][0] = array(
-          'value' => $spoke['field_document_textarea_body_value'],
+          'value' => $spoke->field_document_textarea_body_value,
           'format' => 'filtered_html',
         );
         
@@ -445,15 +573,18 @@ function mediacommons_import_generate_spokes() {
         }
 
         /** Clusters */
-        if (isset($spoke['cluster_nid']) && $spoke['cluster_nid'] != 'NULL') { // CSV value NULL, is not really NULL (sort of speak)
-          drush_print('testing cluster: ' . $spoke['cluster_nid']);
+        if (
+          !empty($spoke->cluster_nid) 
+        ) {
           
-          $hub_result = db_query("SELECT * FROM {mediacommons_import_node_map} WHERE onid = :onid", array(':onid' => $spoke['cluster_nid']));
+          $cluster_nid = explode(', ', $spoke->cluster_nid);
           
-          if ($hub_result->rowCount()) {
-            $hub_record = $hub_result->fetchObject();
-            drush_print_r($hub_record);
-            $node->field_part_of_hub[$node->language][$key]['nid'] = (int)$hub_record->nid;
+          foreach ($cluster_nid as $key => $nid) {
+            $hub_result = db_query("SELECT * FROM {mediacommons_import_node_map} WHERE onid = :onid", array(':onid' => $nid));
+            if ($hub_result->rowCount()) {
+              $hub_record = $hub_result->fetchObject();
+              $node->field_part_of_hub[$node->language][$key]['nid'] = (int)$hub_record->nid;
+            }
           }
         }
         
@@ -512,7 +643,7 @@ function mediacommons_import_generate_spokes() {
         // $array = explode(", ", $value['terms']);        
 
         /** Prepare node for saving */
-        if ($node = node_submit($node)) {
+        if ($node->uid != 0 && $node = node_submit($node)) {
           node_save($node);
           db_insert('mediacommons_import_node_map')
             ->fields(array(
@@ -536,42 +667,48 @@ function mediacommons_import_generate_spokes() {
 function mediacommons_import_generate_hubs() {
   
   /** Promt user which CSV file he want to use */
-  $csv_filepath = mediacommons_import_select_csv_file('hub');
+  // $csv_filepath = mediacommons_import_select_csv_file('hub');
   
   /** Load user selected CSV file */
-  if ($csv_filepath) {
-    $data = mediacommons_import_load_cvs_file($csv_filepath);
-  }
+  //if ($csv_filepath) {
+    //$data = mediacommons_import_load_cvs_file($csv_filepath);
+  //}
+  
+  $data = mediacommons_import_d6_hub_list();
   
   /** Get a list of all the D6 users */
   $d6_users = mediacommons_import_d6_users_list();
-
+  
   /** If we have $data proceed */
   if (isset($data)) {
     
     foreach ($data as $key => $value) {
       
       /** Find out if user is already in the system */
-      $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $value['nid']));
+      $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $value->nid));
       
       if (!$node_exist->rowCount()) {
         
         /** This node defualt configuration */
         $node = mediacommons_import_setup_node('hub');
 
-        $node->title = $value['title'];
+        $node->title = $value->title;
       
         drush_print('Creating ' . $node->title . "\n");
       
-        $node->status = $value['status'];
+        $node->status = $value->status;
       
-        $node->comment = $value['comment'];
+        $node->comment = $value->comment;
       
         /** Find out if user is already in the system */
-        $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $value['uid']));
+        $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $value->uid));
       
-        if (!$author_result->rowCount() && isset($d6_users[$value['uid']])) {
-          $author_record = mediacommons_import_generate_user($d6_users[$value['uid']]);
+        if (!$author_result->rowCount() && isset($d6_users[$value->uid])) {
+          $author_record = mediacommons_import_generate_user($d6_users[$value->uid]);
+          
+          /** Asume user is a editor since has the rights to create hubs */
+          drush_user_add_role('administrator', $author_record->name);
+          
           if ($author_record) {
             db_insert('mediacommons_import_user_map')
               ->fields(array(
@@ -581,18 +718,19 @@ function mediacommons_import_generate_hubs() {
             )->execute();
           }
         }
+
         else {
-          $author_record = $result->fetchObject();
+          $author_record = $author_result->fetchObject();
         }      
       
         /** Node author */
         $node->uid = (int)$author_record->uid;
       
         /** Contributors */
-        $hub_contributors = explode(', ', $value['contributors']);
+        $hub_contributors = explode(', ', $value->contributors);
       
         /** Contributor order */
-        $contributor_order = explode(', ', $value['contributor_order']);      
+        $contributor_order = explode(', ', $value->contributor_order);      
 
         /** Find out if user is already in the system */
         foreach ($hub_contributors as $key => $contributor) {
@@ -621,43 +759,44 @@ function mediacommons_import_generate_hubs() {
       
         /** Add description */
         $node->field_description[$node->language][0] = array(
-          'value' => $value['field_description_value'],
+          'value' => $value->field_description_value,
           'format' => 'filtered_html',
         );
       
         /** Media type */
-        $node->field_type[$node->language][0]['value'] = $value['field_cluster_type_value'];
+        $node->field_type[$node->language][0]['value'] = $value->field_cluster_type_value;
       
         /** Video */
-        if (($value['field_video_embed_link_embed'] != 'NULL')) {
-          $node->field_video_embed_link[$node->language][0]['video_url'] = $value['field_video_embed_link_embed'];
+        if (!empty($value->field_video_embed_link_embed)) {
+          $node->field_video_embed_link[$node->language][0]['video_url'] = $value->field_video_embed_link_embed;
         }
-      
+
         /** Representative image */
+        if (!empty($value->filename)) {
+          
+          drush_print('Representative image');
+
+          $file_path = $script_path . $image_source . $value->filename;
+          
+          drush_print_r($file_path);
       
-        /**
-        if (($data[$c]['filename'] != 'NULL')) {
-      
-          // Some file on our system
-          $file_path = $script_path . $image_source . $data[$c]['filename'];
-      
+          /**
           $file = (object) array(
             'uid' => (int)$data[$c]['uid'],
             'uri' => $file_path,
             'filemime' => file_get_mimetype($file_path),
             'status' => 1,
           );
+          */
          
-          $file = file_copy($file, 'public://'. $image_destination); // Save the file to the root of the files directory.
+          //$file = file_copy($file, 'public://'. $image_destination); // Save the file to the root of the files directory.
       
-          $node->field_representative_image[$node->language][0] = (array)$file; //associate the file object with the image field:
-      
+          //$node->field_representative_image[$node->language][0] = (array)$file; //associate the file object with the image field:
+
         }
-        */
       
         /** spokes */
-      
-      
+
         /**
          * 
          * We probably want to let Drupal do this for us with CNR, just so that wi can test that things are working
@@ -682,9 +821,9 @@ function mediacommons_import_generate_hubs() {
         */
       
         /** dates */
-        $node->field_field_period[$node->language][0]['value'] = $value['field_period_value'];
+        $node->field_field_period[$node->language][0]['value'] = $value->field_period_value;
 
-        $node->field_field_period[$node->language][0]['value2'] = $value['field_period_value2'];
+        $node->field_field_period[$node->language][0]['value2'] = $value->field_period_value2;
       
         /** taxonomy */
         /** work on something similar to users */
@@ -694,15 +833,16 @@ function mediacommons_import_generate_hubs() {
         //}
 
         /** Prepare node for saving */
-        if ($node = node_submit($node)) {
+        //if ($node = node_submit($node) && 'life' == 'full') {
+        if ($node->uid != 0 && $node = node_submit($node)) {
           node_save($node);
           db_insert('mediacommons_import_node_map')
             ->fields(array(
-              'onid' => $value['nid'],
+              'onid' => $value->nid,
               'nid' => $node->nid,
             )
           )->execute();
-          drush_print("Node saved. " . url('node/' . $node->nid, array('absolute'=>TRUE)) . "\n");
+          drush_print('Node saved. ' . url('node/' . $node->nid, array('absolute'=>TRUE)) . "\n");
         }
       }
       else {
@@ -833,11 +973,17 @@ function mediacommons_import_run($task) {
       mediacommons_import_delete_content();
       break;
       
-      case 7 :
-        drush_print('Deleting hubs, spokes  and users');
-        mediacommons_import_delete_users();
-        mediacommons_import_delete_content();
-        break;      
+    case 7 :
+      drush_print('Deleting hubs, spokes  and users');
+      mediacommons_import_delete_users();
+      mediacommons_import_delete_content();
+      break;
+
+    case 8 :
+      drush_print('Running test');
+      // mediacommons_import_d6_hub_list();
+      mediacommons_import_d6_spoke_list();
+      break;
 
     default :
       drush_print('');
@@ -857,6 +1003,7 @@ function mediacommons_import_show_help() {
   drush_print(t('[5] Delete users'));
   drush_print(t('[6] Delete all content'));
   drush_print(t('[7] Delete all user and content'));
+  drush_print(t('[8] Run test'));
   drush_print('');
 }
 
