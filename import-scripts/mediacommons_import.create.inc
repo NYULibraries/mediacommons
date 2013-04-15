@@ -2,6 +2,63 @@
 
 // http://drupal.org/node/1481998
 
+function mediacommons_import_generate_all_users() {
+  drush_print('Importing users: This will take some time, go get yourself a coffee');
+  drush_print("\n");
+  
+  $users_d6_list = mediacommons_import_d6_users_list();
+  foreach ($users_d6_list as $user) {
+    mediacommons_import_generate_user($user);
+  }
+  
+}
+
+function mediacommons_import_generate_roles() {
+  $roles_d7 = array();
+  
+  $roles_d6_list = mediacommons_import_d6_roles();
+  
+  foreach(mediacommons_import_d7_roles() as $role) {
+    $roles_d7[$role->name] = $role->rid;
+  }
+  
+  foreach ($roles_d6_list as $record) {
+    $rid = db_query("SELECT rid FROM {mediacommons_import_role_map} WHERE orid = :orid", array(':orid' => $record->rid));
+
+    if (!$rid->rowCount()) {
+      /** Role exist in Drupal 7 */
+      if (array_key_exists($record->name, $roles_d7)) {
+        drush_print('Role ' . $record->name . ' already exist');
+        db_insert('mediacommons_import_role_map')
+          ->fields(array(
+            'orid' => $record->rid,
+            'rid' => $roles_d7[$record->name]
+          )
+        )->execute();
+      }
+  
+      /** Role does not exist in Drupal 7 */
+      else {
+        drush_print_r('Creating role ' . $record->name);
+        $role = new stdClass();
+        $role->name = $record->name;
+        $new = user_role_save($role);
+        $r = user_role_load_by_name($new);
+  
+        db_insert('mediacommons_import_role_map')
+          ->fields(array(
+            'orid' => $record->rid,
+            'rid' => $r->rid,
+          )
+        )->execute();
+      }
+    }
+    else {
+      drush_print('Role "' . $record->name . '" already imported');
+    }
+  }
+}
+
 function mediacommons_import_generate_vocabulary() {
   $d7 = mediacommons_import_d7_vocabulary_list();
   $d6 = mediacommons_import_d6_vocabulary_list();
@@ -57,6 +114,7 @@ function mediacommons_import_generate_terms() {
   }
   
 }
+
 
 function mediacommons_import_generate_spokes() {
 
@@ -283,6 +341,7 @@ function mediacommons_import_create_taxonomy_term($term) {
   }
 }
 
+
 function mediacommons_import_create_taxonomy_vocabulary($vocabulary) {
   $new = new stdClass();
   $machine_name = strtolower(preg_replace('/\s+/', '', $vocabulary->name));
@@ -310,6 +369,7 @@ function mediacommons_import_create_taxonomy_vocabulary($vocabulary) {
   }
 }
 
+
 function mediacommons_import_generate_hubs() {
   
   $settigs = mediacommons_import_settings();
@@ -325,8 +385,6 @@ function mediacommons_import_generate_hubs() {
   if ($data->rowCount()) {
 
     foreach ($data as $key => $value) {
-      
-      /** drush_print_r($value); */
       
       /** Find out if user is already in the system */
       $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $value->nid));
@@ -350,29 +408,26 @@ function mediacommons_import_generate_hubs() {
         /** Find out if user is already in the system */
         $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $value->uid));
 
-        if (!$author_result->rowCount() && isset($d6_users[$value->uid])) {
-          $author_record = mediacommons_import_generate_user($d6_users[$value->uid]);
-
-          /** Asume user is a editor since has the rights to create hubs */
-          drush_user_add_role('administrator', $author_record->name);
-
-          if ($author_record) {
-            db_insert('mediacommons_import_user_map')
-              ->fields(array(
-                'ouid' => $author_record->ouid,
-                'uid' => $author_record->uid,
-              )
-            )->execute();
-          }
+        if (!$author_result->rowCount()) {
+          drush_die('Please make sure user exist before creating content');
         }
 
-        else {
-          $author_record = $author_result->fetchObject();
-        }      
-
+        $author_record = $author_result->fetchObject();
+        
+        $contributor_role_id = mediacommons_import_get_role_by_name('contributor');
+        
         /** Node author */
         $node->uid = (int)$author_record->uid;
-
+        
+        // Load user object
+        $account = user_load(array('uid' => $node->uid));
+        
+        // Save the user object with the new roles.
+        if ($account !== FALSE && !isset($account->roles[$contributor_role_id])) {
+          $roles = $account->roles + array($contributor_role_id => 'contibutor');
+          user_save($account, array('roles' => $roles));
+        }
+        
         /** Contributors */
         $hub_contributors = explode(', ', $value->contributors);
 
@@ -471,6 +526,7 @@ function mediacommons_import_generate_hubs() {
   }  
 }
 
+
 function mediacommons_import_generate_user($user) {
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
@@ -478,26 +534,42 @@ function mediacommons_import_generate_user($user) {
   $result = db_query("SELECT * FROM {mediacommons_import_user_map} WHERE ouid = :ouid", array(':ouid' => $user->uid));
 
   $exclude_by_username = db_query("SELECT * FROM {users} WHERE name = :name", array(':name' => $user->name));
-
+  
   if ($result->rowCount() == 0 && $exclude_by_username->rowCount() == 0) {
+    
+    drush_print('Creating user: ' . $user->name);
 
     $new_user = array(
-        'name' => $user->name,
-        'pass' => user_password(),
-        'mail' => $user->mail,
-        'init' => $user->init,
-        'status' => $user->status,
-        'access' => $user->access,
-        // 'roles' => $user->roles,
+      'name' => $user->name,
+      'pass' => user_password(),
+      'mail' => $user->mail,
+      'init' => $user->init,
+      'status' => $user->status,
+      'access' => $user->access,
     );
+    
+    if (isset($user->roles)) {
+      foreach(explode(',', $user->roles) as $value) {
+        $new_user['roles'][$value] = TRUE;
+      }
+    }
 
     $account = user_save(null, $new_user);
+    
+    if ($account) {
+      db_insert('mediacommons_import_user_map')
+        ->fields(array(
+          'ouid' => $user->uid,
+          'uid' => $account->uid,
+        )
+      )->execute();    
 
-    db_update('users')->fields(array('mail' => 'dlts.pa@nyu.edu'))
-    ->condition('mail', $user->mail, '=')
-    ->execute();
+      db_update('users')->fields(array('mail' => 'dlts.pa@nyu.edu'))
+        ->condition('mail', $user->mail, '=')
+        ->execute();
 
-    $account->ouid = $user->uid;
+      $account->ouid = $user->uid;
+    }
 
     return $account;
   }
@@ -505,7 +577,7 @@ function mediacommons_import_generate_user($user) {
   else {
 
     if ($exclude_by_username->rowCount()) {
-      drush_print('User already exist in database');
+      drush_print('User already "'. $user->name .'" exist in database');
       $m = $exclude_by_username->fetchObject();
       $account = user_load($m->uid);
       $account->ouid = $user->uid;
@@ -518,6 +590,7 @@ function mediacommons_import_generate_user($user) {
   }
 
 }
+
 
 function mediacommons_import_generate_users($new_users_per_rol = 3) {
 

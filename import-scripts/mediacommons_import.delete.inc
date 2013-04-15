@@ -43,8 +43,32 @@ function mediacommons_import_delete_content($ype = 'all') {
   }
 
   db_delete('mediacommons_import_node_map')
-  ->condition('nid', 'kill em all', '<>')
-  ->execute();
+    ->condition('nid', 'kill em all', '<>')
+    ->execute();
+  
+  db_delete('mediacommons_import_term_map')
+    ->condition('tid', 'kill em all', '<>')
+    ->execute();  
+  
+  db_delete('taxonomy_term_data')
+    ->condition('tid', 'kill em all', '<>')
+    ->execute();
+
+  db_delete('taxonomy_term_hierarchy')
+    ->condition('tid', 'kill em all', '<>')
+    ->execute();
+    
+  db_delete('taxonomy_term_hierarchy')
+    ->condition('tid', 'kill em all', '<>')
+    ->execute();
+    
+  db_delete('mediacommons_import_vocabulary_map')
+    ->condition('vid', 'kill em all', '<>')
+    ->execute();
+
+  db_delete('taxonomy_vocabulary')
+    ->condition('vid', 'kill em all', '<>')
+    ->execute();
 
 }
 

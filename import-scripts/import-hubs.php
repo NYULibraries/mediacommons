@@ -25,9 +25,13 @@
  */
 
 include_once "mediacommons_import.install";
-include_once "mediacommons_import.create.inc";
 include_once "mediacommons_import.datasource.inc";
+include_once "mediacommons_import.create.inc";
 include_once "mediacommons_import.delete.inc";
+
+function mediacommons_import_get_role_by_name($name) {
+  return array_search($name, user_roles());
+}
 
 function mediacommons_import_d6_configured() {
   global $databases;
@@ -47,6 +51,7 @@ function mediacommons_import_prepare() {
 
   $settigs = mediacommons_import_settings();
   ini_set('memory_limit', '512M');
+  
   if (!db_table_exists('mediacommons_import_user_map')) {
     $schema = mediacommons_import_schema();
     mediacommons_import_initialize_schema('mediacommons_import', $schema);
@@ -66,6 +71,11 @@ function mediacommons_import_prepare() {
     $schema = mediacommons_import_schema();
     mediacommons_import_initialize_schema('mediacommons_import', $schema);
     db_create_table('mediacommons_import_term_map', $schema['mediacommons_import_term_map']);
+  }  
+  if (!db_table_exists('mediacommons_import_role_map')) {
+    $schema = mediacommons_import_schema();
+    mediacommons_import_initialize_schema('mediacommons_import', $schema);
+    db_create_table('mediacommons_import_role_map', $schema['mediacommons_import_role_map']);
   }  
 }
 
@@ -105,58 +115,77 @@ function mediacommons_import_run($task) {
   switch ($task) {
 
     case 1 :
-      drush_print('Generating users');
-      break;
-
-    case 2 :
-      drush_print('Generating hubs');
+      drush_print('Import D6 Content (all the stepts)');
       
+      /** Import all users */
+      drush_print('Importing all users');
+      mediacommons_import_generate_all_users();      
+
       /** Import vocabulary */
+      drush_print('Importing vocabulary');
       mediacommons_import_generate_vocabulary();
       
       /** Import terms */
+      drush_print('Importing terms');
       mediacommons_import_generate_terms();
 
       /** Import hubs */
-      
+      drush_print('Importing hubs');
       mediacommons_import_generate_hubs();
       
+      /** Import spokes */
+      drush_print('Importing spokes');
+      mediacommons_import_generate_spokes();
+      
       break;
+      
+    case 2 :
+      drush_print('Importing users');
+      /** Import all users */
+      mediacommons_import_generate_all_users();      
+      break;
+      
 
     case 3 :
-      drush_print('Generating spokes');
-      mediacommons_import_generate_spokes();
+      drush_print('Import D6 Clusters');
+      mediacommons_import_generate_hubs();
       break;
-
+      
     case 4 :
+      drush_print('Import D6 Contributed pieces');
+      mediacommons_import_generate_spokes();
+      break;      
+
+    case 5 :
       drush_print('Generating random hubs and spokes');
       mediacommons_import_generate_random_content();
       break;
 
-    case 5 :
+    case 6 :
       drush_print('Deleting all users');
       mediacommons_import_delete_users();
       break;
 
-    case 6 :
+    case 7 :
       drush_print('Deleting all hubs and spokes');
       mediacommons_import_delete_content();
       break;
       
-    case 7 :
+    case 8 :
       drush_print('Deleting hubs, spokes  and users');
       mediacommons_import_delete_users();
       mediacommons_import_delete_content();
       break;
 
-    case 8 :
+    case 9 :
       drush_print('Importing vocabulary');
       mediacommons_import_generate_vocabulary();
       break;
       
-    case 9 :
+    case 10 :
       drush_print('Running test');
-
+      print_r(mediacommons_import_get_role_by_name('contributor'));
+            
       break;
 
     default :
@@ -170,15 +199,16 @@ function mediacommons_import_run($task) {
 
 function mediacommons_import_show_help() {
   drush_print('');
-  drush_print(t('[1] Generate users'));
-  drush_print(t('[2] Generate hubs'));
-  drush_print(t('[3] Generate spokes'));
-  drush_print(t('[4] Generate random hubs and spokes'));
-  drush_print(t('[5] Delete users'));
-  drush_print(t('[6] Delete all content'));
-  drush_print(t('[7] Delete all user and content'));
-  drush_print(t('[8] Import vocabulary'));  
-  drush_print(t('[9] Run test'));
+  drush_print(t('[1] Import D6 Content (all the stepts)'));
+  drush_print(t('[2] Import users'));
+  drush_print(t('[3] Import hubs'));
+  drush_print(t('[4] Import spokes'));
+  drush_print(t('[5] Generate random hubs and spokes'));
+  drush_print(t('[6] Delete users'));
+  drush_print(t('[7] Delete all content'));
+  drush_print(t('[8] Delete all user and content'));
+  drush_print(t('[9] Import vocabulary'));
+  drush_print(t('[10] Run test'));
   drush_print('');
 }
 

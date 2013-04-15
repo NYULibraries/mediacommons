@@ -1,5 +1,7 @@
 <?php
 
+mediacommons_import_d6_configured();
+
 function mediacommons_import_select_csv_file($type) {
   global $settigs;
 
@@ -47,10 +49,21 @@ function mediacommons_import_load_cvs_file($filepath) {
 
 }
 
+function mediacommons_import_d6_roles() {
+  return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {role}', array(), array());
+}
+
+function mediacommons_import_d7_roles() {
+  /** find all */
+  $query = db_query("SELECT * FROM {role}");
+
+  /** return nids */
+  return $query->fetchAll();
+  
+}
+
 function mediacommons_import_find_d6_user_roles($uid) {
 
-  mediacommons_import_d6_configured();
-  
   $query = '
       SELECT 
         users_roles.uid,
@@ -82,22 +95,16 @@ function mediacommons_import_find_nodes($type) {
 
 function mediacommons_import_find_image($fid) {
 
-  mediacommons_import_d6_configured();
-
   $query = 'SELECT filename, filepath FROM {files} WHERE fid = ' . $fid;
 
   /** Create a database connection to the source (d6) database */
   $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
 
-  $image = $result->fetchObject();
-
-  return $image;
+  return $result->fetchObject();
 
 }
 
 function mediacommons_import_find_term($tid) {
-
-  mediacommons_import_d6_configured();
 
   $term = array();  
 
@@ -131,9 +138,7 @@ function mediacommons_import_find_term($tid) {
 }
 
 function mediacommons_import_find_vocabulary($vid) {
-  
-  mediacommons_import_d6_configured();
-  
+
   $vocabulary = array();
   
   $vocabulary_d7_vid = db_query("SELECT vid FROM {mediacommons_import_vocabulary_map} WHERE vuid = :vuid", array(':vuid' => $vid));
@@ -181,8 +186,6 @@ function mediacommons_import_d7_term_list() {
 
 function mediacommons_import_d6_term_list() {
 
-  mediacommons_import_d6_configured();
-  
   $query = '
       SELECT term.tid, term.vid, term.name, term.description, term.weight, hierarchy.parent
       FROM {term_data} term
@@ -197,35 +200,11 @@ function mediacommons_import_d6_term_list() {
 }
 
 function mediacommons_import_d6_vocabulary_list() {
-  
-  mediacommons_import_d6_configured();
-  
-  $query = '
-        SELECT
-          vocabulary.vid,
-          vocabulary.name,
-          vocabulary.description,
-          vocabulary.help,
-          vocabulary.relations,
-          vocabulary.hierarchy,
-          vocabulary.multiple,
-          vocabulary.required,
-          vocabulary.tags,
-          vocabulary.module,
-          vocabulary.weight
-        FROM {vocabulary} vocabulary';
-  
-  /** Create a database connection to the source (d6) database */
-  $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
-  
-  return $result;
-  
+  return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {vocabulary}', array(), array());
 }
 
 
 function mediacommons_import_d6_users_list() {
-  
-  mediacommons_import_d6_configured();
 
   $users = array();
 
@@ -269,8 +248,6 @@ function mediacommons_import_d6_users_list() {
 
 
 function mediacommons_import_d6_hub_list() {
-
-  mediacommons_import_d6_configured();
 
   $query = "
     SELECT
@@ -316,8 +293,6 @@ function mediacommons_import_d6_hub_list() {
 
 
 function mediacommons_import_d6_spoke_list() {
-
-  mediacommons_import_d6_configured();
 
   $query = "
     SELECT
