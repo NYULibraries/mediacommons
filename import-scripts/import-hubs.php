@@ -29,6 +29,17 @@ include_once "mediacommons_import.create.inc";
 include_once "mediacommons_import.datasource.inc";
 include_once "mediacommons_import.delete.inc";
 
+function mediacommons_import_d6_configured() {
+  global $databases;
+  if (!isset($databases['drupal6'])) {
+    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
+    drush_die();
+  }
+  else {
+    return TRUE;
+  }
+}
+
 function mediacommons_import_prepare() {
   if (!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
   
@@ -66,7 +77,6 @@ function mediacommons_import_settings() {
   return $settigs;
 }
 
-
 /** Return a plain node template */
 function _mediacommons_import_setup_node($type) {
   $node = new StdClass();
@@ -78,8 +88,6 @@ function _mediacommons_import_setup_node($type) {
   node_object_prepare($node);  
   return $node;
 }
-
-
 
 function mediacommons_import_initialize_schema($module, &$schema) {
   // Set the name and module key for all tables.
@@ -93,10 +101,6 @@ function mediacommons_import_initialize_schema($module, &$schema) {
   }
 }
 
-
-
-
-
 function mediacommons_import_run($task) {
   switch ($task) {
 
@@ -106,7 +110,17 @@ function mediacommons_import_run($task) {
 
     case 2 :
       drush_print('Generating hubs');
+      
+      /** Import vocabulary */
+      mediacommons_import_generate_vocabulary();
+      
+      /** Import terms */
+      mediacommons_import_generate_terms();
+
+      /** Import hubs */
+      
       mediacommons_import_generate_hubs();
+      
       break;
 
     case 3 :
@@ -136,9 +150,13 @@ function mediacommons_import_run($task) {
       break;
 
     case 8 :
+      drush_print('Importing vocabulary');
+      mediacommons_import_generate_vocabulary();
+      break;
+      
+    case 9 :
       drush_print('Running test');
-        drush_print_r(mediacommons_import_find_d6_user_roles(1));
-        
+
       break;
 
     default :
@@ -159,7 +177,8 @@ function mediacommons_import_show_help() {
   drush_print(t('[5] Delete users'));
   drush_print(t('[6] Delete all content'));
   drush_print(t('[7] Delete all user and content'));
-  drush_print(t('[8] Run test'));
+  drush_print(t('[8] Import vocabulary'));  
+  drush_print(t('[9] Run test'));
   drush_print('');
 }
 

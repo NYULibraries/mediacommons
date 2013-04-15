@@ -48,12 +48,8 @@ function mediacommons_import_load_cvs_file($filepath) {
 }
 
 function mediacommons_import_find_d6_user_roles($uid) {
-  global $databases;
-  
-  if (!isset($databases['drupal6'])) {
-    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
-    drush_die();
-  }
+
+  mediacommons_import_d6_configured();
   
   $query = '
       SELECT 
@@ -86,12 +82,7 @@ function mediacommons_import_find_nodes($type) {
 
 function mediacommons_import_find_image($fid) {
 
-  global $databases;
-
-  if (!isset($databases['drupal6'])) {
-    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
-    drush_die();
-  }
+  mediacommons_import_d6_configured();
 
   $query = 'SELECT filename, filepath FROM {files} WHERE fid = ' . $fid;
 
@@ -106,7 +97,7 @@ function mediacommons_import_find_image($fid) {
 
 function mediacommons_import_find_term($tid) {
 
-  global $databases;
+  mediacommons_import_d6_configured();
 
   $term = array();  
 
@@ -116,11 +107,6 @@ function mediacommons_import_find_term($tid) {
     
     drush_print_r('old term does not exist; will try to create');
     
-    if (!isset($databases['drupal6'])) {
-      drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
-      drush_die();
-    }
-
     $query = '
       SELECT term.tid, term.vid, term.name, term.description, term.weight, hierarchy.parent
       FROM {term_data} term
@@ -146,18 +132,13 @@ function mediacommons_import_find_term($tid) {
 
 function mediacommons_import_find_vocabulary($vid) {
   
-  global $databases;
+  mediacommons_import_d6_configured();
   
   $vocabulary = array();
   
   $vocabulary_d7_vid = db_query("SELECT vid FROM {mediacommons_import_vocabulary_map} WHERE vuid = :vuid", array(':vuid' => $vid));
   
   if (!$vocabulary_d7_vid->rowCount()) {
-    if (!isset($databases['drupal6'])) {
-      drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
-      drush_die();
-    }
-
     $query = '
         SELECT 
           vocabulary.vid, 
@@ -190,20 +171,68 @@ function mediacommons_import_find_vocabulary($vid) {
 
 }
 
+function mediacommons_import_d7_vocabulary_list() {
+ return taxonomy_get_vocabularies();  
+}
+
+function mediacommons_import_d7_term_list() {
+  return taxonomy_get_vocabularies();
+}
+
+function mediacommons_import_d6_term_list() {
+
+  mediacommons_import_d6_configured();
+  
+  $query = '
+      SELECT term.tid, term.vid, term.name, term.description, term.weight, hierarchy.parent
+      FROM {term_data} term
+      LEFT JOIN {term_hierarchy} hierarchy
+        ON term.tid = hierarchy.tid';
+
+  /** Create a database connection to the source (d6) database */
+  $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+  
+  return $result;
+  
+}
+
+function mediacommons_import_d6_vocabulary_list() {
+  
+  mediacommons_import_d6_configured();
+  
+  $query = '
+        SELECT
+          vocabulary.vid,
+          vocabulary.name,
+          vocabulary.description,
+          vocabulary.help,
+          vocabulary.relations,
+          vocabulary.hierarchy,
+          vocabulary.multiple,
+          vocabulary.required,
+          vocabulary.tags,
+          vocabulary.module,
+          vocabulary.weight
+        FROM {vocabulary} vocabulary';
+  
+  /** Create a database connection to the source (d6) database */
+  $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+  
+  return $result;
+  
+}
+
+
 function mediacommons_import_d6_users_list() {
-  global $databases;
+  
+  mediacommons_import_d6_configured();
 
   $users = array();
 
-  if (!isset($databases['drupal6'])) {
-    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
-    drush_die();
-  }
-
   /** Create a database connection to the source (d6) database */
   $query = Database::getConnection('default', 'drupal6')
-  ->select('users', 'u')
-  ->fields('u', array(
+    ->select('users', 'u')
+    ->fields('u', array(
       'uid',
       'name',
       'pass',
@@ -238,9 +267,10 @@ function mediacommons_import_d6_users_list() {
 
 }
 
+
 function mediacommons_import_d6_hub_list() {
 
-  global $databases;
+  mediacommons_import_d6_configured();
 
   $query = "
     SELECT
@@ -277,11 +307,6 @@ function mediacommons_import_d6_hub_list() {
     GROUP BY node.nid
     ORDER BY node.nid";
   
-  if (!isset($databases['drupal6'])) {
-    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
-    drush_die();
-  }
-
   /** Create a database connection to the source (d6) database */
   $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
 
@@ -289,9 +314,10 @@ function mediacommons_import_d6_hub_list() {
 
 }
 
+
 function mediacommons_import_d6_spoke_list() {
 
-  global $databases;
+  mediacommons_import_d6_configured();
 
   $query = "
     SELECT
@@ -328,11 +354,6 @@ function mediacommons_import_d6_spoke_list() {
     WHERE n.type = 'contributed_pieces' AND n.status = 1
     GROUP BY n.nid
     ORDER BY n.nid";
-
-  if (!isset($databases['drupal6'])) {
-    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
-    drush_die();
-  }
 
   /** Create a database connection to the source (d6) database */
   $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());

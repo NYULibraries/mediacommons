@@ -2,6 +2,62 @@
 
 // http://drupal.org/node/1481998
 
+function mediacommons_import_generate_vocabulary() {
+  $d7 = mediacommons_import_d7_vocabulary_list();
+  $d6 = mediacommons_import_d6_vocabulary_list();
+  $d7_names = array();
+
+  foreach ($d7 as $record) {
+    $d7_names[strtolower($record->name)] = $record->vid;
+  }
+
+  foreach ($d6 as $record) {
+    $vid = db_query("SELECT vid FROM {mediacommons_import_vocabulary_map} WHERE vuid = :vuid", array(':vuid' => $record->vid));
+    if (!$vid->rowCount()) {
+      /** Vocabulary exist in Drupal 7 */
+      if (array_key_exists(strtolower($record->name), $d7_names)) {
+        drush_print('Vocabulary ' . strtolower($record->name) . ' already exist');
+        db_insert('mediacommons_import_vocabulary_map')
+          ->fields(array(
+            'vuid' => $record->vid,
+            'vid' => $d7_names[strtolower($record->name)],
+          )
+        )->execute();
+      }
+      /** Vocabulary does not exist in Drupal 7 */
+      else {
+        drush_print('Creating ' . $record->name);
+        mediacommons_import_create_taxonomy_vocabulary($record);
+      }
+    }
+  }
+}
+
+function mediacommons_import_generate_terms() {
+  
+  /** Just in case */
+  mediacommons_import_generate_vocabulary();
+  
+  $vocabulary_map = db_query("SELECT * FROM {mediacommons_import_vocabulary_map}");
+  $terms_d6 = mediacommons_import_d6_term_list();
+  
+  $vocabularies = array();
+  
+  foreach ($vocabulary_map as $vocabulary) {
+    $vocabularies[$vocabulary->vuid] = $vocabulary->vid;
+  }
+  
+  foreach ($terms_d6 as $term) {
+    if (isset($vocabularies[$term->vid])) {
+      $tid = db_query("SELECT tid FROM {mediacommons_import_term_map} WHERE toid = :toid", array('toid' => $term->tid));
+      if (!$tid->rowCount()) {
+        mediacommons_import_create_taxonomy_term($term);
+      }
+    }
+  }
+  
+}
+
 function mediacommons_import_generate_spokes() {
 
   /** Load data, this will take time; go get yourself a coffee */
@@ -15,7 +71,7 @@ function mediacommons_import_generate_spokes() {
 
     foreach ($data as $key => $spoke) {
 
-      /** Find out if user is already in the system */
+      /** Find out if usr is already in the system */
       $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $spoke->nid));
 
       if (!$node_exist->rowCount()) {
@@ -229,7 +285,7 @@ function mediacommons_import_create_taxonomy_term($term) {
 
 function mediacommons_import_create_taxonomy_vocabulary($vocabulary) {
   $new = new stdClass();
-  $machine_name = 'd6' . strtolower(preg_replace('/\s+/', '', $vocabulary->name));
+  $machine_name = strtolower(preg_replace('/\s+/', '', $vocabulary->name));
   $new->name = $vocabulary->name;
   $new->description = $vocabulary->description;
   $new->help = $vocabulary->help;
