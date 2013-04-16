@@ -7,6 +7,15 @@
  * http://www.group42.ca/creating_and_updating_nodes_programmatically_in_drupal_7
  */
 
+include_once "mediacommons_import.install";
+include_once "include/mediacommons_import.datasource.inc";
+include_once "include/mediacommons_import.create.inc";
+include_once "include/mediacommons_import.delete.inc";
+
+function mediacommons_import_get_role_by_name($name) {
+  return array_search($name, user_roles());
+}
+
 /**
  * Assuming you have already a local copy of TNE, your settings.php should looks somtething like this:
 
@@ -21,18 +30,7 @@
      'prefix' => 'prefix_',
    ),
  );
-
  */
-
-include_once "mediacommons_import.install";
-include_once "mediacommons_import.datasource.inc";
-include_once "mediacommons_import.create.inc";
-include_once "mediacommons_import.delete.inc";
-
-function mediacommons_import_get_role_by_name($name) {
-  return array_search($name, user_roles());
-}
-
 function mediacommons_import_d6_configured() {
   global $databases;
   if (!isset($databases['drupal6'])) {
@@ -45,8 +43,6 @@ function mediacommons_import_d6_configured() {
 }
 
 function mediacommons_import_prepare() {
-
-  if (!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 
   ini_set('memory_limit', '512M');
     

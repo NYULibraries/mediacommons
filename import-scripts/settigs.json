@@ -6,14 +6,10 @@
     "settings" : {
         "local" : {
             "url" : "http://localhost/editor/",
-            "image_source" : "images/teaser-images",
-            "image_destination" : "images/teaser-images",
             "csv_directory" : "include/data"
         },
         "production" : {
             "url" : "http://mediacommons.futureofthebook.org/tne/",
-            "image_source" : "images/teaser-images",
-            "image_destination" : "images/teaser-images",
             "csv_directory" : "include/data"
         }
     }

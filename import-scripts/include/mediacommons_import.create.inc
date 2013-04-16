@@ -7,10 +7,47 @@ function mediacommons_import_generate_all_users() {
   drush_print("\n");
   
   $users_d6_list = mediacommons_import_d6_users_list();
+  
   foreach ($users_d6_list as $user) {
     mediacommons_import_generate_user($user);
   }
   
+}
+
+function mediacommons_import_generate_random_users($new_users_per_rol = 3) {
+
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+
+  $sharedemail_enable = FALSE;
+  $sharedemail_path = drupal_get_path('module', 'sharedemail');
+
+  if (empty($sharedemail_path)) {
+    drush_print('I need sharedemai module in order to use the same email for all the accounts');
+    return;
+  }
+
+  drush_set_option('password', 'dlts2010');
+
+  /** make sure we can used the same email address */
+  if ( !module_exists('sharedemail') ) {
+    drush_print('Will try to enable sharedemail module. Remember to disable/uninstall and remove module before going to production.');
+    module_enable(array('sharedemail'));
+  }
+
+  foreach (user_roles(TRUE) as $rol) {
+    $i = $new_users_per_rol;
+    while ($i--) {
+      $user_name = str_replace(' ', '_', $rol) . '_' . uniqid();
+      $result = db_query("SELECT name FROM {users} WHERE name = :name", array(':name' => $user_name));
+      if (!$result->rowCount()) {
+        drush_user_create($user_name);
+        drush_user_add_role($rol, $user_name);
+        db_update('users')->fields(array('mail' => variable_get('site_mail', 'dlts.pa@nyu.edu')))
+        ->condition('name', $user_name, '=')
+        ->execute();
+      }
+    }
+  }
 }
 
 function mediacommons_import_generate_roles() {
@@ -115,207 +152,197 @@ function mediacommons_import_generate_terms() {
   
 }
 
-
+/**
+ * Create a spokes.
+ */
 function mediacommons_import_generate_spokes() {
 
   /** Load data, this will take time; go get yourself a coffee */
   $data = mediacommons_import_d6_spoke_list();
-
-  /** Get a list of all the D6 users */
-  $d6_users = mediacommons_import_d6_users_list();
 
   /** If we have $data proceed */
   if (isset($data)) {
 
     foreach ($data as $key => $spoke) {
 
-      /** Find out if usr is already in the system */
+      /** Find out if node is already in the system */
       $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $spoke->nid));
+      
+      $rowCount = (int)$node_exist->rowCount();
+      $uid = (int)$spoke->uid;
 
-      if (!$node_exist->rowCount()) {
+      if (
+          $rowCount > 0 && 
+          $uid > 0
+      ) {
         
         drush_print('Creating ' . $spoke->title . "\n");
-
-        /** This node defualt configuration */
-        $node = _mediacommons_import_setup_node('spoke');
-
-        $node->title = $spoke->title;
-
-        /** Find out if user is already in the system */
-        $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $spoke->uid));
-
-        if (!$author_result->rowCount() && isset($d6_users[$spoke->uid])) {
-          $author_record = mediacommons_import_generate_user($d6_users[$spoke->uid]);
-          if ($author_record) {
-            db_insert('mediacommons_import_user_map')
-            ->fields(array(
-            'ouid' => $author_record->ouid,
-            'uid' => $author_record->uid,
-            )
-            )->execute();
-          }
-        }
-        else {
-          $author_record = $author_result->fetchObject();
-        }
-
-        /** Node author */
-        $node->uid = (int)$author_record->uid;
-
-        $node->created = (int)$spoke->created;
-
-        $node->changed = (int)$spoke->changed;
-
-        $node->comment = (int)$spoke->comment;
-
-        $node->status = (int)$spoke->status;
-
-        $node->status = (int)$spoke->status;
-
-        $node->promote = (int)$spoke->promote;
-
-        $node->moderate = (int)$spoke->moderate;
-
-        $node->sticky = (int)$spoke->sticky;
-
-        /** Additonal authors */
-        if ($spoke->additonal_authors) {
           
-          /** Contributors */
-          $spoke_contributors = explode(', ', $spoke->additonal_authors);
-
-          /** Contributor order */
-          $contributor_order = explode(', ', $spoke->additonal_authors_delta);
-
+        $images_query = "SELECT fid FROM {image} WHERE image_size = :size AND nid = :nid";
+          
+        $images_result = Database::getConnection('default', 'drupal6')->query($images_query, array(':nid' => $spoke->nid, ':size' => '_original'), array());
+          
+        if ($images_result->rowCount()) {
+          foreach ($images_result as $i) {
+            drush_print_r($i);
+          }            
+        }
+            
+          /** This node defualt configuration */
+          $node = _mediacommons_import_setup_node('spoke');
+          
+          $node->title = $spoke->title;          
+          
           /** Find out if user is already in the system */
-          foreach ($spoke_contributors as $key => $contributor) {
-            $result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $contributor));
-            if (!$result->rowCount() && isset($d6_users[$contributor])) {
-              $record = mediacommons_import_generate_user($d6_users[$contributor]);
-              if ($record) {
-                db_insert('mediacommons_import_user_map')
-                ->fields(array(
-                'ouid' => $record->ouid,
-                'uid' => $record->uid,
-                )
-                )->execute();
+          $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $spoke->uid));
+
+          if (!$author_result->rowCount()) {
+            drush_die('Author (uid: '. $spoke->uid .') does not exist. Please import users before trying to import the content.'); 
+          }
+        
+          $author_record = $author_result->fetchObject();
+
+          /** Node author */
+          $node->uid = (int)$author_record->uid;
+
+          $node->created = (int)$spoke->created;
+
+          $node->changed = (int)$spoke->changed;
+
+          $node->comment = (int)$spoke->comment;
+
+          $node->status = (int)$spoke->status;
+
+          $node->promote = (int)$spoke->promote;
+
+          $node->moderate = (int)$spoke->moderate;
+
+          $node->sticky = (int)$spoke->sticky;
+
+          /** Additonal authors */
+          if ($spoke->additonal_authors) {
+          
+            /** Contributors */
+            $spoke_contributors = explode(', ', $spoke->additonal_authors);
+
+            /** Contributor order */
+            $contributor_order = explode(', ', $spoke->additonal_authors_delta);
+
+            /** Find out if user is already in the system */
+            foreach ($spoke_contributors as $key => $contributor) {
+              $result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $contributor));
+              if ($result->rowCount()) {
+                $record = $result->fetchObject();
+                $node->field_contributors[$node->language][$key] = array(
+                  'uid' => (int)$record->uid,
+                  '_weight' => (int)$contributor_order[$key],
+                );
               }
             }
-            else {
-              $record = $result->fetchObject();
-            }
-            $node->field_contributors[$node->language][$key] = array(
-                'uid' => (int)$record->uid,
-                '_weight' => (int)$contributor_order[$key],
-            );
-
           }
-        }
 
-        /** Description */
-        $node->field_body[$node->language][0] = array(
+          /** Description */
+          $node->field_body[$node->language][0] = array(
             'value' => $spoke->field_document_textarea_body_value,
             'format' => 'filtered_html',
-        );
+          );
 
-        /** Publication status */
-        if ($spoke->field_pubstat_value == 'Published') {
-          $node->field_pubstat[$node->language][0]['value'] = 1;
-        }
-        else {
-          $node->field_pubstat[$node->language][0]['value'] = 0;
-        }
+          /** Publication status */
+          $node->field_pubstat[$node->language][0]['value'] = (isset($spoke->field_pubstat_value) && $spoke->field_pubstat_value == 'Published' ) ? 1 : 0;
 
-        /** Clusters */
-        if (
-            !empty($spoke->cluster_nid)
-        ) {
-
-          $cluster_nid = explode(', ', $spoke->cluster_nid);
-
-          foreach ($cluster_nid as $key => $nid) {
-            $hub_result = db_query("SELECT * FROM {mediacommons_import_node_map} WHERE onid = :onid", array(':onid' => $nid));
-            if ($hub_result->rowCount()) {
-              $hub_record = $hub_result->fetchObject();
-              $node->field_part_of_hub[$node->language][$key]['nid'] = (int)$hub_record->nid;
+          /** Clusters */
+          if (!empty($spoke->cluster_nid)) {
+            $cluster_nid = explode(', ', $spoke->cluster_nid);
+            foreach ($cluster_nid as $key => $nid) {
+              $hub_result = db_query("SELECT * FROM {mediacommons_import_node_map} WHERE onid = :onid", array(':onid' => $nid));
+              if ($hub_result->rowCount()) {
+                $hub_record = $hub_result->fetchObject();
+                $node->field_part_of_hub[$node->language][$key]['nid'] = (int)$hub_record->nid;
+              }
             }
           }
-        }
 
-        /** Representative image */
+          /** Representative image */
 
-        /*
-         if (($value['filename'] != 'NULL')) {
-        // Some file on our system
-        $file_path = $script_path . $image_source . $value['filename'];
-
-        $file = (object) array(
-            'uid' => (int)$value['uid'],
-            'uri' => $file_path,
-            'filemime' => file_get_mimetype($file_path),
-            'status' => 1,
-        );
+          /*
+           if (($value['filename'] != 'NULL')) {
+          // Some file on our system
+          $file_path = $script_path . $image_source . $value['filename'];
+  
+          $file = (object) array(
+              'uid' => (int)$value['uid'],
+              'uri' => $file_path,
+              'filemime' => file_get_mimetype($file_path),
+              'status' => 1,
+          );
          
-        // Save the file to the root of the files directory.
-        $file = file_copy($file, 'public://'. $image_destination);
+          // Save the file to the root of the files directory.
+          $file = file_copy($file, 'public://'. $image_destination);
          
-        // ALBERTO I'm having trouble loading the file into the attached image table
-        // $node->field_attached_images[$node->language][0] = (array)$file; //associate the file object with the image field:
-        $node->field_representative_image[$node->language][0] = (array)$file; //associate the file object with the image field:
+          // ALBERTO I'm having trouble loading the file into the attached image table
+          // $node->field_attached_images[$node->language][0] = (array)$file; //associate the file object with the image field:
+          $node->field_representative_image[$node->language][0] = (array)$file; //associate the file object with the image field:
          
-        }
-        */
+          }
+          */
 
-        /** attached images */
+          /** attached images */
 
-        /**
-         if (($value['attached_image_filepath'] != 'NULL')) {
+          /**
+           if (($value['attached_image_filepath'] != 'NULL')) {
 
-         $array = explode(", ", $value['attached_image_filepath']);
+           $array = explode(", ", $value['attached_image_filepath']);
 
-         foreach ($array as $key => $value) {
-         $filename = pathinfo($value, PATHINFO_BASENAME);
-         $file_path = $script_path . $image_source . $filename;
-         $file = (object) array(
-         'uid' => (int)$data[$c]['uid'],
-         'uri' => $file_path,
-         'filemime' => file_get_mimetype($file_path),
-         'status' => 1,
-         );
+           foreach ($array as $key => $value) {
+           $filename = pathinfo($value, PATHINFO_BASENAME);
+           $file_path = $script_path . $image_source . $filename;
+           $file = (object) array(
+           'uid' => (int)$data[$c]['uid'],
+           'uri' => $file_path,
+           'filemime' => file_get_mimetype($file_path),
+           'status' => 1,
+           );
 
-         // Save the file to the root of the files directory.
-         $file = file_copy($file, 'public://'. $image_destination);
+           // Save the file to the root of the files directory.
+           $file = file_copy($file, 'public://'. $image_destination);
 
-         // associate the file object with the image field
-         $node->field_attached_images[$node->language][0] = (array)$file;
+           // associate the file object with the image field
+           $node->field_attached_images[$node->language][0] = (array)$file;
 
-         }
-         }
-         */
+           }
+           }
+           */
 
-        /** taxonomy */
-        // $array = explode(", ", $value['terms']);
+          /** taxonomy */
+          foreach (explode(', ', $spoke->terms) as $key => $tid) {
+            if ($tid) {
+              $tid_result = db_query("SELECT tid FROM {mediacommons_import_term_map} WHERE toid = :toid", array(':toid' => $tid));
+              if ($tid_result->rowCount() && $term_object = $tid_result->fetchObject()) {
+                $node->field_tags[$node->language][] = array('tid' => $term_object->tid );
+              }
+            }
+          }
 
-        /** Prepare node for saving */
-        if ($node->uid != 0 && $node = node_submit($node)) {
-          node_save($node);
-          db_insert('mediacommons_import_node_map')
-          ->fields(array(
-          'onid' => $value['nid'],
-          'nid' => $node->nid,
-          )
-          )->execute();
-          drush_print("Spoke saved. " . url('node/' . $node->nid, array('absolute'=>TRUE)) . "\n");
-        }
+          /** Prepare node for saving */
+          $node = node_submit($node);
+          
+          if ($node) {
+            node_save($node);
+            db_insert('mediacommons_import_node_map')
+              ->fields(array(
+                'onid' => $value['nid'],
+                'nid' => $node->nid,
+              )
+            )->execute();
+            drush_print("Spoke saved. " . url('node/' . $node->nid, array('absolute'=>TRUE)) . "\n");
+          }
 
       }
       else {
         drush_print('Spoke already exist');
       }
-
     }
   }
-
 }
 
 /**
@@ -341,7 +368,9 @@ function mediacommons_import_create_taxonomy_term($term) {
   }
 }
 
-
+/**
+ * Create a taxonomy vocabulary.
+ */
 function mediacommons_import_create_taxonomy_vocabulary($vocabulary) {
   $new = new stdClass();
   $machine_name = strtolower(preg_replace('/\s+/', '', $vocabulary->name));
@@ -369,7 +398,9 @@ function mediacommons_import_create_taxonomy_vocabulary($vocabulary) {
   }
 }
 
-
+/**
+ * Create a hubs.
+ */
 function mediacommons_import_generate_hubs() {
   
   $settigs = mediacommons_import_settings();
@@ -419,10 +450,10 @@ function mediacommons_import_generate_hubs() {
         /** Node author */
         $node->uid = (int)$author_record->uid;
         
-        // Load user object
+        /** Load user object */
         $account = user_load(array('uid' => $node->uid));
         
-        // Save the user object with the new roles.
+        /** Save the user object with the new roles. */
         if ($account !== FALSE && !isset($account->roles[$contributor_role_id])) {
           $roles = $account->roles + array($contributor_role_id => 'contibutor');
           user_save($account, array('roles' => $roles));
@@ -501,9 +532,10 @@ function mediacommons_import_generate_hubs() {
         /** taxonomy */
         foreach (explode(', ', $value->terms) as $key => $tid) {
           if ($tid) {
-            drush_print('Generating term');
-            $term = mediacommons_import_find_term($tid);
-            $node->field_cluster_tags[$node->language][] = array('tid' => $term->tid );
+            $tid_result = db_query("SELECT tid FROM {mediacommons_import_term_map} WHERE toid = :toid", array(':toid' => $tid));
+            if ($tid_result->rowCount() && $term_object = $tid_result->fetchObject()) {
+              $node->field_cluster_tags[$node->language][] = array('tid' => $term_object->tid);
+            }
           }
         }
         
@@ -526,7 +558,9 @@ function mediacommons_import_generate_hubs() {
   }  
 }
 
-
+/**
+ * Create user.
+ */
 function mediacommons_import_generate_user($user) {
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
@@ -577,7 +611,7 @@ function mediacommons_import_generate_user($user) {
   else {
 
     if ($exclude_by_username->rowCount()) {
-      drush_print('User already "'. $user->name .'" exist in database');
+      drush_print('User "'. $user->name .'" already exist in database');
       $m = $exclude_by_username->fetchObject();
       $account = user_load($m->uid);
       $account->ouid = $user->uid;
@@ -591,43 +625,9 @@ function mediacommons_import_generate_user($user) {
 
 }
 
-
-function mediacommons_import_generate_users($new_users_per_rol = 3) {
-
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-
-  $sharedemail_enable = FALSE;
-  $sharedemail_path = drupal_get_path('module', 'sharedemail');
-
-  if (empty($sharedemail_path)) {
-    drush_print('I need sharedemai module in order to use the same email for all the accounts');
-    return;
-  }
-
-  drush_set_option('password', 'dlts2010');
-
-  /** make sure we can used the same email address */
-  if ( !module_exists('sharedemail') ) {
-    drush_print('Will try to enable sharedemail module. Remember to disable/uninstall and remove module before going to production.');
-    module_enable(array('sharedemail'));
-  }
-
-  foreach (user_roles(TRUE) as $rol) {
-    $i = $new_users_per_rol;
-    while ($i--) {
-      $user_name = str_replace(' ', '_', $rol) . '_' . uniqid();
-      $result = db_query("SELECT name FROM {users} WHERE name = :name", array(':name' => $user_name));
-      if (!$result->rowCount()) {
-        drush_user_create($user_name);
-        drush_user_add_role($rol, $user_name);
-        db_update('users')->fields(array('mail' => variable_get('site_mail', 'dlts.pa@nyu.edu')))
-        ->condition('name', $user_name, '=')
-        ->execute();
-      }
-    }
-  }
-}
-
+/**
+ * Generate random content
+ */
 function mediacommons_import_generate_random_content($new_hubs = 4) {
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
