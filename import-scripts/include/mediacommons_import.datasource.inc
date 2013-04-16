@@ -2,53 +2,6 @@
 
 mediacommons_import_d6_configured();
 
-function mediacommons_import_select_csv_file($type) {
-  global $settigs;
-
-  $cvs_files = array();
-
-  /** find all the csv files */
-  $cvs_files = file_scan_directory($settigs['script_path']['dirname'] . '/' . $settigs['settings'][$settigs['environment']]['csv_directory'] . '/', '/.*\.csv$/', array( 'recurse' => FALSE ));
-
-  $cvs_files_options = array_keys($cvs_files);
-
-  drush_print(t('Please select one of the following files to continue') . ":\n");
-
-  if (count($cvs_files_options)) {
-    for ($i = 0; $i < count($cvs_files_options); $i++) {
-      drush_print($i . ') ' . ($cvs_files_options[$i] ));
-    }
-    $handle = fopen ("php://stdin","r");
-    $line = fgets($handle);
-    $filepath = $cvs_files[$cvs_files_options[(int)trim($line)]];
-    if (isset($filepath) && is_file($filepath->uri)) {
-      return $filepath->uri;
-    }
-  }
-  return NULL;
-}
-
-function mediacommons_import_load_cvs_file($filepath) {
-  
-  $data = array();
-  $header = NULL;
-  
-  if (($handle = fopen($filepath, "r")) !== FALSE) {
-    while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
-      if(!$header) {
-        $header = $row;
-      } else {
-        $data[] = array_combine($header, $row);
-      }
-    }
-  }
-  
-  fclose($handle);
-  
-  return $data;
-
-}
-
 function mediacommons_import_d6_roles() {
   return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {role}', array(), array());
 }
@@ -64,22 +17,24 @@ function mediacommons_import_d7_roles() {
 
 function mediacommons_import_find_d6_user_roles($uid) {
 
-  $query = '
-      SELECT 
-        users_roles.uid,
-        users_roles.rid,
-        role.name
-      FROM {users_roles} users_roles
-      LEFT JOIN {role} role
-        ON users_roles.rid = role.rid      
-      WHERE users_roles.uid = ' . $uid;
+  $query = Database::getConnection('default', 'drupal6')
   
-  /** Create a database connection to the source (d6) database */
-  $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+  ->select('users', 'u')->fields('u', 
+     array(
+       'uid',
+       'name',
+     )
+   )
   
-  $roles = $result->fetchObject();
+  ->condition('u.uid', $uid, '=');
   
-  return $roles;
+  $query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
+  
+  $query->groupBy('uid');
+  
+  $query->addExpression("GROUP_CONCAT(DISTINCT ur.rid SEPARATOR ',')", 'roles');
+  
+  return $query->execute();
   
 }
 
@@ -210,8 +165,10 @@ function mediacommons_import_d6_users_list() {
 
   /** Create a database connection to the source (d6) database */
   $query = Database::getConnection('default', 'drupal6')
-    ->select('users', 'u')
-    ->fields('u', array(
+  
+  ->select('users', 'u')
+  
+  ->fields('u', array(
       'uid',
       'name',
       'pass',
@@ -227,7 +184,9 @@ function mediacommons_import_d6_users_list() {
       'picture',
       'init',
       'timezone_name'
-  ))
+    )
+  )
+  
   ->condition('u.uid', 1, '>');
 
   $query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');

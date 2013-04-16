@@ -169,10 +169,11 @@ function mediacommons_import_generate_spokes() {
       $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $spoke->nid));
       
       $rowCount = (int)$node_exist->rowCount();
+      
       $uid = (int)$spoke->uid;
-
+      
       if (
-          $rowCount > 0 && 
+          $rowCount == 0 && 
           $uid > 0
       ) {
         
