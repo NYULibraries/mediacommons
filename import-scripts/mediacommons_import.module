@@ -17,7 +17,7 @@ function mediacommons_import_get_role_by_name($name) {
 }
 
 /**
- * Assuming you have already a local copy of TNE, your settings.php should looks somtething like this:
+ * Assuming you have already a local copy of TNE, your settings.php should looks something like this:
 
  $databases['drupal6'] = array(
    'default' => array(

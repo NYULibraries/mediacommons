@@ -418,16 +418,29 @@ function mediacommons_import_generate_hubs() {
 
     foreach ($data as $key => $value) {
       
+      $old_author_uid = (int) $value->uid;
+      
       /** Find out if user is already in the system */
+      $author_exist = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $old_author_uid));
+      
+      $authorCount = (int)$author_exist->rowCount();
+      
+      /** Find out if node is already in the system */
       $node_exist = db_query('SELECT nid FROM {mediacommons_import_node_map} u WHERE onid = :onid', array(':onid' => $value->nid));
       
-      if (!$node_exist->rowCount()) {
+      $rowCount = (int)$node_exist->rowCount();
+      
+      if (
+          $rowCount == 0 &&
+          $authorCount > 0 &&
+          $old_author_uid > 0
+      ) {
+        
+        drush_print('Creating ' . $value->title . "\n");        
         
         /** This node defualt configuration */
         $node = _mediacommons_import_setup_node('hub');
         
-        drush_print('Creating ' . $value->title . "\n");        
-
         /** Node title */
         $node->title = $value->title;
 
@@ -437,14 +450,11 @@ function mediacommons_import_generate_hubs() {
         /** Node comment */
         $node->comment = $value->comment;
 
-        /** Find out if user is already in the system */
-        $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $value->uid));
-
-        if (!$author_result->rowCount()) {
-          drush_die('Please make sure user exist before creating content');
-        }
-
-        $author_record = $author_result->fetchObject();
+        /** Node author record */
+        $author_record = $author_exist->fetchObject();
+        
+        /** Node author new id */
+        $node->uid = (int)$author_record->uid;
         
         $contributor_role_id = mediacommons_import_get_role_by_name('contributor');
         
@@ -531,12 +541,12 @@ function mediacommons_import_generate_hubs() {
         $node->field_field_period[$node->language][0]['value2'] = $value->field_period_value2;
       
         /** taxonomy */
-        foreach (explode(', ', $value->terms) as $key => $tid) {
-          if ($tid) {
-            $tid_result = db_query("SELECT tid FROM {mediacommons_import_term_map} WHERE toid = :toid", array(':toid' => $tid));
-            if ($tid_result->rowCount() && $term_object = $tid_result->fetchObject()) {
-              $node->field_cluster_tags[$node->language][] = array('tid' => $term_object->tid);
-            }
+        foreach (explode(', ', $value->terms) as $tid) {
+          $tid_result = db_query("SELECT tid FROM {mediacommons_import_term_map} WHERE toid = :toid", array(':toid' => $tid));
+          $tiCount = (int)$tid_result->rowCount();
+          if ($tiCount > 0) {
+            $term_object = $tid_result->fetchObject();
+            $node->field_cluster_tags[$node->language][] = array('tid' => $term_object->tid);
           }
         }
         

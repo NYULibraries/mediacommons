@@ -5,7 +5,7 @@
     "dependencies": {},
     "settings" : {
         "local" : {
-            "url" : "http://localhost/editor/",
+            "url" : "http://localhost/z/",
             "csv_directory" : "include/data"
         },
         "production" : {
