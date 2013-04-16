@@ -172,8 +172,14 @@ function mediacommons_import_generate_spokes() {
       
       $uid = (int)$spoke->uid;
       
+      /** Find out if user is already in the system */
+      $author_exist = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $uid));
+      
+      $authorCount = (int)$author_exist->rowCount();
+      
       if (
           $rowCount == 0 && 
+          $authorCount > 0 &&
           $uid > 0
       ) {
         
@@ -189,24 +195,18 @@ function mediacommons_import_generate_spokes() {
           }            
         }
             
-          /** This node defualt configuration */
-          $node = _mediacommons_import_setup_node('spoke');
+        /** This node defualt configuration */
+        $node = _mediacommons_import_setup_node('spoke');
           
-          $node->title = $spoke->title;          
+        $node->title = $spoke->title;          
+
+        /** Node author record */
+        $author_record = $author_exist->fetchObject();
+
+        /** Node author new id */
+        $node->uid = (int)$author_record->uid;      
           
-          /** Find out if user is already in the system */
-          $author_result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $spoke->uid));
-
-          if (!$author_result->rowCount()) {
-            drush_die('Author (uid: '. $spoke->uid .') does not exist. Please import users before trying to import the content.'); 
-          }
-        
-          $author_record = $author_result->fetchObject();
-
-          /** Node author */
-          $node->uid = (int)$author_record->uid;
-
-          $node->created = (int)$spoke->created;
+        $node->created = (int)$spoke->created;
 
           $node->changed = (int)$spoke->changed;
 
