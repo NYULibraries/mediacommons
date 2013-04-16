@@ -45,38 +45,23 @@ function mediacommons_import_d6_configured() {
 }
 
 function mediacommons_import_prepare() {
+
   if (!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
-  
+
+  ini_set('memory_limit', '512M');
+    
   global $settigs;
 
   $settigs = mediacommons_import_settings();
-  ini_set('memory_limit', '512M');
-  
-  if (!db_table_exists('mediacommons_import_user_map')) {
-    $schema = mediacommons_import_schema();
-    mediacommons_import_initialize_schema('mediacommons_import', $schema);
-    db_create_table('mediacommons_import_user_map', $schema['mediacommons_import_user_map']);
+  $schemas = mediacommons_import_schema();
+  mediacommons_import_initialize_schema('mediacommons_import', $schemas);
+
+  foreach ($schemas as $name => $schema) {
+    if (!db_table_exists($name)) {
+      db_create_table($name, $schema);
+    }
   }
-  if (!db_table_exists('mediacommons_import_node_map')) {
-    $schema = mediacommons_import_schema();
-    mediacommons_import_initialize_schema('mediacommons_import', $schema);
-    db_create_table('mediacommons_import_node_map', $schema['mediacommons_import_node_map']);
-  }
-  if (!db_table_exists('mediacommons_import_vocabulary_map')) {
-    $schema = mediacommons_import_schema();
-    mediacommons_import_initialize_schema('mediacommons_import', $schema);
-    db_create_table('mediacommons_import_vocabulary_map', $schema['mediacommons_import_vocabulary_map']);
-  }  
-  if (!db_table_exists('mediacommons_import_term_map')) {
-    $schema = mediacommons_import_schema();
-    mediacommons_import_initialize_schema('mediacommons_import', $schema);
-    db_create_table('mediacommons_import_term_map', $schema['mediacommons_import_term_map']);
-  }  
-  if (!db_table_exists('mediacommons_import_role_map')) {
-    $schema = mediacommons_import_schema();
-    mediacommons_import_initialize_schema('mediacommons_import', $schema);
-    db_create_table('mediacommons_import_role_map', $schema['mediacommons_import_role_map']);
-  }  
+
 }
 
 function mediacommons_import_settings() {
@@ -184,7 +169,7 @@ function mediacommons_import_run($task) {
       
     case 10 :
       drush_print('Running test');
-      print_r(mediacommons_import_get_role_by_name('contributor'));
+      mediacommons_import_prepare();
             
       break;
 
