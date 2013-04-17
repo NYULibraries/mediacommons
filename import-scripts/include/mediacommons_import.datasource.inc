@@ -15,6 +15,26 @@ function mediacommons_import_d7_roles() {
   
 }
 
+function mediacommons_import_d6_find_node_image_attach($nid) {
+
+  $query = Database::getConnection('default', 'drupal6')
+    ->select('image_attach', 'ia')
+    ->fields('f', 
+      array(
+        'filepath',
+        'filename',        
+      )
+    )
+    ->condition('ia.nid', $nid, '=');
+  
+  $query->leftJoin('image', 'i', 'ia.iid = i.nid');
+  
+  $query->leftJoin('files', 'f', 'f.fid = i.fid');      
+
+  return $query->execute();
+  
+}
+
 function mediacommons_import_find_d6_user_roles($uid) {
 
   $query = Database::getConnection('default', 'drupal6')

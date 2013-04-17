@@ -166,12 +166,6 @@ function mediacommons_import_run($task) {
     case 10 :
       drush_print('Running test');
       
-      $record = mediacommons_import_find_d6_user_roles(1);
-      
-      foreach($record as $rol) {
-        drush_print_r($rol);
-      }      
-            
       break;
 
     default :

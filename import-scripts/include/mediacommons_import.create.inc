@@ -159,6 +159,10 @@ function mediacommons_import_generate_spokes() {
 
   /** Load data, this will take time; go get yourself a coffee */
   $data = mediacommons_import_d6_spoke_list();
+  
+  $settigs = mediacommons_import_settings();
+  
+  $production_url = $settigs['settings']['production']['url'];
 
   /** If we have $data proceed */
   if (isset($data)) {
@@ -185,16 +189,6 @@ function mediacommons_import_generate_spokes() {
         
         drush_print('Creating ' . $spoke->title . "\n");
           
-        $images_query = "SELECT fid FROM {image} WHERE image_size = :size AND nid = :nid";
-          
-        $images_result = Database::getConnection('default', 'drupal6')->query($images_query, array(':nid' => $spoke->nid, ':size' => '_original'), array());
-          
-        if ($images_result->rowCount()) {
-          foreach ($images_result as $i) {
-            drush_print_r($i);
-          }            
-        }
-            
         /** This node defualt configuration */
         $node = _mediacommons_import_setup_node('spoke');
           
@@ -208,86 +202,81 @@ function mediacommons_import_generate_spokes() {
           
         $node->created = (int)$spoke->created;
 
-          $node->changed = (int)$spoke->changed;
+        $node->changed = (int)$spoke->changed;
 
-          $node->comment = (int)$spoke->comment;
+        $node->comment = (int)$spoke->comment;
 
-          $node->status = (int)$spoke->status;
+        $node->status = (int)$spoke->status;
 
-          $node->promote = (int)$spoke->promote;
+        $node->promote = (int)$spoke->promote;
 
-          $node->moderate = (int)$spoke->moderate;
+        $node->moderate = (int)$spoke->moderate;
 
-          $node->sticky = (int)$spoke->sticky;
+        $node->sticky = (int)$spoke->sticky;
 
-          /** Additonal authors */
-          if ($spoke->additonal_authors) {
+        /** Additonal authors */
+        if ($spoke->additonal_authors) {
           
-            /** Contributors */
-            $spoke_contributors = explode(', ', $spoke->additonal_authors);
+          /** Contributors */
+          $spoke_contributors = explode(', ', $spoke->additonal_authors);
 
-            /** Contributor order */
-            $contributor_order = explode(', ', $spoke->additonal_authors_delta);
+          /** Contributor order */
+          $contributor_order = explode(', ', $spoke->additonal_authors_delta);
 
-            /** Find out if user is already in the system */
-            foreach ($spoke_contributors as $key => $contributor) {
-              $result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $contributor));
-              if ($result->rowCount()) {
-                $record = $result->fetchObject();
-                $node->field_contributors[$node->language][$key] = array(
-                  'uid' => (int)$record->uid,
-                  '_weight' => (int)$contributor_order[$key],
-                );
-              }
+          /** Find out if user is already in the system */
+          foreach ($spoke_contributors as $key => $contributor) {
+            $result = db_query('SELECT uid FROM {mediacommons_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $contributor));
+            if ($result->rowCount()) {
+              $record = $result->fetchObject();
+              $node->field_contributors[$node->language][$key] = array(
+                'uid' => (int)$record->uid,
+                '_weight' => (int)$contributor_order[$key],
+              );
             }
           }
+        }
 
-          /** Description */
-          $node->field_body[$node->language][0] = array(
-            'value' => $spoke->field_document_textarea_body_value,
-            'format' => 'filtered_html',
-          );
+        /** Description */
+        $node->field_body[$node->language][0] = array(
+          'value' => $spoke->field_document_textarea_body_value,
+          'format' => 'filtered_html',
+        );
 
-          /** Publication status */
-          $node->field_pubstat[$node->language][0]['value'] = (isset($spoke->field_pubstat_value) && $spoke->field_pubstat_value == 'Published' ) ? 1 : 0;
+        /** Publication status */
+        $node->field_pubstat[$node->language][0]['value'] = (isset($spoke->field_pubstat_value) && $spoke->field_pubstat_value == 'Published' ) ? 1 : 0;
 
-          /** Clusters */
-          if (!empty($spoke->cluster_nid)) {
-            $cluster_nid = explode(', ', $spoke->cluster_nid);
-            foreach ($cluster_nid as $key => $nid) {
-              $hub_result = db_query("SELECT * FROM {mediacommons_import_node_map} WHERE onid = :onid", array(':onid' => $nid));
-              if ($hub_result->rowCount()) {
-                $hub_record = $hub_result->fetchObject();
-                $node->field_part_of_hub[$node->language][$key]['nid'] = (int)$hub_record->nid;
-              }
+        /** Clusters */
+        if (!empty($spoke->cluster_nid)) {
+          $cluster_nid = explode(', ', $spoke->cluster_nid);
+          foreach ($cluster_nid as $key => $nid) {
+            $hub_result = db_query("SELECT * FROM {mediacommons_import_node_map} WHERE onid = :onid", array(':onid' => $nid));
+            if ($hub_result->rowCount()) {
+              $hub_record = $hub_result->fetchObject();
+              $node->field_part_of_hub[$node->language][$key]['nid'] = (int)$hub_record->nid;
             }
           }
+        }
 
-          /** Representative image */
+        /** attached images */
+        $dupal_file_path = drupal_realpath('public://');
+                    
+        $images = mediacommons_import_d6_find_node_image_attach($spoke->nid);
 
-          /*
-           if (($value['filename'] != 'NULL')) {
-          // Some file on our system
-          $file_path = $script_path . $image_source . $value['filename'];
-  
-          $file = (object) array(
-              'uid' => (int)$value['uid'],
-              'uri' => $file_path,
-              'filemime' => file_get_mimetype($file_path),
+        foreach ($images as $image) {  
+          if ($image->filename == '_original') {
+            $url_image_path = url($production_url . $image->filepath);
+            $source_image_path = $dupal_file_path . '/' . basename($url_image_path);
+            file_put_contents($source_image_path, file_get_contents($url_image_path));
+            $file = (object) array(
+              'uid' => 1,
+              'uri' => $source_image_path,
+              'filemime' => file_get_mimetype($source_image_path),
               'status' => 1,
-          );
-         
-          // Save the file to the root of the files directory.
-          $file = file_copy($file, 'public://'. $image_destination);
-         
-          // ALBERTO I'm having trouble loading the file into the attached image table
-          // $node->field_attached_images[$node->language][0] = (array)$file; //associate the file object with the image field:
-          $node->field_representative_image[$node->language][0] = (array)$file; //associate the file object with the image field:
-         
+            );      
+            $file = file_copy($file, 'public://');
+            $node->field_representative_image[$node->language][] = (array)$file;
           }
-          */
-
-          /** attached images */
+        }
 
           /**
            if (($value['attached_image_filepath'] != 'NULL')) {
@@ -308,7 +297,7 @@ function mediacommons_import_generate_spokes() {
            $file = file_copy($file, 'public://'. $image_destination);
 
            // associate the file object with the image field
-           $node->field_attached_images[$node->language][0] = (array)$file;
+           $node->field_attached_images[$node->language][0] = (array)$file;s
 
            }
            }
