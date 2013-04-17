@@ -188,7 +188,7 @@ function mediacommons_import_generate_spokes() {
       ) {
         
         drush_print('Creating ' . $spoke->title . "\n");
-          
+        
         /** This node defualt configuration */
         $node = _mediacommons_import_setup_node('spoke');
           
@@ -259,77 +259,89 @@ function mediacommons_import_generate_spokes() {
 
         /** attached images */
         $dupal_file_path = drupal_realpath('public://');
+        
+        if (isset($spoke->thumbnail_fid)) {
+
+          $ri = mediacommons_import_find_image($spoke->thumbnail_fid);
+          $url_image_path = url($production_url . $ri->filepath);
+          $source_image_path = $dupal_file_path . '/' . basename($url_image_path);
+          
+          if (!file_exists($source_image_path)) {
+            file_put_contents($source_image_path, file_get_contents($url_image_path));
+          }
+          
+          $file = (object) array(
+            'uid' => 1,
+            'uri' => $source_image_path,
+            'filemime' => file_get_mimetype($source_image_path),
+            'status' => 1,
+            'extended_ri' => '1',
+            'extended_display' => 0
+          );
+          
+          $file = file_copy($file, 'public://');
+          
+          $node->field_attached_images[$node->language][] = (array)$file;
+          
+        }
                     
         $images = mediacommons_import_d6_find_node_image_attach($spoke->nid);
-
+        
         foreach ($images as $image) {  
-          if ($image->filename == '_original') {
-            $url_image_path = url($production_url . $image->filepath);
-            $source_image_path = $dupal_file_path . '/' . basename($url_image_path);
+            
+          $url_image_path = url($production_url . $image->filepath);
+            
+          $source_image_path = $dupal_file_path . '/' . basename($url_image_path);
+            
+          if (!file_exists($source_image_path)) {
             file_put_contents($source_image_path, file_get_contents($url_image_path));
+          }
+          
+          if ($image->filename == '_original') {
+            
             $file = (object) array(
               'uid' => 1,
               'uri' => $source_image_path,
               'filemime' => file_get_mimetype($source_image_path),
               'status' => 1,
-            );      
+              'extended_ri' => '0',
+              'extended_display' => 0
+            );
+            
             $file = file_copy($file, 'public://');
-            $node->field_representative_image[$node->language][] = (array)$file;
+
+            $node->field_attached_images[$node->language][] = (array)$file;
+
+          }
+          
+        }
+
+        /** taxonomy */
+        foreach (explode(', ', $spoke->terms) as $key => $tid) {
+          if ($tid) {
+            $tid_result = db_query("SELECT tid FROM {mediacommons_import_term_map} WHERE toid = :toid", array(':toid' => $tid));
+            if ($tid_result->rowCount() && $term_object = $tid_result->fetchObject()) {
+              $node->field_tags[$node->language][] = array('tid' => $term_object->tid );
+            }
           }
         }
 
-          /**
-           if (($value['attached_image_filepath'] != 'NULL')) {
-
-           $array = explode(", ", $value['attached_image_filepath']);
-
-           foreach ($array as $key => $value) {
-           $filename = pathinfo($value, PATHINFO_BASENAME);
-           $file_path = $script_path . $image_source . $filename;
-           $file = (object) array(
-           'uid' => (int)$data[$c]['uid'],
-           'uri' => $file_path,
-           'filemime' => file_get_mimetype($file_path),
-           'status' => 1,
-           );
-
-           // Save the file to the root of the files directory.
-           $file = file_copy($file, 'public://'. $image_destination);
-
-           // associate the file object with the image field
-           $node->field_attached_images[$node->language][0] = (array)$file;s
-
-           }
-           }
-           */
-
-          /** taxonomy */
-          foreach (explode(', ', $spoke->terms) as $key => $tid) {
-            if ($tid) {
-              $tid_result = db_query("SELECT tid FROM {mediacommons_import_term_map} WHERE toid = :toid", array(':toid' => $tid));
-              if ($tid_result->rowCount() && $term_object = $tid_result->fetchObject()) {
-                $node->field_tags[$node->language][] = array('tid' => $term_object->tid );
-              }
-            }
-          }
-
-          /** Prepare node for saving */
-          $node = node_submit($node);
+        /** Prepare node for saving */
+        $node = node_submit($node);
           
-          if ($node) {
-            node_save($node);
-            db_insert('mediacommons_import_node_map')
-              ->fields(array(
-                'onid' => $value['nid'],
-                'nid' => $node->nid,
-              )
-            )->execute();
-            drush_print("Spoke saved. " . url('node/' . $node->nid, array('absolute'=>TRUE)) . "\n");
-          }
-
+        if ($node) {
+          node_save($node);
+          db_insert('mediacommons_import_node_map')
+            ->fields(array(
+              'onid' => $value['nid'],
+              'nid' => $node->nid,
+            )
+          )->execute();
+          drush_print("Spoke saved. " . url('node/' . $node->nid, array('absolute'=>TRUE)) . "\n");
+        }
       }
       else {
-        drush_print('Spoke already exist');
+        drush_print('Skiping spoke. uid: ' . $uid . ' rowCount: ' . $rowCount);
       }
     }
   }

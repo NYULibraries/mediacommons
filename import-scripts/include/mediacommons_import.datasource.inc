@@ -35,6 +35,26 @@ function mediacommons_import_d6_find_node_image_attach($nid) {
   
 }
 
+function mediacommons_import_d6_find_node_representative_image($nid) {
+
+  $query = Database::getConnection('default', 'drupal6')
+  ->select('image_attach', 'ia')
+  ->fields('f',
+      array(
+          'filepath',
+          'filename',
+      )
+  )
+  ->condition('ia.nid', $nid, '=');
+
+  $query->leftJoin('image', 'i', 'ia.iid = i.nid');
+
+  $query->leftJoin('files', 'f', 'f.fid = i.fid');
+
+  return $query->execute();
+
+}
+
 function mediacommons_import_find_d6_user_roles($uid) {
 
   $query = Database::getConnection('default', 'drupal6')
@@ -70,10 +90,10 @@ function mediacommons_import_find_nodes($type) {
 
 function mediacommons_import_find_image($fid) {
 
-  $query = 'SELECT filename, filepath FROM {files} WHERE fid = ' . $fid;
+  $query = 'SELECT filename, filepath FROM {files} WHERE fid = :fid';
 
   /** Create a database connection to the source (d6) database */
-  $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+  $result = Database::getConnection('default', 'drupal6')->query($query, array(':fid' => $fid), array());
 
   return $result->fetchObject();
 
@@ -94,10 +114,10 @@ function mediacommons_import_find_term($tid) {
       FROM {term_data} term
       LEFT JOIN {term_hierarchy} hierarchy
         ON term.tid = hierarchy.tid
-      WHERE term.tid = ' . $tid;
+      WHERE term.tid = :tid';
     
     /** Create a database connection to the source (d6) database */
-    $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+    $result = Database::getConnection('default', 'drupal6')->query($query, array(':tid' => $tid), array());
     
     $term = mediacommons_import_create_taxonomy_term($result->fetchObject());
     
@@ -133,10 +153,10 @@ function mediacommons_import_find_vocabulary($vid) {
           vocabulary.module,
           vocabulary.weight
         FROM {vocabulary} vocabulary
-        WHERE vocabulary.vid = ' . $vid;
+        WHERE vocabulary.vid = :vid';
 
     /** Create a database connection to the source (d6) database */
-    $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+    $result = Database::getConnection('default', 'drupal6')->query($query, array(':vid' => $vid), array());
   
     if ($result->rowCount()) {
       $vocabulary = mediacommons_import_create_taxonomy_vocabulary($result->fetchObject());
@@ -230,9 +250,10 @@ function mediacommons_import_d6_hub_list() {
 
   $query = "
     SELECT
-      DISTINCT node.nid,
+      node.nid,
       node.type,
       node.uid,
+      node.vid,
       node.title,
       node.status,
       node.created,
@@ -252,13 +273,13 @@ function mediacommons_import_d6_hub_list() {
       GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
     FROM tne_node node
     LEFT JOIN {content_type_cluster} cluster
-      ON node.nid = cluster.nid
+      ON node.vid = cluster.vid
     LEFT JOIN {content_field_contributors} cfc
-      ON node.nid = cfc.nid
+      ON node.vid = cfc.vid
     LEFT JOIN {files} f
       ON cluster.field_image_fid = f.fid
     LEFT JOIN {term_node} t
-      ON node.nid = t.nid
+      ON node.vid = t.vid
     WHERE node.type = 'cluster' AND node.status = 1
     GROUP BY node.nid
     ORDER BY node.nid";
@@ -272,10 +293,10 @@ function mediacommons_import_d6_hub_list() {
 
 
 function mediacommons_import_d6_spoke_list() {
-
   $query = "
     SELECT
-      DISTINCT n.nid,
+      n.nid,
+      n.vid,
       n.type,
       n.language,
       n.title,
@@ -298,13 +319,13 @@ function mediacommons_import_d6_spoke_list() {
       GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
     FROM tne_node n
       LEFT JOIN {content_type_contributed_pieces} ctcp
-        ON n.nid = ctcp.nid
+        ON n.vid = ctcp.vid
       LEFT JOIN {content_field_additional_authors} cfaa
-        ON n.nid = cfaa.nid
+        ON n.vid = cfaa.vid
       LEFT JOIN {content_field_cluster} cfcl
-        ON n.nid = cfcl.nid
+        ON n.vid = cfcl.vid
       LEFT JOIN {term_node} t
-        ON n.nid = t.nid
+        ON n.vid = t.vid
     WHERE n.type = 'contributed_pieces' AND n.status = 1
     GROUP BY n.nid
     ORDER BY n.nid";
@@ -314,4 +335,8 @@ function mediacommons_import_d6_spoke_list() {
 
   return $result;
 
+}
+
+function mediacommons_import_get_role_by_name($name) {
+  return array_search($name, user_roles());
 }

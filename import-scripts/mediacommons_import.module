@@ -12,10 +12,6 @@ include_once "include/mediacommons_import.datasource.inc";
 include_once "include/mediacommons_import.create.inc";
 include_once "include/mediacommons_import.delete.inc";
 
-function mediacommons_import_get_role_by_name($name) {
-  return array_search($name, user_roles());
-}
-
 /**
  * Assuming you have already a local copy of TNE, your settings.php should looks something like this:
 
@@ -166,6 +162,7 @@ function mediacommons_import_run($task) {
     case 10 :
       drush_print('Running test');
       
+
       break;
 
     default :
