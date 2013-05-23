@@ -1,0 +1,14 @@
+{
+    "name": "mediacommons_imr_import",
+    "version": "0.0.1",
+    "environment" : "local",
+    "dependencies": {},
+    "settings" : {
+        "local" : {
+            "url" : "http://localhost/imr/",
+        },
+        "production" : {
+            "url" : "http://mediacommons.futureofthebook.org/imr/",
+        }
+    }
+}
