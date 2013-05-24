@@ -1,5 +1,37 @@
 <?php
 
+/** Yar, maties, to-day we sail with Virgilio" */
+function mediacommons_imr_import_delete_alias() {
+  db_delete('url_alias')
+    ->condition('pid', 'kill em all', '<>')
+    ->execute();
+}
+
+/** Peer wha'? Shut up! No one cares */
+function mediacommons_imr_import_delete_comments() {
+
+  db_delete('mediacommons_imr_import_comments_map')
+    ->condition('cid', 'kill em all', '<>')
+    ->execute();
+
+  db_delete('comment')
+    ->condition('cid', 'kill em all', '<>')
+    ->execute();    
+    
+  db_delete('node_comment_statistics')
+    ->condition('cid', 'kill em all', '<>')
+    ->execute();        
+
+  db_delete('field_revision_comment_body')
+    ->condition('entity_id', 'kill em all', '<>')
+    ->execute();        
+    
+  db_delete('field_data_comment_body')
+    ->condition('entity_id', 'kill em all', '<>')
+    ->execute();        
+
+}
+
 /** We don't need no education */
 function mediacommons_imr_import_delete_users($roles = array()) {
 
@@ -17,7 +49,6 @@ function mediacommons_imr_import_delete_users($roles = array()) {
   }
 
 }
-
 
 /** Kill 'em all */
 function mediacommons_imr_import_delete_content($ype = 'all') {

@@ -20,5 +20,27 @@ $databases['drupal6'] = array(
 );
 </code>
 
+<code>
+ $databases['drupal6'] = array(
+   'default' => array(
+     'database' => 'db_name',
+     'username' => 'your_user',
+     'password' => 'your_password',
+     'host' => 'localhost',
+     'port' => '',
+     'driver' => 'mysql',
+     'prefix' => array(
+       'default'   => 'prefix_',
+       'authmap' => 'shared_db.shared_prefix_',
+       'profile_fields' => 'shared_db.shared_prefix_',
+       'profile_values' => 'shared_db.shared_prefix_',
+       'sequences' => 'shared_db.shared_prefix_',
+       'sessions' => 'shared_db.shared_prefix_',
+       'users' => 'shared_db.shared_prefix_',
+     ),
+   ),
+ );
+</code>
+
 To run the script `drush scr import-hubs.php`
 

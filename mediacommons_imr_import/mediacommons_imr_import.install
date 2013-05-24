@@ -28,6 +28,29 @@ function mediacommons_imr_import_schema() {
       'primary key' => array('ouid'),
   );
   
+  $schema['mediacommons_imr_import_comments_map'] = array(
+      'description' => 'Stores a record of imported comments.',
+      'fields' => array(
+          'ocid' => array(
+              'description' => 'The primary identifier for the Drupal 6 comment',
+              'type' => 'serial',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'cid' => array(
+              'description' => 'The primary identifier for the rupal 7 comment.',
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+      ),
+      'indexes' => array(
+          'cid' => array('cid'),
+      ),
+      'primary key' => array('ocid'),
+  );
+  
   $schema['mediacommons_imr_import_role_map'] = array(
       'description' => 'Stores a record of role imports.',
       'fields' => array(

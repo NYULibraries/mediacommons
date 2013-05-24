@@ -5,10 +5,10 @@
     "dependencies": {},
     "settings" : {
         "local" : {
-            "url" : "http://localhost/imr/",
+            "url" : "http://ortiz.bobst.nyu.edu/import/"
         },
         "production" : {
-            "url" : "http://mediacommons.futureofthebook.org/imr/",
+            "url" : "http://mediacommons.futureofthebook.org/imr/"
         }
     }
 }

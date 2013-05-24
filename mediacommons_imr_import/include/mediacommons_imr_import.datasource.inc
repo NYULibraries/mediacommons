@@ -99,6 +99,17 @@ function mediacommons_imr_import_find_image($fid) {
 
 }
 
+function mediacommons_imr_import_find_url_alias($src) {
+  
+  $query = 'SELECT dst FROM {url_alias} WHERE src = :src';
+  
+  /** Create a database connection to the source (d6) database */
+  $result = Database::getConnection('default', 'drupal6')->query($query, array(':src' => $src), array());
+  
+  return $result->fetchObject();
+  
+}
+
 function mediacommons_imr_import_find_term($tid) {
 
   $term = array();  
@@ -198,6 +209,9 @@ function mediacommons_imr_import_d6_vocabulary_list() {
   return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {vocabulary}', array(), array());
 }
 
+function mediacommons_imr_import_d6_node_comments_list() {
+  return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments} ORDER BY cid ASC', array(), array());
+}
 
 function mediacommons_imr_import_d6_users_list() {
 
@@ -245,6 +259,51 @@ function mediacommons_imr_import_d6_users_list() {
 
 }
 
+function mediacommons_imr_import_d6_post_list() {
+  
+  $type = 'post';
+  
+  $query = "
+    SELECT
+      n.nid,
+      MAX(n.vid) AS vid,
+      n.type,
+      n.uid,
+      n.status,
+      n.created,
+      n.changed,
+      n.comment,
+      n.promote,
+      n.moderate,
+      n.sticky,
+      n.language, 
+      n.tnid,
+      n.translate,
+      nr.title,
+      nr.body,
+      nr.teaser,
+      nr.format,
+      ctp.*,
+      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
+    FROM {node} n
+    LEFT JOIN {node_revisions} nr
+      ON n.vid = nr.vid
+    LEFT JOIN {content_type_post} ctp
+      ON n.vid = ctp.vid
+    LEFT JOIN {term_node} t
+      ON n.vid = t.vid      
+    WHERE n.type = :type 
+    AND n.status > 0
+    GROUP BY n.nid
+    ORDER BY n.nid";
+  
+  
+  /** Create a database connection to the source (d6) database */
+  $result = Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
+
+  return $result;
+
+}
 
 function mediacommons_imr_import_d6_hub_list() {
 
