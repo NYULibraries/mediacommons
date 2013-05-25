@@ -210,7 +210,8 @@ function mediacommons_imr_import_d6_vocabulary_list() {
 }
 
 function mediacommons_imr_import_d6_node_comments_list() {
-  return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments} ORDER BY cid ASC', array(), array());
+  //return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments} ORDER BY cid ASC', array(), array());
+  return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments}', array(), array());
 }
 
 function mediacommons_imr_import_d6_users_list() {

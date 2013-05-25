@@ -1,5 +1,7 @@
 <?php
 
+// http://fooninja.net/2011/04/13/guide-to-programmatic-node-creation-in-drupal-7/
+
 function mediacommons_imr_import_generate_all_users() {
   drush_print('Importing users: This will take some time, go get yourself a coffee');
   drush_print("\n");
@@ -61,9 +63,7 @@ function mediacommons_imr_import_generate_vocabulary() {
   $d6 = mediacommons_imr_import_d6_vocabulary_list();
   $d7_names = array();
 
-  foreach ($d7 as $record) {
-    $d7_names[strtolower($record->name)] = $record->vid;
-  }
+  foreach ($d7 as $record) { $d7_names[strtolower($record->name)] = $record->vid; }
 
   foreach ($d6 as $record) {
     $vid = db_query("SELECT vid FROM {mediacommons_imr_import_vocabulary_map} WHERE vuid = :vuid", array(':vuid' => $record->vid));
@@ -109,7 +109,6 @@ function mediacommons_imr_import_generate_terms() {
       }
     }
   }
-  
 }
 
 /**
@@ -150,7 +149,7 @@ function mediacommons_imr_import_generate_spokes() {
       ) {
         
         drush_print('Creating ' . $spoke->title . "\n");
-        
+
         /** This node defualt configuration */
         $node = _mediacommons_imr_import_setup_node('spoke');
           
@@ -162,11 +161,7 @@ function mediacommons_imr_import_generate_spokes() {
         /** Node author new id */
         $node->uid = (int)$author_record->uid;      
           
-        $node->created = $spoke->created;
-
-        $node->changed = $spoke->changed;
-        
-        $node->timestamp = $spoke->created;
+        $node->date = date("Y-m-j H:i:s", $spoke->created);
 
         $node->comment = (int)$spoke->comment;
 
@@ -181,9 +176,9 @@ function mediacommons_imr_import_generate_spokes() {
         /** Add description */
         $node->field_body[$node->language][0] = array(
           'value' => $spoke->body,
-          'format' => 'filtered_html',
+          'format' => 'full_html', // should this be filtered_html
         );
-        
+                
         $node->field_pubstat[$node->language][0] = array(
           'value' => $node->status,
         );
@@ -215,339 +210,25 @@ function mediacommons_imr_import_generate_spokes() {
           $node->field_attached_images[$node->language][] = (array)$file;
 
         }
-        
-        if (isset($spoke->field_video_embed_link_value)) {
-          
-          $found = false;
 
-          $pattern = '/(slideshare.net)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }          
-          
-          $pattern = '/(veoh.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(photosnack.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(vimeo.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }          
-
-          $pattern = '/(msn.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }          
-
-          $pattern = '/(criticalcommons.org)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(4shared.org)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(4shared.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(vh1.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(turner.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(bravotv.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(hulu.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(blip.tv)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(mtvnservices.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(collegehumor.cvcdn.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(discoverymedia.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(kickstarter.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(livingroomcandidate.org)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(picasaweb.google.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(static.flickr.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(ericlemay.org)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }          
-
-          $pattern = '/(a-widget.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(nfl.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(texasarchive.org)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(youtube-nocookie.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(staticflickr.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(video.google.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(newsy.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(longtailvideo.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(myspace.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(dailymotion.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(kawaiikakkoiisugoi.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }          
-          
-          $pattern = '/(mlb.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(collegehumor.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(monzondm.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(ning.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(brightcove.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(mydamnchannel.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(motionbox.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(soundcloud.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(radiobilingue.org)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(amazonaws.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(mediastorm.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(bestads.tv)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(wirewax.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-          
-          $pattern = '/(ncta.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-
-          $pattern = '/(maximumfun.org)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          } 
-
-          $pattern = '/(http:\/\/media-commons.org\/)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }          
-
-          $pattern = '/(cnet.com)/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-          }
-        
-          // Pattern for: http://www.youtube.com/embed/{{video_id}}
-          $pattern = '/youtube.com\/embed\/((?:[^\s?]{11}))/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);
-          if (!$found && isset($matches[1])) {
-            $found = true;
-            unset($matches);
-          }
-         
-          // Pattern for: http://www.youtube.com/v/{{video_id}}
-          $pattern = '/youtube.com\/v\/([^\s?]{11})/';
-          preg_match($pattern, $spoke->field_video_embed_link_value, $matches);            
-
-          if (!$found && isset($matches[1])) {
-            $found = true;
-            unset($matches);
-          }
-          
-          if (!$found) {
-            // drush_print_r($spoke->field_video_embed_link_value);
-          }
-  
+        // see fornow();
+        if (isset($spoke->field_video_embed_link_value)) { 
+          /** Add embed content */
+          $node->field_embed[$node->language][0] = array(
+            'value' => $spoke->field_video_embed_link_value,
+            'format' => 'full_html',  // should this be filtered_html
+          );        
         }
         
         /** taxonomy */
-        /**
         foreach (explode(', ', $spoke->terms) as $tid) {
           $tid_result = db_query("SELECT tid FROM {mediacommons_imr_import_term_map} WHERE toid = :toid", array(':toid' => $tid));
           $tiCount = (int)$tid_result->rowCount();
           if ($tiCount > 0) {
             $term_object = $tid_result->fetchObject();
-            $node->field_cluster_tags[$node->language][] = array('tid' => $term_object->tid);
+            $node->field_tags[$node->language][] = array('tid' => $term_object->tid);
           }
         }
-        */
         
         /** Prepare node for saving */
         $node = node_submit($node);
@@ -555,7 +236,7 @@ function mediacommons_imr_import_generate_spokes() {
         if ($node) {
 
           node_save($node);
-
+          
           $path = array(
             'source' => 'node/' . $node->nid,  // The internal system path.
             'alias' => $path_alias->dst, // The URL alias.
@@ -563,23 +244,64 @@ function mediacommons_imr_import_generate_spokes() {
 
           path_save(&$path);
           
+          mediacommons_imr_import_comment($node->nid, $spoke->nid);
+          
           db_insert('mediacommons_imr_import_node_map')
             ->fields(array(
               'onid' => $spoke->nid,
               'nid' => $node->nid,
             )
           )->execute();
-          
           drush_print("Spoke saved. " . url('node/' . $node->nid, array('absolute'=>TRUE)) . "\n");
-          
         }
-        
       }
       else {
         drush_print('Skiping spoke. uid: ' . $uid . ' rowCount: ' . $rowCount);
       }
     }
   }
+}
+
+function mediacommons_imr_import_comment($nid, $oldNid) {
+
+  $nodes_records = $users_records = $comments_record = array();
+  $users = db_query("SELECT * FROM {mediacommons_imr_import_user_map}");
+  $comments = Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments} WHERE nid = :nid', array(':nid' => $oldNid), array());
+  
+  foreach ($users as $user) {
+    $users_records[$user->ouid] = $user->uid;
+  }
+
+  foreach ($comments as $comment) {
+    $new_comment = (object) array(
+      'nid' => $nid,
+      'cid' => 0,
+      'pid' => 0,
+      'uid' => $users_records[$comment->uid],
+      'mail' => $comment->mail,
+      'is_anonymous' => 0,
+      'homepage' =>  $comment->homepage,
+      'status' => ($comment->status == 0) ? 1 : 0,
+      'subject' => $comment->subject,
+      'language' => LANGUAGE_NONE,
+      'thread' => $comment->thread,
+      'hostname' => $comment->hostname,
+      'date' => date("Y-m-j H:i:s", $comment->timestamp),
+      'comment_body' => array(
+        LANGUAGE_NONE => array(
+          0 => array (
+            'value' => $comment->comment,
+            'format' => 'filtered_html'
+          ),
+        ),
+        ),
+      );
+        
+      comment_submit($new_comment);
+      comment_save($new_comment);
+      
+  }
+    
 }
 
 function mediacommons_imr_import_comments() {

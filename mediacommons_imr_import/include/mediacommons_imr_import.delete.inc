@@ -29,6 +29,22 @@ function mediacommons_imr_import_delete_comments() {
   db_delete('field_data_comment_body')
     ->condition('entity_id', 'kill em all', '<>')
     ->execute();        
+    
+  db_update('node')
+    ->fields(array(
+      'comment' => 0,
+    )
+  )
+  ->condition('title', 'kill em all', '<>')
+  ->execute();
+
+  db_update('node_revision')
+    ->fields(array(
+      'comment' => 0,
+    )
+  )
+  ->condition('title', 'kill em all', '<>')
+  ->execute();
 
 }
 
@@ -48,6 +64,20 @@ function mediacommons_imr_import_delete_users($roles = array()) {
     ->execute();
   }
 
+}
+
+/** Kill 'em all */
+function mediacommons_imr_import_delete_post($ype = 'all') {
+  $nodes = mediacommons_imr_import_find_nodes('spoke');
+
+  foreach ($nodes as $node) {
+    node_delete($node->nid);
+  }
+
+  db_delete('mediacommons_imr_import_node_map')
+    ->condition('nid', 'kill em all', '<>')
+    ->execute();  
+    
 }
 
 /** Kill 'em all */

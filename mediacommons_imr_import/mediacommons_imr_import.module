@@ -188,11 +188,67 @@ function mediacommons_imr_import_run($task) {
       
     case 0 :
       drush_print('Running test:' . time());
-
-      drush_print('Deleting all comments');
+      
       mediacommons_imr_import_delete_comments();
-      drush_print('Importing comments');
-      mediacommons_imr_import_comments();
+      mediacommons_imr_import_delete_post();
+      
+      return;
+      
+      $onid = 18;
+      
+      $nodes_records = $users_records = array();
+      $nodes = db_query("SELECT * FROM {mediacommons_imr_import_node_map}");
+      $users = db_query("SELECT * FROM {mediacommons_imr_import_user_map}");
+      $comments = Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments} WHERE nid = :nid', array(':nid' => $onid), array());      
+            
+      foreach ($nodes as $node) {
+        if ($node->onid == 18) {
+          drush_print_r($node);
+        }
+        $nodes_records[$node->onid] = $node->nid;
+      }
+      
+      return;
+  
+      foreach ($users as $user) {
+        $users_records[$user->ouid] = $user->uid;
+      }
+      
+      foreach ($comments as $comment) {
+        
+        drush_print(url('node/' . $comment->nid, array('absolute' => TRUE)));
+        
+        drush_print($nodes_records['n' . $comment->nid]);
+        
+        drush_print($comment->nid);
+        
+        $new_comment = (object) array(
+          'nid' => 22,
+          'cid' => 0,
+          'pid' => 0,
+          'uid' => $users_records[$comment->uid],
+          'mail' => $comment->mail,
+          'is_anonymous' => 0,
+          'homepage' =>  $comment->homepage,
+          'status' => ($comment->status == 0) ? 1 : 0,
+          'subject' => $comment->subject,
+          'language' => LANGUAGE_NONE,
+          'thread' => $comment->thread,
+          'hostname' => $comment->hostname,
+          'comment_body' => array(
+            LANGUAGE_NONE => array(
+              0 => array (
+                'value' => $comment->comment,
+                'format' => 'filtered_html'
+              ),
+            ),
+          ),
+        );
+        
+        comment_submit($new_comment);
+        comment_save($new_comment);
+        
+      }
       
       break;
 
