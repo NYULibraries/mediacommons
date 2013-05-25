@@ -68,16 +68,22 @@ function mediacommons_imr_import_delete_users($roles = array()) {
 
 /** Kill 'em all */
 function mediacommons_imr_import_delete_post($ype = 'all') {
-  $nodes = mediacommons_imr_import_find_nodes('spoke');
-
-  foreach ($nodes as $node) {
+  foreach (mediacommons_imr_import_find_nodes('spoke') as $node) {
     node_delete($node->nid);
+    db_delete('mediacommons_imr_import_node_map')
+      ->condition('nid', $node->nid, '=')
+      ->execute();      
   }
+}
 
-  db_delete('mediacommons_imr_import_node_map')
-    ->condition('nid', 'kill em all', '<>')
-    ->execute();  
-    
+/** Kill 'em all */
+function mediacommons_imr_import_delete_hubs() {
+  foreach (mediacommons_imr_import_find_nodes('hub') as $node) {
+    node_delete($node->nid);
+    db_delete('mediacommons_imr_import_node_map')
+      ->condition('nid', $node->nid, '=')
+      ->execute();  
+  }
 }
 
 /** Kill 'em all */

@@ -351,6 +351,50 @@ function mediacommons_imr_import_d6_hub_list() {
 
 }
 
+function mediacommons_imr_import_d6_theme_week_list() {
+  
+  $type = 'theme_week_page';
+  
+  $query = "
+    SELECT
+      n.nid,
+      MAX(n.vid) AS vid,
+      n.type,
+      n.uid,
+      n.status,
+      n.created,
+      n.changed,
+      n.comment,
+      n.promote,
+      n.moderate,
+      n.sticky,
+      n.language, 
+      n.tnid,
+      n.translate,
+      nr.title,
+      nr.body,
+      nr.teaser,
+      nr.format,
+      cttwp.*,
+      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
+    FROM {node} n
+    LEFT JOIN {node_revisions} nr
+      ON n.vid = nr.vid
+    LEFT JOIN {content_type_theme_week_page} cttwp
+      ON n.vid = cttwp.vid
+    LEFT JOIN {term_node} t
+      ON n.vid = t.vid      
+    WHERE n.type = :type 
+    AND n.status > 0
+    GROUP BY n.nid
+    ORDER BY n.nid";
+  
+  /** Create a database connection to the source (d6) database */
+  $result = Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
+
+  return $result;
+
+}
 
 function mediacommons_imr_import_d6_spoke_list() {
   $query = "

@@ -1,7 +1,5 @@
 <?php
 
-// http://fooninja.net/2011/04/13/guide-to-programmatic-node-creation-in-drupal-7/
-
 function mediacommons_imr_import_generate_all_users() {
   drush_print('Importing users: This will take some time, go get yourself a coffee');
   drush_print("\n");
@@ -211,7 +209,6 @@ function mediacommons_imr_import_generate_spokes() {
 
         }
 
-        // see fornow();
         if (isset($spoke->field_video_embed_link_value)) { 
           /** Add embed content */
           $node->field_embed[$node->language][0] = array(
@@ -266,21 +263,24 @@ function mediacommons_imr_import_comment($nid, $oldNid) {
 
   $nodes_records = $users_records = $comments_record = array();
   $users = db_query("SELECT * FROM {mediacommons_imr_import_user_map}");
-  $comments = Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments} WHERE nid = :nid', array(':nid' => $oldNid), array());
+  $query = 'SELECT * FROM {comments} WHERE nid = :nid';
+  $comments = Database::getConnection('default', 'drupal6')->query($query, array(':nid' => $oldNid), array());
   
-  foreach ($users as $user) {
-    $users_records[$user->ouid] = $user->uid;
+  foreach ($users as $user) { 
+    $users_records[$user->ouid] = $user->uid; 
   }
 
   foreach ($comments as $comment) {
     $new_comment = (object) array(
       'nid' => $nid,
       'cid' => 0,
-      'pid' => 0,
+      'pid' => 0, // need to fix this so that the parent of the comment get assigned
       'uid' => $users_records[$comment->uid],
       'mail' => $comment->mail,
       'is_anonymous' => 0,
       'homepage' =>  $comment->homepage,
+      // http://api.drupal.org/api/drupal/modules%21comment%21comment.module/constant/COMMENT_PUBLISHED/6
+      // http://api.drupal.org/api/drupal/modules%21comment%21comment.module/constant/COMMENT_PUBLISHED/7
       'status' => ($comment->status == 0) ? 1 : 0,
       'subject' => $comment->subject,
       'language' => LANGUAGE_NONE,
@@ -291,100 +291,29 @@ function mediacommons_imr_import_comment($nid, $oldNid) {
         LANGUAGE_NONE => array(
           0 => array (
             'value' => $comment->comment,
-            'format' => 'filtered_html'
+            'format' => 'filtered_html',
           ),
         ),
-        ),
-      );
-        
-      comment_submit($new_comment);
-      comment_save($new_comment);
-      
-  }
-    
-}
-
-function mediacommons_imr_import_comments() {
-  
-  $nodes_records = $users_records = $comments_record = array();
-  
-  $nodes = db_query("SELECT * FROM {mediacommons_imr_import_node_map}");
-  $users = db_query("SELECT * FROM {mediacommons_imr_import_user_map}");
-  $comments = mediacommons_imr_import_d6_node_comments_list();
-  
-  foreach ($nodes as $node) {
-    $nodes_records[$node->onid] = $node->nid;
-  }
-  
-  foreach ($users as $user) {
-    $users_records[$user->ouid] = $user->uid;
-  }
-  
-  foreach ($comments as $comment) {
-    $oldCid = $comment->cid;
-    $comment->nid = $nodes_records[$comment->nid];
-    $comment->uid = $users_records[$comment->uid];
-    $comment->is_anonymous = 0; 
-    $comment->language = LANGUAGE_NONE;
-    $comment->comment_body = array(
-      LANGUAGE_NONE => array(
-        0 => array (
-          'value' => $comment->comment,
-          'format' => 'filtered_html'
-        ),
-      )
+      ),
     );
-    
-    // $node = node_load(array($comment->nid));
+        
+    comment_submit($new_comment);
+    comment_save($new_comment);
+      
+    $comments_record[] = array(
+      'old' => $comment,
+      'new' => $new_comment
+    );
 
-    $options = array('absolute' => TRUE);
-    
-    drush_print("Importing comment from: " . $comment->subject .  '; NODE URL: ' . url('node/' . $comment->nid, $options) );
-
-    /**
-    if (isset($comment->pid) && $comment->pid > 0 && isset($comments_record[$comment->cid]) ) {
-      $comment->pid = $comments_record[$comment->pid];
-    }
-    */
-
-    /*
-     * Drupal 6 and 7 have a reverse value for COMMENT_PUBLISHED constant
-     * http://api.drupal.org/api/drupal/modules%21comment%21comment.module/constant/COMMENT_PUBLISHED/6
-     * http://api.drupal.org/api/drupal/modules%21comment%21comment.module/constant/COMMENT_PUBLISHED/7  
-     */
-    //$comment->status = (($comment->status == 0 ) ? 1 : 0 );
-    
-    /**
-     * Drupal 7 comment module have a strong opinion about created value, use this 
-     * to ensure we have the date we want
-     * http://api.drupal.org/api/drupal/modules!comment!comment.module/function/comment_submit/7
-     */
-    //$comment->date = $comment->timestamp;
-    $comment->created = $comment->timestamp;
-    $comment->changed = $comment->timestamp;    
-    
-    unset($comment->comment);
-    unset($comment->timestamp);    
-    unset($comment->format);        
-    
-    comment_submit($comment);
-    comment_save($comment);  
-
-    //$comments_record[$oldCid] = $comment->cid;
-
-  }
-
-  /*
-  foreach ($comments_record as $record) {  
     db_insert('mediacommons_imr_import_comments_map')
       ->fields(array(
-        'ocid' => $record->ocid,
-        'cid' => $record->cid,
+        'ocid' => (int)$comment->cid,
+        'cid' => (int)$new_comment->cid,
       )
-    )->execute();  
+    )->execute();
+
   }
-  */
-  
+
 }
 
 /**
@@ -449,15 +378,17 @@ function mediacommons_imr_import_generate_hubs() {
   
   $production_url = $settigs['settings']['production']['url'];
 
-  $data = mediacommons_imr_import_d6_hub_list();
+  $data = mediacommons_imr_import_d6_theme_week_list();
   
   /** Get a list of all the D6 users */
-  $d6_users = mediacommons_imr_import_d6_users_list();
+  /** $d6_users = mediacommons_imr_import_d6_users_list(); */
   
   /** If we have $data proceed */
   if ($data->rowCount()) {
 
     foreach ($data as $key => $value) {
+    
+      //drush_print_r($value);
       
       $old_author_uid = (int) $value->uid;
       
@@ -477,7 +408,7 @@ function mediacommons_imr_import_generate_hubs() {
           $old_author_uid > 0
       ) {
         
-        drush_print('Creating ' . $value->title . "\n");        
+        drush_print('Importing ' . $value->title . "\n");        
         
         /** This node defualt configuration */
         $node = _mediacommons_imr_import_setup_node('hub');
@@ -487,6 +418,9 @@ function mediacommons_imr_import_generate_hubs() {
 
         /** Node status */
         $node->status = $value->status;
+        
+        /** Node created and changed */
+        $node->date = date("Y-m-j H:i:s", $value->created);
 
         /** Node comment */
         $node->comment = $value->comment;
@@ -511,58 +445,19 @@ function mediacommons_imr_import_generate_hubs() {
           user_save($account, array('roles' => $roles));
         }
         
-        /** Contributors */
-        $hub_contributors = explode(', ', $value->contributors);
-
-        /** Contributor order */
-        $contributor_order = explode(', ', $value->contributor_order);      
-
-        /** Find out if user is already in the system */
-        foreach ($hub_contributors as $key => $contributor) {
-
-          $result = db_query('SELECT uid FROM {mediacommons_imr_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $contributor));
-
-          if (!$result->rowCount() && isset($d6_users[$contributor])) {
-            $record = mediacommons_imr_import_generate_user($d6_users[$contributor]);
-            if ($record) {
-              db_insert('mediacommons_imr_import_user_map')
-                ->fields(array(
-                  'ouid' => $record->ouid,
-                  'uid' => $record->uid,
-                )
-              )->execute();
-            }
-          }
-          else {
-            $record = $result->fetchObject();
-          }
-          $node->field_contributors[$node->language][$key] = array(
-            'uid' => (int)$record->uid,
-            '_weight' => (int)$contributor_order[$key], 
-          );
-        }
-      
         /** Add description */
         $node->field_description[$node->language][0] = array(
-          'value' => $value->field_description_value,
-          'format' => 'filtered_html',
+          'value' => $value->body,
+          'format' => 'full_html',
         );
         
-        /** Video */
-        if (isset($value->provider)) {
-          if ($value->provider == 'youtube') {
-           $video_url = 'http://www.youtube.com/watch?v=' . $value->video_link;  
-          }
-          $node->field_video_embed_link[$node->language][0]['video_url'] = $video_url;
-        }
-        
         /** Media type */
-        $node->field_type[$node->language][0]['value'] = $value->field_cluster_type_value;
+        $node->field_type[$node->language][0]['value'] = 1;
       
         /** Hub representative image */
-        if (!empty($value->field_image_fid)) {
+        if (!empty($value->field_theme_week_image_fid)) {
           $dupal_file_path = drupal_realpath('public://');
-          $data = mediacommons_imr_import_find_image($value->field_image_fid);
+          $data = mediacommons_imr_import_find_image($value->field_theme_week_image_fid);
           $url_image_path = url($production_url . $data->filepath);
           $source_image_path = $dupal_file_path . '/' . $data->filename;
           file_put_contents($source_image_path, file_get_contents($url_image_path));
@@ -575,11 +470,59 @@ function mediacommons_imr_import_generate_hubs() {
           $file = file_copy($file, 'public://');
           $node->field_representative_image[$node->language][0] = (array)$file;
         }
+
+        $contributors = array();
+        $posts = array();        
+        
+        if (!empty($value->field_featured_post_1_nid)) {
+          $posts[] = $value->field_featured_post_1_nid;
+        }
+        
+        if (!empty($value->field_featured_post_2_nid)) {
+          $posts[] = $value->field_featured_post_2_nid;
+        }
+
+        if (!empty($value->field_featured_post_3_nid)) {
+          $posts[] = $value->field_featured_post_3_nid;
+        }
+
+        if (!empty($value->field_featured_post_4_nid)) {
+          $posts[] = $value->field_featured_post_4_nid;
+        }
+
+        if (!empty($value->field_featured_page_or_feed_nid)) {
+          $posts[] = $value->field_featured_page_or_feed_nid;
+        }
+    
+        if (!empty($value->field_featured_post_5_nid)) {
+          $posts[] = $value->field_featured_post_5_nid;
+        }
+        
+        
+        foreach ($posts as $key => $post) {
+          $post_exist = db_query("SELECT nid FROM {mediacommons_imr_import_node_map} WHERE onid = :onid", array(':onid' => $post));
+          if ($post_exist->rowCount()) {
+            $post_record = $post_exist->fetchObject();
+            $c = db_query("SELECT uid FROM {node} WHERE nid = :nid", array(':nid' => $post_record->nid));
+            $contributor_record = $c->fetchObject();
+            $contributors[] = $contributor_record->uid;
+            $node->field_spokes[LANGUAGE_NONE][$key]['nid'] = (int)$post_record->nid;
+          }
+        }
+
+        foreach ($contributors as $key => $contributor) {
+          $node->field_contributors[LANGUAGE_NONE][$key] = array(
+            'uid' => $contributor,
+            '_weight' => $key, 
+          );        
+        }        
+        
+        unset($contributors);
       
         /** dates */
-        $node->field_field_period[$node->language][0]['value'] = $value->field_period_value;
+        //$node->field_field_period[$node->language][0]['value'] = $value->field_period_value;
 
-        $node->field_field_period[$node->language][0]['value2'] = $value->field_period_value2;
+        //$node->field_field_period[$node->language][0]['value2'] = $value->field_period_value2;
       
         /** taxonomy */
         foreach (explode(', ', $value->terms) as $tid) {
