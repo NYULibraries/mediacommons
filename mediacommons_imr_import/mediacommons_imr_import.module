@@ -116,10 +116,10 @@ function mediacommons_imr_import_run($task) {
       drush_print(t('Importing users'));
       mediacommons_imr_import_generate_all_users();    
       
-      drush_print(t('Import Spokes'));
+      drush_print(t('Importing spokes'));
       mediacommons_imr_import_generate_spokes();    
       
-      drush_print(t('Import Hubs'));
+      drush_print(t('Importing hubs'));
       mediacommons_imr_import_generate_hubs();      
       
       break;
