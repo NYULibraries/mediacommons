@@ -69,7 +69,7 @@ function mediacommons_imr_import_prepare() {
 function mediacommons_imr_import_settings() {
   $script = pathinfo(__FILE__);
   $settigs = array();
-  $settigs = json_decode(utf8_encode(file_get_contents($script['dirname'] . '/settigs.json')), true);
+  $settigs = json_decode(utf8_encode(file_get_contents($script['dirname'] . '/settings.json')), true);
   $settigs['script_path'] = $script;
   return $settigs;
 }
