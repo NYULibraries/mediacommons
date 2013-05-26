@@ -2,9 +2,9 @@
     "name": "mediacommons_imr_import",
     "version": "0.0.1",
     "environment" : "development",
-    "dependencies": {
+    "dependencies": [
         "mediacommons_base_import"
-    },
+    ],
     "settings" : {
         "local" : {
             "url" : "http://localhost/imr/"
