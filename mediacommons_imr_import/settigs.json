@@ -1,12 +1,17 @@
 {
     "name": "mediacommons_imr_import",
     "version": "0.0.1",
-    "environment" : "local",
-    "dependencies": {},
+    "environment" : "development",
+    "dependencies": {
+        "mediacommons_base_import"
+    },
     "settings" : {
         "local" : {
-            "url" : "http://ortiz.bobst.nyu.edu/import/"
+            "url" : "http://localhost/imr/"
         },
+        "development" : {
+            "url" : "http://dev-dl-pa.home.nyu.edu/imr/"
+        },        
         "production" : {
             "url" : "http://mediacommons.futureofthebook.org/imr/"
         }
