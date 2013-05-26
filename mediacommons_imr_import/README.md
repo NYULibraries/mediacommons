@@ -19,7 +19,7 @@ Before running open settings.json and fill the blanks. You also need to add the 
   );
 ```
 
-### Sharede databases example: 
+### Shared DB example: 
 
 ```php
   $databases['drupal6'] = array(
