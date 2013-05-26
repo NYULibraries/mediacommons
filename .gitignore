@@ -3,4 +3,5 @@
 .svn
 .buildpath
 .settings
+settings.json
 import-scripts/images/*
