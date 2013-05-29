@@ -2,11 +2,11 @@
 
 $base_file = __DIR__ . '/../mediacommons_base_import/' . 'mediacommons_base_import.module';
 
-function mediacommons_imr_import_init() {
+function mediacommons_tne_import_init() {
 
   $commands = array(
     array(
-      'label' => t('Import IMR D6 Content (all the stepts)'),
+      'label' => t('Import TNE D6 Content (all the stepts)'),
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
         'mediacommons_base_import_generate_terms',   
@@ -15,33 +15,38 @@ function mediacommons_imr_import_init() {
       ),
     ),
     array(
-      'label' => t('Migrate posts'),
+      'label' => t('Migrate Contributed Pieces'),
       'callback' => array(
-        'mediacommons_imr_import_migrate_posts',
+        'mediacommons_tne_import_migrate_contributed_pieces',
       ),
     ),
     array(
-      'label' => t('Migrate Theme Weeks'),
+      'label' => t('Migrate Clusters'),
       'callback' => array(
-        'mediacommons_imr_import_migrate_theme_weeks'
+        'mediacommons_tne_import_migrate_cluster'
       ),
     ),
     array(
-      'label' => t('Delete post and comments'),
+      'label' => t('Migrate Responses'),
       'callback' => array(
-        'mediacommons_base_import_delete_comments',
-        'mediacommons_base_import_delete_post',
+        'mediacommons_tne_import_migrate_response'
+      ),
+    ),
+    array(
+      'label' => t('Run test'),
+      'callback' => array(
+        'mediacommons_tne_import_test'
       ),
     ),
   );
-
+  
   mediacommons_base_import_init(
     array('commands' => $commands)
   );
-
+  
 }
 
 if (file_exists($base_file)) {
   include_once($base_file);
-  mediacommons_imr_import_init();
+  mediacommons_tne_import_init();
 }

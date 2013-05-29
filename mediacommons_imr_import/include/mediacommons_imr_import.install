@@ -1,0 +1,9 @@
+<?php
+
+/** Implements hook_schema(). */
+function mediacommons_imr_import_schema() {
+
+  $schema = array();
+
+  return $schema;
+}

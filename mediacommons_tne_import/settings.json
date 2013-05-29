@@ -1,0 +1,19 @@
+{
+    "name": "mediacommons_tne_import",
+    "version": "0.0.1",
+    "environment" : "local",
+    "dependencies": [
+      "mediacommons_base_import"
+    ],
+    "settings" : {
+        "local" : {
+            "url" : "http://ortiz.bobst.nyu.edu/tne/"
+        },
+        "development" : {
+            "url" : "http://dev-dl-pa.home.nyu.edu/tne/"
+        },
+        "production" : {
+            "url" : "http://mediacommons.futureofthebook.org/tne/"
+        }
+    }
+}
