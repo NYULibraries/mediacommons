@@ -1,201 +1,9 @@
 <?php
 
-<<<<<<< HEAD
 $base_file = __DIR__ . '/../mediacommons_base_import/' . 'mediacommons_base_import.module';
-=======
-include_once "mediacommons_imr_import.install";
-include_once "include/mediacommons_imr_import.datasource.inc";
-include_once "include/mediacommons_imr_import.create.inc";
-include_once "include/mediacommons_imr_import.delete.inc";
-
-/**
- * Assuming you have already a local copy of the site database, your settings.php should looks something like this:
- *
- $databases['drupal6'] = array(
-   'default' => array(
-     'database' => 'db_name',
-     'username' => 'your_user',
-     'password' => 'your_password',
-     'host' => '127.0.0.1',
-     'port' => '',
-     'driver' => 'mysql',
-     'prefix' => 'prefix_',
-   ),
- );
- 
- OR
- 
- $databases['drupal6'] = array(
-   'default' => array(
-     'database' => 'db_name',
-     'username' => 'your_user',
-     'password' => 'your_password',
-     'host' => 'localhost',
-     'port' => '',
-     'driver' => 'mysql',
-     'prefix' => array(
-       'default'   => 'prefix_',
-       'authmap' => 'shared_db.shared_prefix_',
-       'profile_fields' => 'shared_db.shared_prefix_',
-       'profile_values' => 'shared_db.shared_prefix_',
-       'sequences' => 'shared_db.shared_prefix_',
-       'sessions' => 'shared_db.shared_prefix_',
-       'users' => 'shared_db.shared_prefix_',
-     ),
-   ),
- );
- 
- */
-function mediacommons_imr_import_d6_configured() {
-  global $databases;
-  if (!isset($databases['drupal6'])) {
-    drush_set_error('About to die like a coward. Unable to find Drupal 6 database.');
-    drush_die();
-  }
-  else {
-    return TRUE;
-  }
-}
-
-function mediacommons_imr_import_prepare() {
-  global $settigs;  
-  $settigs = mediacommons_imr_import_settings();
-  $schemas = mediacommons_imr_import_schema();
-  mediacommons_imr_import_initialize_schema('mediacommons_imr_import', $schemas);
-  foreach ($schemas as $name => $schema) {
-    if (!db_table_exists($name)) {
-      db_create_table($name, $schema);
-    }
-  }
-}
-
-function mediacommons_imr_import_settings() {
-  $script = pathinfo(__FILE__);
-  $settigs = array();
-  $settigs = json_decode(utf8_encode(file_get_contents($script['dirname'] . '/settings.json')), true);
-  $settigs['script_path'] = $script;
-  return $settigs;
-}
-
-/** Return a plain node template */
-function _mediacommons_imr_import_setup_node($type) {
-  $node = new StdClass();
-  $node->type = $type;
-  $node->language = LANGUAGE_NONE;
-  $node->promote = 0;
-  $node->sticky = 0;
-  /** Fills in a few default values */
-  node_object_prepare($node);  
-  return $node;
-}
-
-function mediacommons_imr_import_initialize_schema($module, &$schema) {
-  // Set the name and module key for all tables.
-  foreach ($schema as $name => $table) {
-    if (empty($table['module'])) {
-      $schema[$name]['module'] = $module;
-    }
-    if (!isset($table['name'])) {
-      $schema[$name]['name'] = $name;
-    }
-  }
-}
-
-function mediacommons_imr_import_run($task) {
-  switch ($task) {
-
-    case 1 :
-      drush_print(t('Import D6 Content (all the stepts)'));
-
-      drush_print(t('Importing vocabulary'));
-      mediacommons_imr_import_generate_vocabulary();
-      
-      drush_print(t('Importing terms'));
-      mediacommons_imr_import_generate_terms();
-      
-      drush_print(t('Importing roles'));
-      mediacommons_imr_import_generate_roles();      
-      
-      drush_print(t('Importing users'));
-      mediacommons_imr_import_generate_all_users();    
-      
-      drush_print(t('Importing spokes'));
-      mediacommons_imr_import_generate_spokes();    
-      
-      drush_print(t('Importing hubs'));
-      mediacommons_imr_import_generate_hubs();      
-      
-      break;
-      
-    case 2 :
-      drush_print(t('Importing vocabulary'));
-      mediacommons_imr_import_generate_vocabulary();
-      break;
-
-    case 3 :
-      drush_print(t('Importing terms'));
-      mediacommons_imr_import_generate_terms();
-      break;
-      
-    case 4 :
-      drush_print(t('Importing roles'));
-      mediacommons_imr_import_generate_roles();
-      break;
-      
-    case 5 :
-      drush_print(t('Importing users'));
-      mediacommons_imr_import_generate_all_users();      
-      break;
-
-    case 6 :
-      drush_print(t('Importing spokes'));
-      mediacommons_imr_import_generate_spokes();
-      break;      
-
-    case 7 :
-      drush_print(t('Importing hubs'));
-      mediacommons_imr_import_generate_hubs();
-      break;
-      
-    case 0 :
-      drush_print(t('Running test'));
-
-      break;
-
-    default :
-      drush_print('');
-      drush_print(t('ERROR: Unable to perform task'));
-      drush_print('');
-      mediacommons_imr_import_show_options();
-      break;
-  }
-}
-
-function mediacommons_imr_import_show_help() {
-  drush_print('');
-  drush_print(t('[1] Import Content (all the stepts)'));
-  drush_print(t('[2] Import vocabulary'));
-  drush_print(t('[3] Import terms'));  
-  drush_print(t('[4] Import roles'));
-  drush_print(t('[5] Import users'));
-  drush_print(t('[6] Import spokes'));
-  drush_print(t('[7] Import hubs'));
-  drush_print(t('[0] Run test'));
-  drush_print('');
-}
-
-function mediacommons_imr_import_show_options() {
-  drush_print(t('Please type one of the following options to continue:'));
-  mediacommons_imr_import_show_help();
-  $handle = fopen ("php://stdin","r");
-  $line = fgets($handle);
-  mediacommons_imr_import_run(trim($line));
-}
->>>>>>> 9803a9013d32d3915d9233842c2d3b83c9a1bdb6
 
 function mediacommons_imr_import_init() {
 
-<<<<<<< HEAD
   $commands = array(
     array(
       'label' => t('Import IMR D6 Content (all the stepts)'),
@@ -225,6 +33,13 @@ function mediacommons_imr_import_init() {
         'mediacommons_base_import_delete_post',
       ),
     ),
+    array(
+      'label' => t('Run test'),
+      'callback' => array(
+        'mediacommons_imr_import_test',
+      ),
+    ),    
+    
   );
 
   mediacommons_base_import_init(
@@ -237,6 +52,3 @@ if (file_exists($base_file)) {
   include_once($base_file);
   mediacommons_imr_import_init();
 }
-=======
-mediacommons_imr_import_init();
->>>>>>> 9803a9013d32d3915d9233842c2d3b83c9a1bdb6
