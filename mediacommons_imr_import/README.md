@@ -1,8 +1,8 @@
 MediaCommons IMR Import
 ============
 
-Before running open settings.json and fill the blanks. Also, add the Drupal 6 database connection setting 
-to settings.php.
+Before running copy default.settings.json as settings.json and fill the blanks. 
+You also need to add the to settings.php the information of your Drupal 6 database.
 
 ### Example:
 

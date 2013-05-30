@@ -3,11 +3,11 @@
     "version": "0.0.1",
     "environment" : "local",
     "dependencies": [
-      "mediacommons_base_import"
+      "mediacommons_editorialworkflow"
     ],
     "settings" : {
         "local" : {
-            "url" : "http://ortiz.bobst.nyu.edu/tne/"
+            "url" : "http://localhost/tne/"
         },
         "development" : {
             "url" : "http://dev-dl-pa.home.nyu.edu/tne/"

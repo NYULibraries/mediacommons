@@ -99,6 +99,14 @@ function mediacommons_base_import_prepare($caller) {
   global $settings;
   
   $settings = $settigs = mediacommons_base_import_settings($caller);
+  
+  foreach ($settings['dependencies'] as $dependency) {
+    if(!module_exists($dependency)) {
+      drush_set_error(
+        t('About to die like a coward. Dependency @dependency not met.', array('@dependency' => $dependency))
+      );
+    }
+  }
 
   $schemas = mediacommons_base_import_schema();
   

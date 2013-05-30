@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "environment" : "local",
     "dependencies": [
-        "mediacommons_base_import"
+        "mediacommons_editorialworkflow"
     ],
     "settings" : {
         "local" : {
