@@ -324,7 +324,7 @@ function mediacommons_base_import_create_spoke(array $old_node) {
 }
 
 /**
- * Given an old node, create a hub.
+ * Given an *old* node (Drupal 6), create a hub.
  */
 function mediacommons_base_import_create_hub(array $old_node) {
 
@@ -362,16 +362,27 @@ function mediacommons_base_import_create_hub(array $old_node) {
    * Conditions to be meet before creating content
    */
 
+  /**
+   * If hub exist, exit
+   */
   if ($node_exist) {
     drush_print(
-      t('Spoke @title already exist.', array('@title' => $old_node->title))
+      t('Hub @title already exist.', array('@title' => $old_node->title))
     );
     return;
   }
-      
+
+  /**
+   * Do not migrate if we don't have a valid author.
+   * This "only fail" if someone try to migrate the content before migrating users, any 
+   * other reason, you can assume something is wrong with the script or the datasource.
+   */
   if (!$author_uid) {
     drush_print(
-      t('Can\'t import spoke "@title" (nid: @nid, uid: @uid) author does not exist in system. Please make sure the author is created before creating content under his username.', array('@title' => $old_node->title, '@nid' => $old_node->onid, '@uid' => $old_node->ouid))
+      t(
+        'Can\'t import spoke "@title" (nid: @nid, uid: @uid) author does not exist in system.', 
+        array('@title' => $old_node->title, '@nid' => $old_node->onid, '@uid' => $old_node->ouid)
+      )
     );
     return;
   }
@@ -471,11 +482,9 @@ function mediacommons_base_import_create_hub(array $old_node) {
   /** 
    * Attached representative image
    */
+  if (isset($old_node->field_representative_image)) {
 
-  /**    
-  if (isset($old_node->field_attached_images_ri)) {
-
-    $ri = mediacommons_base_import_find_image($old_node->field_attached_images_ri);
+    $ri = mediacommons_base_import_find_image($old_node->field_representative_image);
 
     $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
 
@@ -486,27 +495,20 @@ function mediacommons_base_import_create_hub(array $old_node) {
     if ($put_success) {
 
       $file = (object) array(
-        'uid' => (int)$new_node->uid, // change this to this user ID?
+        'uid' => (int)$new_node->uid,
         'uri' => $source_image_path,
         'filemime' => file_get_mimetype($source_image_path),
         'status' => 1,
-        'extended_ri' => '1',
-        'extended_display' => 0
       );
 
       $file = file_copy($file, 'public://');
 
-      $new_node->field_attached_images[$old_node->language][] = (array)$file;
+      $new_node->field_representative_image[$old_node->language][] = (array)$file;
 
     }
 
   }
-  */   
   
-  /**
-   * @TODO Attached all other images
-   */  
-
   /**
    * Add extended fields (fields that are not part of mediacommons_base distribution)
    */
