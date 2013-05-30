@@ -3,15 +3,47 @@
 mediacommons_base_import_d6_configured();
 
 /**
+ *  Return configured production URL
+ */
+function mediacommons_base_import_get_production_url() {
+      
+  global $settings;
+
+  /**
+   * URL to be used as the production URL
+   */
+  $production_url = $settings['settings']['production']['url'];
+  
+  return $production_url;
+  
+}
+
+/**
  *  Find out if node is already in the system by its old Drupal 6 nid 
  */
 function mediacommons_base_import_node_exists($onid) {
       
-  $node_exist = db_query('SELECT nid FROM {mediacommons_base_import_node_map} u WHERE onid = :onid', array(':onid' => $onid));
+  $node_exist = db_query('SELECT nid FROM {mediacommons_base_import_node_map} m WHERE onid = :onid', array(':onid' => $onid));
   
   return ((int)$node_exist->rowCount() > 0) ? TRUE : FALSE;
   
 }
+
+/**
+ *  Find out Drupal 7 node id by Drupal 6 nid
+ */
+function mediacommons_base_import_node_nid($onid) {
+      
+  $node = db_query('SELECT nid FROM {mediacommons_base_import_node_map} m WHERE onid = :onid', array(':onid' => $onid))->fetchObject();
+  
+  if (isset($node->nid)) {
+    return $node->nid;
+  }
+  
+  return FALSE;  
+  
+}
+
 
 /**
  *  Find out if user is already in the system by its Drupal 6 user id
@@ -19,6 +51,10 @@ function mediacommons_base_import_node_exists($onid) {
 function mediacommons_base_import_user_exists($ouid) {
 
   $ouid = (int)$ouid;
+  
+  if ($ouid == 1) {
+    return 1;
+  }
 
   $author_exist = db_query('SELECT uid FROM {mediacommons_base_import_user_map} u WHERE ouid = :ouid', array(':ouid' => $ouid));
 
@@ -291,52 +327,6 @@ function mediacommons_base_import_d6_users_list() {
 
 }
 
-function mediacommons_base_import_d6_post_list() {
-  
-  $type = 'post';
-  
-  $query = "
-    SELECT
-      n.nid,
-      MAX(n.vid) AS vid,
-      n.type,
-      n.uid,
-      n.status,
-      n.created,
-      n.changed,
-      n.comment,
-      n.promote,
-      n.moderate,
-      n.sticky,
-      n.language, 
-      n.tnid,
-      n.translate,
-      nr.title,
-      nr.body,
-      nr.teaser,
-      nr.format,
-      ctp.*,
-      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
-    FROM {node} n
-    LEFT JOIN {node_revisions} nr
-      ON n.vid = nr.vid
-    LEFT JOIN {content_type_post} ctp
-      ON n.vid = ctp.vid
-    LEFT JOIN {term_node} t
-      ON n.vid = t.vid      
-    WHERE n.type = :type 
-    AND n.status > 0
-    GROUP BY n.nid
-    ORDER BY n.nid";
-  
-  
-  /** Create a database connection to the source (d6) database */
-  $result = Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
-
-  return $result;
-
-}
-
 function mediacommons_base_import_d6_hub_list() {
 
   $query = "
@@ -377,51 +367,6 @@ function mediacommons_base_import_d6_hub_list() {
   
   /** Create a database connection to the source (d6) database */
   $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
-
-  return $result;
-
-}
-
-function mediacommons_base_import_d6_theme_week_list() {
-  
-  $type = 'theme_week_page';
-  
-  $query = "
-    SELECT
-      n.nid,
-      MAX(n.vid) AS vid,
-      n.type,
-      n.uid,
-      n.status,
-      n.created,
-      n.changed,
-      n.comment,
-      n.promote,
-      n.moderate,
-      n.sticky,
-      n.language, 
-      n.tnid,
-      n.translate,
-      nr.title,
-      nr.body,
-      nr.teaser,
-      nr.format,
-      cttwp.*,
-      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
-    FROM {node} n
-    LEFT JOIN {node_revisions} nr
-      ON n.vid = nr.vid
-    LEFT JOIN {content_type_theme_week_page} cttwp
-      ON n.vid = cttwp.vid
-    LEFT JOIN {term_node} t
-      ON n.vid = t.vid      
-    WHERE n.type = :type 
-    AND n.status > 0
-    GROUP BY n.nid
-    ORDER BY n.nid";
-  
-  /** Create a database connection to the source (d6) database */
-  $result = Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
 
   return $result;
 
@@ -481,5 +426,4 @@ function mediacommons_base_import_d7_hubs_list() {
 
   /** return nids */
   return $query->fetchAll();
-
 }

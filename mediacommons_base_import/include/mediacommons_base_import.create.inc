@@ -123,12 +123,17 @@ function mediacommons_base_import_generate_terms() {
  */
 function mediacommons_base_import_create_spoke(array $old_node) {
 
-  global $settings;
+  // global $settings;
 
   /**
    * URL to be used as the production URL
    */
-  $production_url = $settings['settings']['production']['url'];
+  $production_url = mediacommons_base_import_get_production_url();
+  
+  /**
+   * Files folder real path
+   */
+  $dupal_file_path = drupal_realpath('public://');
 
   /**
    * This node default configuration 
@@ -175,7 +180,7 @@ function mediacommons_base_import_create_spoke(array $old_node) {
     t('Migrating "@title".', array('@title' => $old_node->title))
   );
 
-  $path_alias = mediacommons_imr_import_find_url_alias('node/' . $old_node->nid);
+  $path_alias = mediacommons_base_import_find_url_alias('node/' . $old_node->onid);
   
   $new_node->title = $old_node->title;
   
@@ -201,7 +206,7 @@ function mediacommons_base_import_create_spoke(array $old_node) {
     $new_node->field_body[$old_node->language][0] = array(
       'value' => $old_node->field_body,
       'format' => 'full_html', // should this be filtered_html?
-    );
+    );  
   }
   
   /** Tags */
@@ -214,10 +219,70 @@ function mediacommons_base_import_create_spoke(array $old_node) {
   }
   
   /**
-   * Add extended fields
-   * Looks like is working; look out for it.
+   * Contributors 2 steps
+   * 1. Add the author of the spoke as a contributor
+   * 2. If we have contributors, add them to the field
    */
+  $new_node->field_contributors = array(
+    $new_node->language => array(),
+  );
+
+  /** 
+   * Step 1. The author is always the first contributor (at least for the migration) 
+   */
+  $new_node->field_contributors[$new_node->language][0] = array(
+    'uid' => $new_node->uid,
+    '_weight' => 0,
+  );
+  
+  /** 
+   * Step 2. Work on this when when we have this case 
+   */  
+  
+  /** 
+   * Attached representative image
+   */    
+  if (isset($old_node->field_attached_images_ri)) {
+
+    $ri = mediacommons_base_import_find_image($old_node->field_attached_images_ri);
+
+    $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
+
+    $source_image_path = $dupal_file_path . '/' . $ri->filename;
+
+    $put_success = file_put_contents($source_image_path, mediacommons_base_import_get_content($url_image_path));
+    
+    if ($put_success) {
+
+      $file = (object) array(
+        'uid' => (int)$new_node->uid, // change this to this user ID?
+        'uri' => $source_image_path,
+        'filemime' => file_get_mimetype($source_image_path),
+        'status' => 1,
+        'extended_ri' => '1',
+        'extended_display' => 0
+      );
+
+      $file = file_copy($file, 'public://');
+
+      $new_node->field_attached_images[$old_node->language][] = (array)$file;
+
+    }
+
+  }
+  
+  /**
+   * @TODO Attached all other images
+   */  
+
+  /**
+   * Add extended fields (fields that are not part of mediacommons_base distribution)
+   */
+  
+  // Function to be call
   $call = $settings['script_path']['filename'] . '_extend_fields';
+  
+  // If function exists call it
   if (function_exists($call)) {
     $fields = $call();
     foreach ($fields as $field) {
@@ -225,35 +290,7 @@ function mediacommons_base_import_create_spoke(array $old_node) {
         $new_node->$field = $old_node->$field;
       }
     }
-  }
-  
-  /** 
-   * Attached images
-   * test oldid: node/1476 (broken) 
-   * http://mediacommons.futureofthebook.org/imr/files/imagefield_thumbs/teaser-images/deepika%20pudakone%20salwar%20kameez%20om%20shanti%20om.jpg
-   */
-  /**    
-  if (isset($spoke->field_tease_image_fid) && 1 ==2) {
-    $ri = mediacommons_base_import_find_image($spoke->field_tease_image_fid);
-    $url_image_path = url($production_url . $ri->filepath);
-    $source_image_path = $dupal_file_path . '/' . basename($url_image_path);
-    if (!file_exists($source_image_path)) {
-      file_put_contents($source_image_path, file_get_contents(urlencode($url_image_path)));
-    }
-                
-    $file = (object) array(
-      'uid' => 1,
-      'uri' => $source_image_path,
-      'filemime' => file_get_mimetype($source_image_path),
-      'status' => 1,
-      'extended_ri' => '1',
-      'extended_display' => 0
-    );
-                
-    $file = file_copy($file, 'public://');          
-    $new_node->nid->field_attached_images[$node->language][] = (array)$file;
-  }
-  */
+  }  
   
   /**
    * Prepare node for saving 
@@ -286,123 +323,236 @@ function mediacommons_base_import_create_spoke(array $old_node) {
   
 }
 
-function mediacommons_base_import_comment($nid, $oldNid) {
+/**
+ * Given an old node, create a hub.
+ */
+function mediacommons_base_import_create_hub(array $old_node) {
 
-  $table_prefix = $settigs['script_path']['filename'];
+  /**
+   * URL to be used as the production URL
+   */
+  $production_url = mediacommons_base_import_get_production_url();
+  
+  /**
+   * Files folder real path
+   */
+  $dupal_file_path = drupal_realpath('public://');
 
-  $nodes_records = $users_records = $comments_record = array();
+  /**
+   * This node default configuration 
+   */
+  $new_node = _mediacommons_base_import_setup_node('hub');
   
-  $users_query = 'SELECT * FROM {mediacommons_base_import_user_map}';
+  /**
+   * Prepare node
+   */      
+  $old_node = (object) $old_node;
   
-  $users = db_query($users_query);
+  /** 
+   * Find out if node is already in the system 
+   */
+  $node_exist = mediacommons_base_import_node_exists($old_node->onid);
   
-  $query = 'SELECT * FROM {comments} WHERE nid = :nid';
+  /**
+   * Find out if user is already in the system 
+   */
+  $author_uid = mediacommons_base_import_user_exists($old_node->ouid);
   
-  $comments = Database::getConnection('default', 'drupal6')->query($query, array(':nid' => $oldNid), array());
+  /**
+   * Conditions to be meet before creating content
+   */
+
+  if ($node_exist) {
+    drush_print(
+      t('Spoke @title already exist.', array('@title' => $old_node->title))
+    );
+    return;
+  }
+      
+  if (!$author_uid) {
+    drush_print(
+      t('Can\'t import spoke "@title" (nid: @nid, uid: @uid) author does not exist in system. Please make sure the author is created before creating content under his username.', array('@title' => $old_node->title, '@nid' => $old_node->onid, '@uid' => $old_node->ouid))
+    );
+    return;
+  }
   
-  foreach ($users as $user) { 
-    $users_records[$user->ouid] = $user->uid; 
+  /**
+   * Conditions meet node migration start
+   */
+  drush_print(
+    t('Migrating "@title".', array('@title' => $old_node->title))
+  );
+
+  $path_alias = mediacommons_base_import_find_url_alias('node/' . $old_node->onid);
+  
+  $new_node->title = $old_node->title;
+  
+  $new_node->uid = $author_uid;
+
+  $new_node->language = $old_node->language;
+
+  $new_node->date = $old_node->date;
+
+  $new_node->status = $old_node->status;
+
+  $new_node->promote = $old_node->promote;
+
+  $new_node->moderate = $old_node->moderate;
+
+  $new_node->sticky = $old_node->sticky;
+  
+  /** 
+   * Add description 
+   */
+  $new_node->field_description[$new_node->language][0] = array(
+    'value' => $old_node->field_description,
+    'format' => 'full_html',
+  );
+        
+  /** 
+   * Media type 
+   */
+  if (isset($old_node->field_type)) {
+    $new_node->field_type[$old_node->language][0]['value'] = $old_node->field_type;
+  }
+      
+  /**
+   * Tags 
+   */
+  if (isset($old_node->field_tags)) {
+    $new_node->field_tags = array();
+    foreach ($old_node->field_tags as $tag_id) {
+      if ($tag = mediacommons_base_import_find_term_id($tag_id)) {
+        $new_node->field_tags[$old_node->language][] = array('tid' => $tag);
+      }
+    }
+  }
+  
+  /**
+   * Contributors
+   */
+  if (isset($old_node->field_contributors)) {
+    $new_node->field_contributors = array();
+    foreach ( $old_node->field_contributors as $key => $contributors ) {
+      $uid = mediacommons_base_import_user_exists($contributors);
+      if ($uid) {
+        $new_node->field_contributors[$old_node->language][$key] = array(
+          'uid' => $uid,
+          '_weight' => $key, 
+        );        
+      }
+    }
+  }
+  
+  /**
+   * Spokes
+   */   
+  if (isset($old_node->field_spokes)) {
+    $new_node->field_spokes = array();
+    foreach ($old_node->field_spokes as $key => $hub) {
+      $nid = mediacommons_base_import_node_nid($hub);
+      if ($nid) {
+        $new_node->field_spokes[$old_node->language][$key]['nid'] = $nid;
+      }
+    }
+  }   
+
+  /**
+   * Dates
+   */
+  if (isset($old_node->field_field_period_1)) {
+    $new_node->field_field_period[$old_node->language][0]['value'] = $old_node->field_field_period_1; 
+  }
+   
+  if (isset($old_node->field_field_period_2)) {
+    $new_node->field_field_period[$old_node->language][0]['value2'] = $old_node->field_field_period_2; 
   }
 
-  foreach ($comments as $comment) {
-    $new_comment = (object) array(
-      'nid' => $nid,
-      'cid' => 0,
-      'pid' => 0, // need to fix this so that the parent of the comment get assigned
-      'uid' => $users_records[$comment->uid],
-      'mail' => $comment->mail,
-      'is_anonymous' => 0,
-      'homepage' =>  $comment->homepage,
-      // http://api.drupal.org/api/drupal/modules%21comment%21comment.module/constant/COMMENT_PUBLISHED/6
-      // http://api.drupal.org/api/drupal/modules%21comment%21comment.module/constant/COMMENT_PUBLISHED/7
-      'status' => ($comment->status == 0) ? 1 : 0,
-      'subject' => $comment->subject,
-      'language' => LANGUAGE_NONE,
-      'thread' => $comment->thread,
-      'hostname' => $comment->hostname,
-      'date' => date("Y-m-j H:i:s", $comment->timestamp),
-      'comment_body' => array(
-        LANGUAGE_NONE => array(
-          0 => array (
-            'value' => $comment->comment,
-            'format' => 'filtered_html',
-          ),
-        ),
-      ),
+  /** 
+   * Attached representative image
+   */
+
+  /**    
+  if (isset($old_node->field_attached_images_ri)) {
+
+    $ri = mediacommons_base_import_find_image($old_node->field_attached_images_ri);
+
+    $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
+
+    $source_image_path = $dupal_file_path . '/' . $ri->filename;
+
+    $put_success = file_put_contents($source_image_path, mediacommons_base_import_get_content($url_image_path));
+    
+    if ($put_success) {
+
+      $file = (object) array(
+        'uid' => (int)$new_node->uid, // change this to this user ID?
+        'uri' => $source_image_path,
+        'filemime' => file_get_mimetype($source_image_path),
+        'status' => 1,
+        'extended_ri' => '1',
+        'extended_display' => 0
+      );
+
+      $file = file_copy($file, 'public://');
+
+      $new_node->field_attached_images[$old_node->language][] = (array)$file;
+
+    }
+
+  }
+  */   
+  
+  /**
+   * @TODO Attached all other images
+   */  
+
+  /**
+   * Add extended fields (fields that are not part of mediacommons_base distribution)
+   */
+  
+  // Function to be call
+  $call = $settings['script_path']['filename'] . '_extend_fields';
+  
+  // If function exists call it
+  if (function_exists($call)) {
+    $fields = $call();
+    foreach ($fields as $field) {
+      if (isset($old_node->$field)) {
+        $new_node->$field = $old_node->$field;
+      }
+    }
+  }
+  
+  /**
+   * Prepare node for saving 
+   */
+  if ($new_node = node_submit($new_node)) {
+        
+    node_save($new_node);
+        
+    $path = array(
+      'source' => 'node/' . $new_node->nid,  // The internal system path.
+      'alias' => $path_alias->dst, // The URL alias.
     );
         
-    comment_submit($new_comment);
-    comment_save($new_comment);
-      
-    $comments_record[] = array(
-      'old' => $comment,
-      'new' => $new_comment
+    path_save(&$path);
+        
+    mediacommons_base_import_comment($new_node->nid, $old_node->onid);
+        
+    db_insert('mediacommons_base_import_node_map')->fields(
+      array(
+        'onid' => $old_node->onid,
+        'nid' => $new_node->nid,
+      )
+    )->execute();
+        
+    drush_print(
+      t('Spoke saved.')
     );
-
-    db_insert('mediacommons_base_import_comments_map')
-      ->fields(array(
-        'ocid' => (int)$comment->cid,
-        'cid' => (int)$new_comment->cid,
-      )
-    )->execute();
-
+      
   }
-
-}
-
-/**
- * Create a taxonomy term and return the tid.
- */
-function mediacommons_base_import_create_taxonomy_term($term) {
   
-  $new = new stdClass();
-  $vocabulary = mediacommons_base_import_find_vocabulary($term->vid);
-  $new->vid = $vocabulary->vid;
-  $new->name = $term->name;
-  $new->description = $term->description;
-  $new->weight = $term->weight;
-  $new->parent = (int)$term->parent;
-  if (taxonomy_term_save($new)) {
-    db_insert('mediacommons_base_import_term_map')
-      ->fields(array(
-        'toid' => $term->tid,
-        'tid' => $new->tid,
-      )
-    )->execute();
-    drush_print('Term ' . $new->name . ' saved!');
-    return $new;
-  }
-}
-
-/**
- * Create a taxonomy vocabulary.
- */
-function mediacommons_base_import_create_taxonomy_vocabulary($vocabulary) {
-  
-  $new = new stdClass();
-  $machine_name = strtolower(preg_replace('/\s+/', '', $vocabulary->name));
-  $new->name = $vocabulary->name;
-  $new->description = $vocabulary->description;
-  $new->help = $vocabulary->help;
-  $new->relations = $vocabulary->relations;
-  $new->machine_name = $machine_name;
-  $new->hierarchy = $vocabulary->hierarchy;
-  $new->multiple = $vocabulary->multiple;
-  $new->required = $vocabulary->required;
-  $new->tags = $vocabulary->tags;
-  $new->module = $vocabulary->module;
-  $new->weight = $vocabulary->weight;
-  if ($v = taxonomy_vocabulary_save($new)) {
-    $m = taxonomy_vocabulary_machine_name_load($new->machine_name);
-    db_insert('mediacommons_base_import_vocabulary_map')
-      ->fields(array(
-        'vuid' => $vocabulary->vid,
-        'vid' => $m->vid,
-      )
-     )->execute();
-     drush_print('Vocabulary saved. ' . $vocabulary->name . "\n");
-     return $v;
-  }
 }
 
 /**
@@ -410,9 +560,11 @@ function mediacommons_base_import_create_taxonomy_vocabulary($vocabulary) {
  */
 function mediacommons_base_import_generate_hubs() {
   
-  $settigs = mediacommons_base_import_settings();
+  global $settings;
   
-  $production_url = $settigs['settings']['production']['url'];
+  $production_url = $settings['settings']['production']['url'];
+  
+  $dupal_file_path = drupal_realpath('public://');
 
   $data = mediacommons_base_import_d6_theme_week_list();
   
@@ -585,6 +737,124 @@ function mediacommons_base_import_generate_hubs() {
       }
     }
   }  
+}
+
+
+function mediacommons_base_import_comment($nid, $oldNid) {
+
+  $nodes_records = $users_records = $comments_record = array();
+  
+  $users_query = 'SELECT * FROM {mediacommons_base_import_user_map}';
+  
+  $users = db_query($users_query);
+  
+  $query = 'SELECT * FROM {comments} WHERE nid = :nid';
+  
+  $comments = Database::getConnection('default', 'drupal6')->query($query, array(':nid' => $oldNid), array());
+  
+  foreach ($users as $user) { 
+    $users_records[$user->ouid] = $user->uid; 
+  }
+
+  foreach ($comments as $comment) {
+    $new_comment = (object) array(
+      'nid' => $nid,
+      'cid' => 0,
+      'pid' => 0, // need to fix this so that the parent of the comment get assigned
+      'uid' => $users_records[$comment->uid],
+      'mail' => $comment->mail,
+      'is_anonymous' => 0,
+      'homepage' =>  $comment->homepage,
+      // http://api.drupal.org/api/drupal/modules%21comment%21comment.module/constant/COMMENT_PUBLISHED/6
+      // http://api.drupal.org/api/drupal/modules%21comment%21comment.module/constant/COMMENT_PUBLISHED/7
+      'status' => ($comment->status == 0) ? 1 : 0,
+      'subject' => $comment->subject,
+      'language' => LANGUAGE_NONE,
+      'thread' => $comment->thread,
+      'hostname' => $comment->hostname,
+      'date' => date("Y-m-j H:i:s", $comment->timestamp),
+      'comment_body' => array(
+        LANGUAGE_NONE => array(
+          0 => array (
+            'value' => $comment->comment,
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+    );
+        
+    comment_submit($new_comment);
+    comment_save($new_comment);
+      
+    $comments_record[] = array(
+      'old' => $comment,
+      'new' => $new_comment
+    );
+
+    db_insert('mediacommons_base_import_comments_map')
+      ->fields(array(
+        'ocid' => (int)$comment->cid,
+        'cid' => (int)$new_comment->cid,
+      )
+    )->execute();
+
+  }
+
+}
+
+/**
+ * Create a taxonomy term and return the tid.
+ */
+function mediacommons_base_import_create_taxonomy_term($term) {
+  
+  $new = new stdClass();
+  $vocabulary = mediacommons_base_import_find_vocabulary($term->vid);
+  $new->vid = $vocabulary->vid;
+  $new->name = $term->name;
+  $new->description = $term->description;
+  $new->weight = $term->weight;
+  $new->parent = (int)$term->parent;
+  if (taxonomy_term_save($new)) {
+    db_insert('mediacommons_base_import_term_map')
+      ->fields(array(
+        'toid' => $term->tid,
+        'tid' => $new->tid,
+      )
+    )->execute();
+    drush_print('Term ' . $new->name . ' saved!');
+    return $new;
+  }
+}
+
+/**
+ * Create a taxonomy vocabulary.
+ */
+function mediacommons_base_import_create_taxonomy_vocabulary($vocabulary) {
+  
+  $new = new stdClass();
+  $machine_name = strtolower(preg_replace('/\s+/', '', $vocabulary->name));
+  $new->name = $vocabulary->name;
+  $new->description = $vocabulary->description;
+  $new->help = $vocabulary->help;
+  $new->relations = $vocabulary->relations;
+  $new->machine_name = $machine_name;
+  $new->hierarchy = $vocabulary->hierarchy;
+  $new->multiple = $vocabulary->multiple;
+  $new->required = $vocabulary->required;
+  $new->tags = $vocabulary->tags;
+  $new->module = $vocabulary->module;
+  $new->weight = $vocabulary->weight;
+  if ($v = taxonomy_vocabulary_save($new)) {
+    $m = taxonomy_vocabulary_machine_name_load($new->machine_name);
+    db_insert('mediacommons_base_import_vocabulary_map')
+      ->fields(array(
+        'vuid' => $vocabulary->vid,
+        'vid' => $m->vid,
+      )
+     )->execute();
+     drush_print('Vocabulary saved. ' . $vocabulary->name . "\n");
+     return $v;
+  }
 }
 
 /**

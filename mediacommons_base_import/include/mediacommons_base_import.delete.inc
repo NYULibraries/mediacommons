@@ -7,6 +7,13 @@ function mediacommons_base_import_delete_alias() {
     ->execute();
 }
 
+/** I'm going Megaupload on you */
+function mediacommons_base_import_delete_files() {
+  db_delete('file_managed')
+    ->condition('uri', 'kill em all', '<>')
+    ->execute();
+}
+
 /** Peer wha'? Shut up! No one cares */
 function mediacommons_base_import_delete_comments() {
 
@@ -66,17 +73,17 @@ function mediacommons_base_import_delete_users($roles = array()) {
 
 }
 
-/** Kill 'em all */
-function mediacommons_base_import_delete_post($ype = 'all') {
+/** I just want to poke your left eye */
+function mediacommons_base_import_delete_post() {
   foreach (mediacommons_base_import_find_nodes('spoke') as $node) {
     node_delete($node->nid);
     db_delete('mediacommons_base_import_node_map')
       ->condition('nid', $node->nid, '=')
-      ->execute();      
+      ->execute();
   }
 }
 
-/** Kill 'em all */
+/** I really don't have a title for this one, want to pitch in? */
 function mediacommons_base_import_delete_hubs() {
   foreach (mediacommons_base_import_find_nodes('hub') as $node) {
     node_delete($node->nid);

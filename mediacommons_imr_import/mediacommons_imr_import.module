@@ -27,10 +27,11 @@ function mediacommons_imr_import_init() {
       ),
     ),
     array(
-      'label' => t('Delete post and comments'),
+      'label' => t('Delete post and comments and file registry'),
       'callback' => array(
         'mediacommons_base_import_delete_comments',
         'mediacommons_base_import_delete_post',
+        'mediacommons_base_import_delete_files',
       ),
     ),
     array(

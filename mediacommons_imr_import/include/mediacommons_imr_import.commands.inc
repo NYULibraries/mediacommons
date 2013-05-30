@@ -1,7 +1,119 @@
 <?php
 
 function mediacommons_imr_import_test() {
-  drush_print('Running test command at ' . time());
+  drush_print('Running test command at ' . date('Y-m-j H:i:s', time()));
+}
+
+function mediacommons_imr_import_migrate_theme_weeks() {
+  
+  /**
+   * Load data, this will take time; go get yourself a coffee 
+   */
+  $data = mediacommons_imr_import_d6_theme_week_list();
+
+  /** 
+   * If we have $data proceed 
+   */
+  if (isset($data)) {
+
+    foreach ($data as $key => $hub) {
+    
+      /**
+       * Prepare node
+       */
+      $node = array();
+
+      $node['title'] =  mediacommons_imr_import_theme_weeks_title($hub->title);
+
+      $node['ouid'] = $hub->uid;
+
+      $node['onid'] = $hub->nid;
+
+      $node['language'] = (!empty($hub->language)) ? $hub->language : LANGUAGE_NONE;
+ 
+      $node['date'] = date('Y-m-j H:i:s', $hub->created);
+
+      $node['status'] = $hub->status;
+
+      $node['promote'] = $hub->promote;
+
+      $node['moderate'] = $hub->moderate;
+
+      $node['sticky'] = $hub->sticky;
+      
+      if (isset($hub->body)) {
+        $node['field_description'] = $hub->body;
+      }      
+
+      $node['field_type'] = 1;
+      
+      /** 
+       * Representative image
+       */
+      if (isset($hub->field_theme_week_image_fid)) {
+        $node['field_representative_image'] = $hub->field_theme_week_image_fid;
+      }
+      
+      $node['field_pubstat'] = $hub->status;
+      
+      $node['field_cluster_tags'] = array();
+      
+      if (isset($hub->terms)) {
+        foreach (explode(', ', $hub->terms) as $tid) {
+          $node['field_cluster_tags'][] = $tid;
+        }
+      }
+      
+      $node['field_spokes'] = array();
+      
+      if (!empty($hub->field_featured_post_1_nid)) {
+        $node['field_spokes'][] = $hub->field_featured_post_1_nid;
+      }
+        
+      if (!empty($hub->field_featured_post_2_nid)) {
+        $node['field_spokes'][] = $hub->field_featured_post_2_nid;
+      }
+
+      if (!empty($hub->field_featured_post_3_nid)) {
+        $node['field_spokes'][] = $hub->field_featured_post_3_nid;
+      }
+
+      if (!empty($hub->field_featured_post_4_nid)) {
+        $node['field_spokes'][] = $hub->field_featured_post_4_nid;
+      }
+
+      if (!empty($hub->field_featured_post_5_nid)) {
+        $node['field_spokes'][] = $hub->field_featured_post_5_nid;
+      }
+
+      if (!empty($hub->field_featured_page_or_feed_nid)) {
+        $node['field_spokes'][] = $hub->field_featured_page_or_feed_nid;
+      }
+      
+      $node['field_contributors'] = array();
+      
+      foreach ($node['field_spokes'] as $onid) {
+        $node['field_contributors'][] = mediacommons_imr_import_d6_uid_by_node($onid);
+      }
+      
+      $dates = mediacommons_imr_import_find_hub_dates($hub->title);
+
+      /** 
+       * Dates
+       * http://drupal.stackexchange.com/questions/26948/programmatically-set-date-fields-in-drupal-7-date-date-iso-format-and-date
+       */
+      $node['field_field_period_1'] = date('Y-m-d H:i:s', strtotime($dates['start']));
+
+      $node['field_field_period_2'] = date('Y-m-d H:i:s', strtotime($dates['end']));
+
+      mediacommons_base_import_create_hub($node);
+
+    }
+  }
+  
+  drush_print(
+    t('Done')
+  );
 }
 
 /**
@@ -21,7 +133,7 @@ function mediacommons_imr_import_migrate_posts() {
 
     foreach ($data as $key => $spoke) {
 
-      $path_alias = mediacommons_imr_import_find_url_alias('node/' . $spoke->nid);
+      $path_alias = mediacommons_base_import_find_url_alias('node/' . $spoke->nid);
 
       /** 
        * Find out if node is already in the system 
@@ -56,7 +168,7 @@ function mediacommons_imr_import_migrate_posts() {
       $node['title'] = $spoke->title;
 
       $node['ouid'] = $spoke->uid;
-      
+
       $node['onid'] = $spoke->nid;
 
       $node['language'] = (!empty($spoke->language)) ? $spoke->language : LANGUAGE_NONE;
@@ -71,7 +183,9 @@ function mediacommons_imr_import_migrate_posts() {
 
       $node['sticky'] = $spoke->sticky;
 
-      $node['field_body'] = $spoke->body;
+      if (isset($spoke->body)) {
+        $node['field_body'] = $spoke->body;
+      }
 
       $node['field_pubstat'] = $spoke->status;
       
@@ -88,7 +202,7 @@ function mediacommons_imr_import_migrate_posts() {
       
       /** 
        * Add embed content
-       * Extend field must be explicity added to mediacommons_imr_import_extend_fields()
+       * Extend field must be explicitly added to mediacommons_imr_import_extend_fields()
        */
       if (isset($spoke->field_video_embed_link_value)) { 
         $node['field_embed'] = array(
@@ -121,11 +235,12 @@ function mediacommons_imr_import_extend_fields() {
 /**
  * Migrate Theme Weeks into hubs.
  */
-function mediacommons_imr_import_migrate_theme_weeks() {
+function mediacommons_imr_import_migrate_theme_weeks_old() {
   
-  $settigs = mediacommons_imr_import_settings();
   
-  $production_url = $settigs['settings']['production']['url'];
+  $settings = mediacommons_imr_import_settings();
+  
+  $production_url = $settings['settings']['production']['url'];
 
   $data = mediacommons_imr_import_d6_theme_week_list();
   
@@ -301,55 +416,62 @@ function mediacommons_imr_import_migrate_theme_weeks() {
   }  
 }
 
-function mediacommons_imr_import_find_hub_dates() {
+function mediacommons_imr_import_theme_weeks_title($title) {
+  
+  preg_match('/\[(.*)\]$/', $title, $match);
+  
+  if (isset($match[0])) {
+    return str_replace($match[0], '', $title);
+  }
+
+  return $title;  
+  
+}
+
+function mediacommons_imr_import_find_hub_dates($date_source) {
   
   $p = '/\[(.*)\]$/';
   $year_pattern = '/[0-9]{4}$/';
   $months_pattern = '/[a-zA-Z]+/';
   $days_pattern = '/[0-9]{1,2}/';
-      
-  foreach ($hubs as $hub) {
-    preg_match($p, $hub->title, $match);
-    if (isset($match[1])) {
-      drush_print('Title: ' . $match[1]);
-      preg_match($year_pattern, $match[1], $years);
-        	
-        	$start_month = NULL;
-        	$end_month = NULL;
-        	
-        	preg_match_all($months_pattern, $match[1], $months);
-        	
-        	if (isset($months[0])) {
-					  if (isset($months[0][0])) {
-							$start_month = $months[0][0];
-						}	
-					  if (isset($months[0][1])) {
-							$end_month = $months[0][1];
-						}
-						
-						if ($end_month == NULL && !empty($start_month)) {
-							$end_month = $start_month;
-						}
-        	}
-        	
-        	$start_day = NULL;
-        	$end_day = NULL;
-        	        	
-        	preg_match_all($days_pattern, str_replace($years, ' ', $match[1]), $days); 
-        	
-        	
-        	if (isset($days[0])) {
-					  if (isset($days[0][0])) {
-							$start_day = $days[0][0];
-						}	
-					  if (isset($days[0][1])) {
-							$end_day = $days[0][1];
-						}
-        	}        	
-        	
-        	drush_print($start_month . ' ' . $start_day . ', ' . $years[0]);
-        	drush_print($end_month . ' ' . $end_day . ', ' . $years[0]);
+  
+  $start_month = $end_month = $start_day = $end_day = NULL;
 
+  preg_match($p, $date_source, $match);
+  
+  if (isset($match[1])) {
+    preg_match($year_pattern, $match[1], $years);
+        	
+
+    preg_match_all($months_pattern, $match[1], $months);
+
+    if (isset($months[0])) {
+      if (isset($months[0][0])) {
+        $start_month = $months[0][0];
+      }	
+      if (isset($months[0][1])) {
+        $end_month = $months[0][1];
+      }
+      if ($end_month == NULL && !empty($start_month)) {
+        $end_month = $start_month;
+      }
     }
+    
+     preg_match_all($days_pattern, str_replace($years, ' ', $match[1]), $days); 
+        	
+    if (isset($days[0])) {
+      if (isset($days[0][0])) {
+        $start_day = $days[0][0];
+      }
+      if (isset($days[0][1])) {
+        $end_day = $days[0][1];
+      }
+    }
+    
+    return array(
+      'start' => $start_month . ' ' . $start_day . ', ' . $years[0],
+      'end' => $end_month . ' ' . $end_day . ', ' . $years[0],
+    );
+
   }
 }

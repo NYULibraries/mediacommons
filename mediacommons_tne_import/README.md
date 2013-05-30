@@ -1,13 +1,13 @@
 MediaCommons IMR Import
 ============
 
-Before running open settings.json and fill the blanks. You also need to add
-the to settings.php the information of your Drupal 6 database.
+Before running open copy default.settings.json as settings.json and fill the blanks. 
+You also need to add the to settings.php the information of your Drupal 6 database.
 
 ### Example:
 
-<code>
-$databases['drupal6'] = array(
+ ```php
+  $databases['drupal6'] = array(
     'default' => array(
       'database' => 'db_name',
       'username' => 'your_user',
@@ -16,12 +16,14 @@ $databases['drupal6'] = array(
       'port' => '',
       'driver' => 'mysql',
       'prefix' => 'prefix_',
-  ),
-);
-</code>
+    ),
+  );
+```
 
-<code>
- $databases['drupal6'] = array(
+### Shared DB example: 
+
+```php
+  $databases['drupal6'] = array(
    'default' => array(
      'database' => 'db_name',
      'username' => 'your_user',
@@ -40,7 +42,7 @@ $databases['drupal6'] = array(
      ),
    ),
  );
-</code>
+```
 
-To run the script `drush scr import-hubs.php`
+To run the script `drush scr mediacommons_tne_import.module`
 
