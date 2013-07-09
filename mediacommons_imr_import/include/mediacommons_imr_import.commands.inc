@@ -3,10 +3,43 @@
 /**
  * Test callback
  */
-
 function mediacommons_imr_import_test() {
   drush_print('Running test command at ' . date('Y-m-j H:i:s', time()));
   mediacommons_base_import_delete_hubs();
+}
+
+/**
+ * Echo 5 random Hubs and generate the link for prodcution site and dev
+ */
+
+function mediacommons_imr_import_test_content() {
+
+  global $settings;
+  
+  $environment_url = $settings['settings'][$settings['environment']]['url'];
+  $production_url = $settings['settings']['production']['url'];
+  
+  $query = "SELECT 
+    m.*
+    FROM {mediacommons_base_import_node_map} m
+    LEFT JOIN node n
+      ON n.nid = m.nid
+    WHERE 
+      type = 'hub' 
+    ORDER BY RAND() 
+    LIMIT 5";
+    
+  $result = db_query($query, array(), array());
+    
+  foreach ($result as $record) {
+    drush_print(
+      url($environment_url . 'node/' . $record->nid, array('absolute' => TRUE))
+    );
+    drush_print(
+      url($production_url . 'node/' . $record->onid, array('absolute' => TRUE))
+    );      
+  }    
+    
 }
 
 /**
@@ -64,11 +97,11 @@ function mediacommons_imr_import_migrate_theme_weeks() {
       
       $node['field_pubstat'] = $hub->status;
       
-      $node['field_cluster_tags'] = array();
+      $node['field_tags'] = array();
       
       if (isset($hub->terms)) {
         foreach (explode(', ', $hub->terms) as $tid) {
-          $node['field_cluster_tags'][] = $tid;
+          $node['field_tags'][] = $tid;
         }
       }
       
@@ -126,8 +159,8 @@ function mediacommons_imr_import_migrate_theme_weeks() {
          isset($dates['start']) && 
          isset($dates['end'])
        ) {
-        $node['field_field_period_1'] = date('Y-m-d H:i:s', strtotime($dates['start']));
-        $node['field_field_period_2'] = date('Y-m-d H:i:s', strtotime($dates['end']));
+        $node['field_period_1'] = date('Y-m-d H:i:s', strtotime($dates['start']));
+        $node['field_period_2'] = date('Y-m-d H:i:s', strtotime($dates['end']));
       }
       
       mediacommons_base_import_create_hub($node);

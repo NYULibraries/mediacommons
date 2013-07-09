@@ -198,16 +198,60 @@ function mediacommons_base_import_create_spoke(array $old_node) {
 
   $new_node->sticky = $old_node->sticky;
   
-  $new_node->field_pubstat[$old_node->language][0] = array(
-    'value' => $old_node->field_pubstat,
-  );
-  
   if (isset($old_node->field_body)) {
     $new_node->field_body[$old_node->language][0] = array(
       'value' => $old_node->field_body,
       'format' => 'full_html', // should this be filtered_html?
     );  
   }
+
+  /** 
+   * Attached representative image
+   */    
+  if (isset($old_node->field_attached_images_ri)) {
+
+    $ri = mediacommons_base_import_find_image($old_node->field_attached_images_ri);
+
+    $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
+
+    $source_image_path = $dupal_file_path . '/' . $ri->filename;
+
+    $put_success = file_put_contents($source_image_path, mediacommons_base_import_get_content($url_image_path));
+    
+    if ($put_success) {
+    
+      $info = image_get_info($source_image_path);
+
+      if (is_array($info)) {
+      
+        //$width = $info['width'];
+        //$height = $info['height'];
+
+        $file = (object) array(
+          'uid' => (int)$new_node->uid, // change this to this user ID?
+          'uri' => $source_image_path,
+          'filemime' => file_get_mimetype($source_image_path),
+          'status' => 1,
+          'ri' => 1,
+          'cropbox_x' => 0,
+          'cropbox_y' => 0,
+          'cropbox_height' => 0,
+          'cropbox_width' => 0,
+        );
+
+        $file = file_copy($file, 'public://');
+
+        $new_node->field_attached_images[$old_node->language][] = (array)$file;
+      
+      }
+      
+    }
+
+  }
+  
+  /**
+   * @TODO Attached all other images
+   */    
   
   /** Tags */
   if (isset($old_node->field_tags)) {
@@ -216,6 +260,11 @@ function mediacommons_base_import_create_spoke(array $old_node) {
         $new_node->field_tags[$old_node->language][] = array('tid' => $tag);
       }
     }
+  }
+  
+  
+  if (isset($old_node->field_part_of)) {
+
   }
   
   /**
@@ -234,47 +283,15 @@ function mediacommons_base_import_create_spoke(array $old_node) {
     'uid' => $new_node->uid,
     '_weight' => 0,
   );
-  
+
   /** 
    * Step 2. Work on this when when we have this case 
    */  
   
-  /** 
-   * Attached representative image
-   */    
-  if (isset($old_node->field_attached_images_ri)) {
-
-    $ri = mediacommons_base_import_find_image($old_node->field_attached_images_ri);
-
-    $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
-
-    $source_image_path = $dupal_file_path . '/' . $ri->filename;
-
-    $put_success = file_put_contents($source_image_path, mediacommons_base_import_get_content($url_image_path));
-    
-    if ($put_success) {
-
-      $file = (object) array(
-        'uid' => (int)$new_node->uid, // change this to this user ID?
-        'uri' => $source_image_path,
-        'filemime' => file_get_mimetype($source_image_path),
-        'status' => 1,
-        'extended_ri' => '1',
-        'extended_display' => 0
-      );
-
-      $file = file_copy($file, 'public://');
-
-      $new_node->field_attached_images[$old_node->language][] = (array)$file;
-
-    }
-
-  }
+  $new_node->field_pubstat[$old_node->language][0] = array(
+    'value' => $old_node->field_pubstat,
+  );
   
-  /**
-   * @TODO Attached all other images
-   */  
-
   /**
    * Add extended fields (fields that are not part of mediacommons_base distribution)
    */
@@ -415,8 +432,8 @@ function mediacommons_base_import_create_hub(array $old_node) {
   /** 
    * Add description 
    */
-  $new_node->field_description[$new_node->language][0] = array(
-    'value' => $old_node->field_description,
+  $new_node->field_body[$new_node->language][0] = array(
+    'value' => $old_node->field_body,
     'format' => 'full_html',
   );
         
@@ -471,12 +488,12 @@ function mediacommons_base_import_create_hub(array $old_node) {
   /**
    * Dates
    */
-  if (isset($old_node->field_field_period_1)) {
-    $new_node->field_field_period[$old_node->language][0]['value'] = $old_node->field_field_period_1; 
+  if (isset($old_node->field_period_1)) {
+    $new_node->field_period[$old_node->language][0]['value'] = $old_node->field_period_1; 
   }
    
-  if (isset($old_node->field_field_period_2)) {
-    $new_node->field_field_period[$old_node->language][0]['value2'] = $old_node->field_field_period_2; 
+  if (isset($old_node->field_period_2)) {
+    $new_node->field_period[$old_node->language][0]['value2'] = $old_node->field_period_2; 
   }
 
   /** 
@@ -499,6 +516,10 @@ function mediacommons_base_import_create_hub(array $old_node) {
         'uri' => $source_image_path,
         'filemime' => file_get_mimetype($source_image_path),
         'status' => 1,
+        'cropbox_x' => 0,
+        'cropbox_y' => 0,
+        'cropbox_height' => 0,
+        'cropbox_width' => 0,
       );
 
       $file = file_copy($file, 'public://');

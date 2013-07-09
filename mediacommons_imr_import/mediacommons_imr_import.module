@@ -27,13 +27,21 @@ function mediacommons_imr_import_init() {
       ),
     ),
     array(
-      'label' => t('Delete post and comments and file registry'),
+      'label' => t('Delete Theme Weeks, Posts, comments and file registry'),
       'callback' => array(
-        'mediacommons_base_import_delete_comments',
         'mediacommons_base_import_delete_post',
+        'mediacommons_base_import_delete_hubs',
+        'mediacommons_base_import_delete_comments',        
         'mediacommons_base_import_delete_files',
+        'mediacommons_base_import_delete_alias'
       ),
     ),
+    array(
+      'label' => t('Echo 5 random Hubs URL'),
+      'callback' => array(
+        'mediacommons_imr_import_test_content',
+      ),
+    ),    
     array(
       'label' => t('Run test'),
       'callback' => array(
