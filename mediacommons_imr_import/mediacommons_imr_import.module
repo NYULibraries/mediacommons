@@ -45,7 +45,7 @@ function mediacommons_imr_import_init() {
     array(
       'label' => t('Run test'),
       'callback' => array(
-        'mediacommons_imr_import_test',
+        'mediacommons_imr_import_migrate_theme_weeks',
       ),
     ),    
     

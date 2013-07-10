@@ -83,7 +83,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
       $node['sticky'] = $hub->sticky;
       
       if (isset($hub->body)) {
-        $node['field_description'] = $hub->body;
+        $node['field_body'] = $hub->body;
       }      
 
       $node['field_type'] = 1;
@@ -151,6 +151,9 @@ function mediacommons_imr_import_migrate_theme_weeks() {
        */
       $dates = mediacommons_imr_import_find_hub_dates($hub->title);
 
+      drush_print_r($hub->title);      
+      drush_print_r($dates);
+
       /** 
        * Dates
        * If $dates is set proceed, no good comes from setting dates with wrong values
@@ -163,7 +166,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
         $node['field_period_2'] = date('Y-m-d H:i:s', strtotime($dates['end']));
       }
       
-      mediacommons_base_import_create_hub($node);
+      // mediacommons_base_import_create_hub($node);
 
     }
   }

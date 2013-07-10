@@ -123,7 +123,7 @@ function mediacommons_base_import_generate_terms() {
  */
 function mediacommons_base_import_create_spoke(array $old_node) {
 
-  // global $settings;
+  global $settings;
 
   /**
    * URL to be used as the production URL
@@ -223,9 +223,6 @@ function mediacommons_base_import_create_spoke(array $old_node) {
       $info = image_get_info($source_image_path);
 
       if (is_array($info)) {
-      
-        //$width = $info['width'];
-        //$height = $info['height'];
 
         $file = (object) array(
           'uid' => (int)$new_node->uid, // change this to this user ID?
@@ -262,10 +259,8 @@ function mediacommons_base_import_create_spoke(array $old_node) {
     }
   }
   
-  
-  if (isset($old_node->field_part_of)) {
-
-  }
+  // for now let the cluster do the work
+  if (isset($old_node->field_part_of)) {}
   
   /**
    * Contributors 2 steps
@@ -440,21 +435,22 @@ function mediacommons_base_import_create_hub(array $old_node) {
   /** 
    * Media type 
    */
-  if (isset($old_node->field_type)) {
-    $new_node->field_type[$old_node->language][0]['value'] = $old_node->field_type;
-  }
+  //if (isset($old_node->field_type)) {
+  //  $new_node->field_type[$old_node->language][0]['value'] = $old_node->field_type;
+  //}
       
   /**
    * Tags 
+   * Hubs no longer have tags
    */
-  if (isset($old_node->field_tags)) {
-    $new_node->field_tags = array();
-    foreach ($old_node->field_tags as $tag_id) {
-      if ($tag = mediacommons_base_import_find_term_id($tag_id)) {
-        $new_node->field_tags[$old_node->language][] = array('tid' => $tag);
-      }
-    }
-  }
+  //if (isset($old_node->field_tags)) {
+    //$new_node->field_tags = array();
+    //foreach ($old_node->field_tags as $tag_id) {
+      //if ($tag = mediacommons_base_import_find_term_id($tag_id)) {
+        //$new_node->field_tags[$old_node->language][] = array('tid' => $tag);
+      //}
+    //}
+  //}
   
   /**
    * Contributors
@@ -530,6 +526,15 @@ function mediacommons_base_import_create_hub(array $old_node) {
 
   }
   
+  /** 
+   * Attached representative image
+   */
+  if (isset($old_node->field_pubstat)) {  
+    $new_node->field_pubstat[$old_node->language][0] = array(
+      'value' => $old_node->field_pubstat,
+    );
+  }
+
   /**
    * Add extended fields (fields that are not part of mediacommons_base distribution)
    */
@@ -558,7 +563,7 @@ function mediacommons_base_import_create_hub(array $old_node) {
       'source' => 'node/' . $new_node->nid,  // The internal system path.
       'alias' => $path_alias->dst, // The URL alias.
     );
-        
+
     path_save(&$path);
         
     mediacommons_base_import_comment($new_node->nid, $old_node->onid);
@@ -590,9 +595,6 @@ function mediacommons_base_import_generate_hubs() {
   $dupal_file_path = drupal_realpath('public://');
 
   $data = mediacommons_base_import_d6_theme_week_list();
-  
-  /** Get a list of all the D6 users */
-  /** $d6_users = mediacommons_base_import_d6_users_list(); */
   
   /** If we have $data proceed */
   if ($data->rowCount()) {
