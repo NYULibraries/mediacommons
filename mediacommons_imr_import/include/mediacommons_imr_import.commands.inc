@@ -151,9 +151,6 @@ function mediacommons_imr_import_migrate_theme_weeks() {
        */
       $dates = mediacommons_imr_import_find_hub_dates($hub->title);
 
-      drush_print_r($hub->title);      
-      drush_print_r($dates);
-
       /** 
        * Dates
        * If $dates is set proceed, no good comes from setting dates with wrong values
@@ -162,11 +159,16 @@ function mediacommons_imr_import_migrate_theme_weeks() {
          isset($dates['start']) && 
          isset($dates['end'])
        ) {
-        $node['field_period_1'] = date('Y-m-d H:i:s', strtotime($dates['start']));
-        $node['field_period_2'] = date('Y-m-d H:i:s', strtotime($dates['end']));
+       
+        // Y-m-d H:i:s
+        //$node['field_period_1'] = date('Y-m-d', strtotime($dates['start']));
+        //$node['field_period_2'] = date('Y-m-d', strtotime($dates['end']));
+        $node['field_period_1'] = strtotime($dates['start']);
+        $node['field_period_2'] = strtotime($dates['end']);
+        
       }
       
-      // mediacommons_base_import_create_hub($node);
+      mediacommons_base_import_create_hub($node);
 
     }
   }

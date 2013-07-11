@@ -434,6 +434,7 @@ function mediacommons_base_import_create_hub(array $old_node) {
         
   /** 
    * Media type 
+   * Hubs no longer have media type
    */
   //if (isset($old_node->field_type)) {
   //  $new_node->field_type[$old_node->language][0]['value'] = $old_node->field_type;
