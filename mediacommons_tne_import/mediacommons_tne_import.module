@@ -35,7 +35,7 @@ function mediacommons_tne_import_init() {
     array(
       'label' => t('Run test'),
       'callback' => array(
-        'mediacommons_tne_import_migrate_contributed_pieces'
+        'mediacommons_tne_migrate_response'
       ),
     ),
     array(

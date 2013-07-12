@@ -156,6 +156,15 @@ function _mediacommons_base_import_setup_node($type) {
   return $node;
 }
 
+function mediacommons_base_migrate_truncate($string, $limit, $pad = '...') {
+  
+  if (strlen($string) <= $limit) return $string;
+  
+  return trim(substr($string, 0, $limit)) .  $pad;
+  
+}
+
+
 function mediacommons_base_import_initialize_schema($module, &$schema) {
   // Set the name and module key for all tables.
   foreach ($schema as $name => $table) {

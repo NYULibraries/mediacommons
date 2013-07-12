@@ -247,8 +247,38 @@ function mediacommons_base_import_create_spoke(array $old_node) {
   }
   
   /**
-   * @TODO Attached all other images
-   */    
+   * Attached all other images
+   */
+  if (isset($old_node->field_attached_images)) {
+    foreach ($old_node->field_attached_images as $image) {  
+      
+    	$url_image_path = url($production_url . $image->filepath, array('absolute' => TRUE));
+      
+      $source_image_path = $dupal_file_path . '/' . basename($url_image_path);
+            
+      if (!file_exists($source_image_path)) {
+        $put_success = file_put_contents($source_image_path, file_get_contents($url_image_path));
+      }
+      
+      if ($put_success && !isset($image->skip)) {
+          
+        $file = (object) array(
+          'uid' => (int)$new_node->uid,
+          'uri' => $source_image_path,
+          'filemime' => file_get_mimetype($source_image_path),
+          'status' => 1,
+          'extended_ri' => '0',
+          'extended_display' => 0
+        );
+            
+        $file = file_copy($file, 'public://');
+
+        $node->field_attached_images[$node->language][] = (array)$file;
+        
+      }
+
+    }
+  }  
   
   /** Tags */
   if (isset($old_node->field_tags)) {
@@ -528,7 +558,7 @@ function mediacommons_base_import_create_hub(array $old_node) {
   }
   
   /** 
-   * Attached representative image
+   * Pubstat
    */
   if (isset($old_node->field_pubstat)) {  
     $new_node->field_pubstat[$old_node->language][0] = array(

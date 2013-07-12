@@ -1,5 +1,36 @@
 <?php
 
+function mediacommons_tne_import_d6_response_list() {
+	
+  $query = "
+    SELECT
+      c.cid,
+      c.pid,
+      c.nid,
+      c.nid,
+      c.hostname,
+      c.thread,
+      c.name,
+      c.uid,
+      c.mail,
+      c.homepage,
+      nr.title,
+      nr.body,
+      nr.teaser,
+      nr.timestamp
+    FROM {node_comments} c
+      LEFT JOIN {node_revisions} nr
+        ON nr.nid = c.cid
+      LEFT JOIN {node} n
+        ON n.nid = c.cid
+    WHERE n.status = 1
+  ";
+  
+  $results = Database::getConnection('default', 'drupal6')->query($query, array(), array());
+  
+  /** Create and return a database connection to the source (d6) database */
+  return Database::getConnection('default', 'drupal6')->query($query, array(':onid' => $onid), array());
+}
 
 function mediacommons_tne_import_d6_contributed_pieces_list() {
   
@@ -54,19 +85,18 @@ function mediacommons_tne_import_d6_contributed_pieces_list() {
 }
 
 function mediacommons_tne_import_d6_attached_images($nid) {
-
   $query = Database::getConnection('default', 'drupal6')
     ->select('image_attach', 'ia')
-    ->fields('f', 
+    ->fields('f',
       array(
+        'fid',
         'filepath',
-        'filename',        
+        'filename',
       )
     )
     ->condition('ia.nid', $nid, '=');
   
-  $query->leftJoin('image', 'i', 'ia.iid = i.nid');
-  
+  $query->leftJoin('image', 'i', 'ia.iid = i.nid');  
   $query->leftJoin('files', 'f', 'f.fid = i.fid');      
 
   return $query->execute();
