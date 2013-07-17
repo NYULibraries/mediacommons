@@ -17,25 +17,19 @@ function mediacommons_tne_import_init() {
     array(
       'label' => t('Migrate Contributed Pieces'),
       'callback' => array(
-        'mediacommons_tne_import_migrate_contributed_pieces',
+        'mediacommons_tne_import_migrate_all_contributed_pieces',
       ),
     ),
     array(
       'label' => t('Migrate Clusters'),
       'callback' => array(
-        'mediacommons_tne_import_migrate_cluster'
+        'mediacommons_tne_import_migrate_all_clusters'
       ),
     ),
     array(
       'label' => t('Migrate Responses'),
       'callback' => array(
-        'mediacommons_tne_import_migrate_response'
-      ),
-    ),
-    array(
-      'label' => t('Run test'),
-      'callback' => array(
-        'mediacommons_tne_migrate_response'
+        'mediacommons_tne_import_migrate_all_response'
       ),
     ),
     array(
@@ -46,6 +40,12 @@ function mediacommons_tne_import_init() {
         'mediacommons_base_import_delete_comments',
         'mediacommons_base_import_delete_files',
         'mediacommons_base_import_delete_alias'
+      ),
+    ),
+    array(
+      'label' => t('Run test'),
+      'callback' => array(
+        'mediacommons_tne_import_quickhack'
       ),
     ),
     

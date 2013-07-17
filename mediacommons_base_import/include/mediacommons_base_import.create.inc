@@ -3,13 +3,12 @@
 function mediacommons_base_import_generate_all_users() {
   
   drush_print(
-    t("Importing users: This will take some time, go get yourself a coffee")
+    t("Importing users: This will take time, go get yourself a coffee.")
   );
   
   foreach (mediacommons_base_import_d6_users_list() as $user) {
     mediacommons_base_import_generate_user($user);
   }
-  
 }
 
 function mediacommons_base_import_generate_roles() {
@@ -122,9 +121,9 @@ function mediacommons_base_import_generate_terms() {
  * Given an old node, create a spoke.
  */
 function mediacommons_base_import_create_spoke(array $old_node) {
-
+	
   global $settings;
-
+  
   /**
    * URL to be used as the production URL
    */
@@ -199,31 +198,34 @@ function mediacommons_base_import_create_spoke(array $old_node) {
   $new_node->sticky = $old_node->sticky;
   
   if (isset($old_node->field_body)) {
-    $new_node->field_body[$old_node->language][0] = array(
+  	// $new_node->field_body[$old_node->language][0] = array( not working for TNE; there is only 5 ES nodes; what should we do?
+  	
+    $new_node->field_body[LANGUAGE_NONE][0] = array(
       'value' => $old_node->field_body,
       'format' => 'full_html', // should this be filtered_html?
-    );  
+      // 'format' => 'filtered_html',
+    );
   }
 
   /** 
    * Attached representative image
+   * @TODO: Make modifications to IMR
    */    
   if (isset($old_node->field_attached_images_ri)) {
+  	
+    drush_print_r('Attached representative image');
 
-    $ri = mediacommons_base_import_find_image($old_node->field_attached_images_ri);
-
+    $ri = mediacommons_base_import_find_image($old_node->field_attached_images_ri->fid);
+    
     $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
 
     $source_image_path = $dupal_file_path . '/' . $ri->filename;
-
+    
     $put_success = file_put_contents($source_image_path, mediacommons_base_import_get_content($url_image_path));
     
-    if ($put_success) {
-    
+    if ($put_success) {    
       $info = image_get_info($source_image_path);
-
       if (is_array($info)) {
-
         $file = (object) array(
           'uid' => (int)$new_node->uid, // change this to this user ID?
           'uri' => $source_image_path,
@@ -236,49 +238,51 @@ function mediacommons_base_import_create_spoke(array $old_node) {
           'cropbox_width' => 0,
         );
 
-        $file = file_copy($file, 'public://');
-
-        $new_node->field_attached_images[$old_node->language][] = (array)$file;
-      
-      }
-      
+        $file = file_copy($file, 'public://');        
+        $new_node->field_attached_images[$old_node->language][] = (array)$file;      
+      }      
     }
-
   }
   
   /**
    * Attached all other images
+   * @TODO: Make modifications to IMR (maybe not)
    */
   if (isset($old_node->field_attached_images)) {
-    foreach ($old_node->field_attached_images as $image) {  
-      
-    	$url_image_path = url($production_url . $image->filepath, array('absolute' => TRUE));
-      
+
+    foreach ($old_node->field_attached_images as $image) {
+    	
+      $url_image_path = url($production_url . $image->filepath, array('absolute' => TRUE));
+
       $source_image_path = $dupal_file_path . '/' . basename($url_image_path);
-            
+      
       if (!file_exists($source_image_path)) {
         $put_success = file_put_contents($source_image_path, file_get_contents($url_image_path));
       }
+      // file already exist in file directory
+      else {
+        $put_success = TRUE;
+      }
       
       if ($put_success && !isset($image->skip)) {
-          
+      	
         $file = (object) array(
           'uid' => (int)$new_node->uid,
           'uri' => $source_image_path,
           'filemime' => file_get_mimetype($source_image_path),
           'status' => 1,
-          'extended_ri' => '0',
-          'extended_display' => 0
+          'ri' => 1,
+          'cropbox_x' => 0,
+          'cropbox_y' => 0,
+          'cropbox_height' => 0,
+          'cropbox_width' => 0,
         );
-            
-        $file = file_copy($file, 'public://');
-
-        $node->field_attached_images[$node->language][] = (array)$file;
         
+        $file = file_copy($file, 'public://');        
+        $new_node->field_attached_images[$old_node->language][] = (array)$file;        
       }
-
     }
-  }  
+  }
   
   /** Tags */
   if (isset($old_node->field_tags)) {
@@ -442,7 +446,9 @@ function mediacommons_base_import_create_hub(array $old_node) {
   
   $new_node->uid = $author_uid;
 
-  $new_node->language = $old_node->language;
+  // $new_node->language = $old_node->language;
+  
+  $new_node->language = LANGUAGE_NONE; // for now
 
   $new_node->date = $old_node->date;
 

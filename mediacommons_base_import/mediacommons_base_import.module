@@ -211,6 +211,9 @@ function mediacommons_base_import_show_options(array $commands = array()) {
 
 function mediacommons_base_import_init(array $options = array()) {
 
+	// We need extra memory for GD
+	ini_set("memory_limit", "512MM");
+	
   mediacommons_base_import_d6_configured();
 
   $trace = debug_backtrace();
