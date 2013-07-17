@@ -1,4 +1,4 @@
-MediaCommons IMR Import
+MediaCommons TNE Import
 ============
 
 Before running open copy default.settings.json as settings.json and fill the blanks. 
