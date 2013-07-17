@@ -2,5 +2,5 @@
 
 /*
  * Main
- * Usually empty. Add any site specific rutine here
+ * Usually empty. Add any site specific routine here
  */
