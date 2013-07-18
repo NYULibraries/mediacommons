@@ -1,8 +1,7 @@
 MediaCommons TNE Import
 ============
 
-Before running open copy default.settings.json as settings.json and fill the blanks. 
-You also need to add the to settings.php the information of your Drupal 6 database.
+Copy default.settings.json as settings.json and fill the blanks. Also, add to your site settings.php the information of the Drupal 6 database(s) that will be migrated.
 
 ### Example:
 
