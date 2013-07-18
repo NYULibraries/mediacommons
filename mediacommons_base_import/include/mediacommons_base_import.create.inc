@@ -213,8 +213,6 @@ function mediacommons_base_import_create_spoke(array $old_node) {
    */    
   if (isset($old_node->field_attached_images_ri)) {
   	
-    drush_print_r('Attached representative image');
-
     $ri = mediacommons_base_import_find_image($old_node->field_attached_images_ri->fid);
     
     $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
@@ -528,13 +526,13 @@ function mediacommons_base_import_create_hub(array $old_node) {
   if (isset($old_node->field_period_2)) {
     $new_node->field_period[$old_node->language][0]['value2'] = $old_node->field_period_2; 
   }
-
+  
   /** 
    * Attached representative image
    */
   if (isset($old_node->field_representative_image)) {
-
-    $ri = mediacommons_base_import_find_image($old_node->field_representative_image);
+  
+    $ri = mediacommons_base_import_find_image($old_node->field_representative_image->fid);
 
     $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
 

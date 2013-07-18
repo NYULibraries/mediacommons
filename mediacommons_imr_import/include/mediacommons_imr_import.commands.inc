@@ -5,13 +5,11 @@
  */
 function mediacommons_imr_import_test() {
   drush_print('Running test command at ' . date('Y-m-j H:i:s', time()));
-  mediacommons_base_import_delete_hubs();
 }
 
 /**
  * Echo 5 random Hubs and generate the link for prodcution site and dev
  */
-
 function mediacommons_imr_import_test_content() {
 
   global $settings;
@@ -37,9 +35,9 @@ function mediacommons_imr_import_test_content() {
     );
     drush_print(
       url($production_url . 'node/' . $record->onid, array('absolute' => TRUE))
-    );      
-  }    
-    
+    );
+  }
+
 }
 
 /**
@@ -52,7 +50,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
    */
   $data = mediacommons_imr_import_d6_theme_week_list();
 
-  /** 
+  /**
    * If we have $data proceed 
    */
   if (isset($data)) {
@@ -92,7 +90,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
        * Representative image
        */
       if (isset($hub->field_theme_week_image_fid)) {
-        $node['field_representative_image'] = $hub->field_theme_week_image_fid;
+        $node['field_representative_image'] = (object) array( 'fid' => $hub->field_theme_week_image_fid, );
       }
       
       $node['field_pubstat'] = $hub->status;
@@ -161,15 +159,12 @@ function mediacommons_imr_import_migrate_theme_weeks() {
        ) {
        
         // Y-m-d H:i:s
-        //$node['field_period_1'] = date('Y-m-d', strtotime($dates['start']));
-        //$node['field_period_2'] = date('Y-m-d', strtotime($dates['end']));
+        // $node['field_period_1'] = date('Y-m-d', strtotime($dates['start']));
+        // $node['field_period_2'] = date('Y-m-d', strtotime($dates['end']));
         $node['field_period_1'] = strtotime($dates['start']);
         $node['field_period_2'] = strtotime($dates['end']);
-        
       }
-      
       mediacommons_base_import_create_hub($node);
-
     }
   }
   
@@ -264,8 +259,8 @@ function mediacommons_imr_import_migrate_posts() {
        * Representative image
        */
       if (isset($spoke->field_tease_image_fid)) {
-        $node['field_attached_images_ri'] = $spoke->field_tease_image_fid;
-      }
+        $node['field_attached_images_ri'] = (object) array( 'fid' => $spoke->field_tease_image_fid, );
+      }      
       
       /** 
        * Add embed content
@@ -280,10 +275,8 @@ function mediacommons_imr_import_migrate_posts() {
             ),
           ),
         );
-      }
-      
+      }      
       mediacommons_base_import_create_spoke($node);
-
     }
   }
 
