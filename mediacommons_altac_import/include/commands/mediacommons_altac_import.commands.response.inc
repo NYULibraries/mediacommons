@@ -13,8 +13,6 @@ function mediacommons_altac_import_migrate_response($data = array()) {
 
   foreach ($data as $response) {
   	
-	drush_print_r($response);
-    
     $d7Nid = mediacommons_base_import_node_nid($response->nid);
 
     $d7Uid = mediacommons_base_import_user_exists($response->uid);
