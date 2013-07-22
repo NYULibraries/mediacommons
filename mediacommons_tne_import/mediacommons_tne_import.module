@@ -1,6 +1,6 @@
 <?php
 
-$base_file = __DIR__ . '/../mediacommons_base_import/' . 'mediacommons_base_import.module';
+$base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';
 
 function mediacommons_tne_import_init() {
 
@@ -9,8 +9,8 @@ function mediacommons_tne_import_init() {
       'label' => t('Import TNE D6 Content (all the stepts)'),
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
-        'mediacommons_base_import_generate_terms',   
-        'mediacommons_base_import_generate_roles',             
+        'mediacommons_base_import_generate_terms',
+        'mediacommons_base_import_generate_roles',
         'mediacommons_base_import_generate_all_users',
       ),
     ),
@@ -23,13 +23,13 @@ function mediacommons_tne_import_init() {
     array(
       'label' => t('Migrate Clusters'),
       'callback' => array(
-        'mediacommons_tne_import_migrate_all_clusters'
+        'mediacommons_tne_import_migrate_all_clusters',
       ),
     ),
     array(
       'label' => t('Migrate Responses'),
       'callback' => array(
-        'mediacommons_tne_import_migrate_all_response'
+        'mediacommons_tne_import_migrate_all_response',
       ),
     ),
     array(
@@ -45,14 +45,13 @@ function mediacommons_tne_import_init() {
     array(
       'label' => t('Run test'),
       'callback' => array(
-        'mediacommons_tne_import_quickhack'
+        'mediacommons_tne_import_test',
       ),
     ),
-    
   );
   
   mediacommons_base_import_init(
-    array('commands' => $commands)
+    array('commands' => $commands )
   );
   
 }

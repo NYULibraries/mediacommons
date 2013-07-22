@@ -531,14 +531,31 @@ function mediacommons_base_import_create_hub(array $old_node) {
    * Attached representative image
    */
   if (isset($old_node->field_representative_image)) {
+  	
+  	if (isset($old_node->field_representative_image->fid)) {
   
-    $ri = mediacommons_base_import_find_image($old_node->field_representative_image->fid);
+      $ri = mediacommons_base_import_find_image($old_node->field_representative_image->fid);
 
-    $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
+      // The path of the image we will try to download
+      $url_image_path = url($production_url . $ri->filepath, array('absolute' => TRUE));
 
-    $source_image_path = $dupal_file_path . '/' . $ri->filename;
+      // The path to save the image if 'put' is successful 
+      $source_image_path = $dupal_file_path . '/' . $ri->filename;
 
-    $put_success = file_put_contents($source_image_path, mediacommons_base_import_get_content($url_image_path));
+    }
+    
+    elseif (isset($old_node->field_representative_image->source)) {
+
+    	
+      // The path of the image we will try to download
+      $url_image_path = $old_node->field_representative_image->source;
+
+      // The path to save the image if 'put' is successful 
+      $source_image_path = $dupal_file_path . '/' . basename($old_node->field_representative_image->source);
+      
+    }
+
+    $put_success = file_put_contents($source_image_path, mediacommons_base_import_curl($url_image_path));
     
     if ($put_success) {
 
@@ -557,8 +574,7 @@ function mediacommons_base_import_create_hub(array $old_node) {
 
       $new_node->field_representative_image[$old_node->language][] = (array)$file;
 
-    }
-
+    }    
   }
   
   /** 

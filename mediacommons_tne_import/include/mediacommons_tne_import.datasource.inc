@@ -79,6 +79,51 @@ function mediacommons_tne_import_d6_cluster_list() {
   	
 }
 
+function mediacommons_tne_import_d6_get_cluster_by_nid($nid = 0) {
+
+  $type = 'cluster';
+  
+  $query = "
+    SELECT 
+      n.nid,
+      MAX(n.vid) AS vid, 
+      n.type,
+      n.language,
+      n.uid,
+      n.status,
+      n.created,
+      n.changed,
+      n.comment,
+      n.promote,
+      n.moderate,
+      n.sticky,
+      nr.title,
+      ct.*,
+      f.filename AS filename,
+      GROUP_CONCAT(DISTINCT cfc.field_contributors_uid ORDER by cfc.delta SEPARATOR ', ') AS contributors,
+      GROUP_CONCAT(DISTINCT cfp.field_contributed_piece_nid ORDER by cfp.delta SEPARATOR ', ') AS pieces,
+      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms      
+    FROM {node} n
+      LEFT JOIN {node_revisions} nr
+        ON n.vid = nr.vid    
+      LEFT JOIN {content_type_cluster} ct
+        ON n.vid = ct.vid
+      LEFT JOIN {content_field_contributors} cfc
+        ON n.vid = cfc.vid
+      LEFT JOIN {content_field_contributed_piece} cfp
+        ON n.vid = cfp.vid      
+      LEFT JOIN {files} f
+        ON ct.field_image_fid = f.fid
+      LEFT JOIN {term_node} t
+        ON n.vid = t.vid
+    WHERE n.type = :type
+    AND n.nid  = :nid";  
+
+  /** Create and return a database connection to the source (d6) database */
+  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type, ':nid' => $nid, ), array());
+    
+}
+
 function mediacommons_tne_import_d6_contributed_pieces_list() {
   	
   $type = 'contributed_pieces'; 

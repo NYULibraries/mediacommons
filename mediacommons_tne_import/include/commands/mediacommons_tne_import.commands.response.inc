@@ -1,15 +1,16 @@
 <?php
 
-function mediacommons_tne_import_migrate_response() {
+function mediacommons_tne_import_migrate_all_response() {
+  
   /**
    * Load all clusters
    */
-  mediacommons_tne_import_migrate_all_response(
+  mediacommons_tne_import_migrate_response(
     mediacommons_tne_import_d6_response_list()
   );
 }
 
-function mediacommons_tne_import_migrate_all_response($data = array()) {
+function mediacommons_tne_import_migrate_response($data = array()) {
 
   foreach ($data as $response) {
     

@@ -57,6 +57,10 @@ function mediacommons_base_import_d6_configured() {
    return $data;
 }
 
+function mediacommons_base_import_curl($URL) {
+	return mediacommons_base_import_get_content($URL);
+}
+
 function mediacommons_base_import_default_commands() {
   return array(
     array(
