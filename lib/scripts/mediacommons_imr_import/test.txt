@@ -1,0 +1,14 @@
+Please type one of the following options to continue:
+
+[0] Import vocabulary
+[1] Import terms
+[2] Import roles
+[3] Import users
+[4] Import IMR D6 Content (all the stepts)
+[5] Migrate posts
+[6] Migrate Theme Weeks
+[7] Delete Theme Weeks, Posts, comments and file registry
+[8] Echo 5 random Hubs URL
+[9] Run test
+[10] Exit
+
