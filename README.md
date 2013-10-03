@@ -19,7 +19,5 @@ Build the drupal distribution, e.g.
 
 	sh dev_scripts/deploy_build.sh mediacommons.make
 
-Visit the site
-
 
 
