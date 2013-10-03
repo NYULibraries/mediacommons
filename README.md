@@ -13,7 +13,7 @@ Install make_local
 
 Configure the build script by copying the default template default.project.conf as project.conf and fill out the blanks
 
-  cp default.project.conf project.conf
+	cp default.project.conf project.conf
 
 Build the drupal distribution, e.g.
 
