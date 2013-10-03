@@ -1,0 +1,5 @@
+name = Image crop extended
+description = Add cropping ability to images using javascript and the ability to select the representative image
+core = 7.x
+version = 7.x-2.x-dev
+dependencies[] = image

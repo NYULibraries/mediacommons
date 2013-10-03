@@ -69,13 +69,14 @@ projects[mediacommons_editorialworkflow][download][type] = "local"
 projects[mediacommons_editorialworkflow][download][source] = lib/modules/mediacommons_editorialworkflow
 projects[mediacommons_editorialworkflow][type] = "module"
 
-; projects[mediacommons_base][download][type] = "local"
-; projects[mediacommons_base][download][source] = lib/themes/mediacommons_base
-; projects[mediacommons_base][type] = "theme"
+projects[imagefield_crop_extended][download][type] = "local"
+projects[imagefield_crop_extended][download][source] = lib/modules/imagefield_crop_extended
+projects[imagefield_crop_extended][type] = "module"
 
+projects[mediacommons_base][download][type] = "local"
+projects[mediacommons_base][download][source] = lib/themes/mediacommons_base
+projects[mediacommons_base][type] = "theme"
 
-; Profile
-; projects[manhattanville_profile][type] = "profile"
-; projects[manhattanville_profile][download][type] = "local"
-; projects[manhattanville_profile][download][source] = lib/profiles/manhattanville_profile
-
+projects[mediacommons_profile][type] = "profile"
+projects[mediacommons_profile][download][type] = "local"
+projects[mediacommons_profile][download][source] = lib/profiles/mediacommons_profile
