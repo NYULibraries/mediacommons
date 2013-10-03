@@ -17,7 +17,7 @@ Configure the build script by copying the default template default.project.conf 
 
 Build the drupal distribution, e.g.
 
-	sh dev_scripts/deploy_build.sh
+	sh dev_scripts/deploy_build.sh mediacommons.make
 
 Some configuration settings captured in 'feature' modules need to be reloaded after installation:
 
