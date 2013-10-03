@@ -6,6 +6,8 @@ MediaCommons README
 Install drush 5.9.0. (drush make-local fail with drush 6)
 
 	pear install drush/drush-5.9.0
+	
+	brew install drush
     
 Install make_local
 
