@@ -3,7 +3,7 @@ MediaCommons README
 
 # Building the Drupal Distribution
 
-Install drush 5.9.0. (drush make-local fail drush 6)
+Install drush 5.9.0. (drush make-local fail with drush 6)
 
 	pear install drush/drush-5.9.0
     
