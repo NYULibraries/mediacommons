@@ -28,6 +28,7 @@ function mediacommons_profile_themes() {
   $enable = array(
     'theme_default' => 'mediacommons_base',
     'admin_theme' => 'rubik',
+    'node_admin_theme' => 1,
   );
 
   theme_enable($enable);
