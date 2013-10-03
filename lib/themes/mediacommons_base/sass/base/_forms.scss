@@ -1,0 +1,11 @@
+//////////////////////////////
+// BASE: Page specific styles that aren't in Compass Pattern-Primer 
+//////////////////////////////
+
+input[type], 
+select {
+  width: auto;
+}
+label {
+  display: block;
+}

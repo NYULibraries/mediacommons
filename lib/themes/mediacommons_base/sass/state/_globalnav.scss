@@ -1,0 +1,12 @@
+.global {
+  .logged-out {
+    li[aria-haspopup="true"] > ul {
+      &[aria-hidden="true"] {
+        display: none;
+      }
+      &[aria-hidden="false"] {
+        display: inline-block;
+      }
+    }
+  }
+}

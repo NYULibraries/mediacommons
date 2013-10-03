@@ -1,0 +1,92 @@
+//////////////////////////////
+// MODULES: Styles that are layout independent 
+//////////////////////////////
+form[role="search"] {
+  label {
+    display: none;
+  }
+}
+
+//.search-form {
+//  &:hover{
+//    @include box-shadow(0, 0, 30px, #ebebeb);
+//    @include transition(all 0.2s ease-in-out);
+//  }
+//  @include transition(all 0.2s ease-in-out);
+//  width: 38.5%;
+//  display: inline-block;
+//  background: $grey;
+//  padding: 1em;
+//  margin-top: 0;
+//  border:1px solid darken($grey,3%);
+//  label {
+//    font-style:italic;
+//    margin-bottom:1em;
+//    display:block;
+//  }
+//  input[type="text"]{
+//    padding: 1.125em 0.25em;
+//    border: 1px solid #ebebeb;
+//    @include border-radius(0);
+//    margin-bottom:1em;
+//  }
+//  fieldset {
+//    .criterion {
+//      margin-right:0;
+//      float:none;
+//    }
+//    label {
+//      display:inline;
+//      font-weight:normal;
+//    }
+//    border:1px solid darken($grey,5%);
+//    input[type="text"]{
+//      margin-bottom:0;
+//      padding:0;
+//      padding: 1.125em 0.25em;
+//      border: 1px solid #ebebeb;
+//    }
+//  }
+//}
+//
+//.search-results-col {
+//  width: 58.5%;
+//  display: inline-block;
+//  float:right;
+//  .bold-title {
+//    color: white;
+//    padding: 1em;
+//    background: #333333;
+//    font-size:1,25em;
+//    &.none {
+//      color:yellow;
+//      font-style:italic;
+//    }
+//  }
+//  .search-results-wrapper{
+//    columns:100px 2;
+//    -webkit-columns:100px 2; /* Safari and Chrome */
+//    -moz-columns:100px 2; /* Firefox */
+//    display:block;
+//    margin-top:1em;
+//    ul.search-results {
+//      padding:0;
+//      margin:0;
+//      display:block;
+//      li.search-result {
+//        list-style-position: inside;
+//        margin-left:0em;
+//        text-indent: 0em;
+//        display:inline-block;
+//        border:1px solid #f3f3f3;
+//        padding:1em;
+//        .search-snippet-info {
+//          padding-left:0;
+//          strong {
+//            background:yellow;
+//          }
+//        }
+//      }
+//    }
+//  }
+//}

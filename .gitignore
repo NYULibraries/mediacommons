@@ -1,6 +1,10 @@
+# Ignore configuration files that may contain sensitive information.
+
 .DS_Store
 .project
+project.conf
 .svn
 .buildpath
 .settings
 settings.json
+/builds

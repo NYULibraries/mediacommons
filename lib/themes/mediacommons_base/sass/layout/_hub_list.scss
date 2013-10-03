@@ -1,0 +1,40 @@
+@include respond-to-ie('desktop') {
+  aside[role="complimentary"].part-of-hub {
+    max-width: 20em;
+    float: right;
+    clear: right
+  }
+  aside[role="complimentary"].part-of-hub {
+    ul[role="menu"] {
+      li {
+       > a:first-child {
+         width: 25%;
+       } 
+       > h3 {
+         width: 75%;
+        }
+      }
+    }
+  }
+}
+//////////////////////////////
+// LAYOUT: Layout dependent css and media queries only 
+//////////////////////////////
+
+@include respond-to-ie('tablet') {
+  aside[role="complimentary"].part-of-hub { 
+    clear: left;
+    max-width: 36em;
+    ul[role="menu"] {
+      li {
+       > a:first-child {
+         width: 20%;
+       } 
+       > h3 {
+         width: 80%;
+        }
+      }
+    }
+  }
+}
+

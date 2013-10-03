@@ -1,0 +1,11 @@
+//////////////////////////////
+// LAYOUT: Layout dependent css and media queries only 
+//////////////////////////////
+
+header[role="banner"] {
+  @include respond-to-ie('desktop') {
+    margin: 1.75em auto 0 auto;
+    width: 100%;
+    max-width: 60em;
+  }
+}

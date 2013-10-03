@@ -1,0 +1,26 @@
+//////////////////////////////
+// LAYOUT: Layout dependent css and media queries only 
+//////////////////////////////
+
+nav[role="navigation"].main {
+  @include respond-to-ie('desktop') {
+    display: table-caption;
+    margin-top: 10em;
+    ul.main {
+      @include horizontal-list();
+      li {
+        font-size: 1.75em;
+        &:before {
+          content: "\20•\20";
+          color: #999;
+        }
+        &:first-child:before {
+          content: "\20";
+        }
+      }
+    }
+  }
+  @include respond-to-ie('narrow navigation') {
+   // add 'mobile' navigation specific style
+  }
+}

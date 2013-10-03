@@ -1,0 +1,13 @@
+//////////////////////////////
+// LAYOUT: Layout dependent css and media queries only 
+//////////////////////////////
+
+.NAVCLASS {
+  @include respond-to('full navigation') {
+    // add full navigation specific style
+    
+  }
+  @include respond-to('narrow navigation') {
+   // add mobile navigation specific style
+  }
+}

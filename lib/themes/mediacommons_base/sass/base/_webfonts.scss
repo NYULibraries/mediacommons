@@ -1,0 +1,81 @@
+//////////////////////////////
+// BASE: Page specific styles that aren't in Pattern-Primer 
+//////////////////////////////
+
+// For offline fonts
+//@include web-font-face($body-font-name, $body-font-file-name, $font-weight, $font-style, $inline-fonts);
+//
+//@include web-font-face($body-bold-font-name, $body-bold-font-file-name, $body-bold-font-weight, $font-style, $inline-fonts); 
+//
+//@include web-font-face($body-italic-font-name, $body-italic-font-file-name, $font-weight, $body-italic-font-style, $inline-fonts);
+//
+//@include web-font-face($body-bold-italic-font-name, $body-bold-italic-font-file-name, $body-bold-italic-font-weight, $body-bold-italic-font-style, $inline-fonts);
+//
+//@include web-font-face($heading-font-name, $heading-font-file-name, $font-weight, $font-style, $inline-fonts);
+//
+//@include web-font-face($heading-bold-font-name, $heading-bold-font-file-name, $heading-bold-font-weight, $font-style, $inline-fonts);
+
+.wf-droidserif-n4-active {
+  body {
+    font-family: $body-font-name, $body-font-family; 
+  }
+}
+.wf-droidsans-n4-active {
+  #{headings()} {
+    font-family: $heading-font-name, $header-font-family;
+  }
+  button,
+  input[type="button"],
+  input[type="submit"], 
+  input.cancel {
+    font-family: $heading-font-name, $header-font-family;
+  }
+}
+
+.wf-droidserif-n7-active {
+  strong, b {
+    @include web-font-family($body-bold-font-name);
+    font-weight: 700;
+    font-style: normal;
+  }
+}
+.wf-droidserif-i4-active {
+  em, i {
+    @include web-font-family($body-italic-font-name);
+    font-style: italic;
+  }
+}
+// never sure what order the tags will be in and if there mixed
+.wf-droidserif-i7-active {
+  strong em, 
+  b i, 
+  em strong, 
+  i b, 
+  strong i, 
+  b em, 
+  i strong, 
+  em b {
+    @include web-font-family($body-bold-italic-font-name);
+    font-weight: 700;
+    font-style: italic;
+  }
+}
+.wf-droidsans-n7-active {
+  #{headings()} {
+    strong {
+      @include web-font-family($heading-bold-font-name);
+      font-weight: 700;
+      font-style: normal;
+    }
+  }
+  blockquote strong {
+    @include web-font-family($heading-bold-font-name);
+    font-weight: 700;
+    font-style: normal;
+  }
+  h4 {
+    font-family: $heading-bold-font-name;
+    font-weight: 700;
+    font-style: normal;
+  }
+}

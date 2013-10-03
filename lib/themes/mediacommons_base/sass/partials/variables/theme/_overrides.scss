@@ -1,0 +1,112 @@
+//////////////////////////////
+// VARIABLES: For Theme — Overides for Compass Pattern-Primer  
+//////////////////////////////
+
+// Fonts see base/_webfonts
+// http://awesome-fontstacks.com/bundles/414-droooooid
+// added Droid Serif and Droid Sans for native font on Android Phones
+
+$body-font-family: "Georgia", "Times New Roman", "Palatino", "Hoefler Text", "Baskerville", "Droid Serif", serif;
+$header-font-family: "Arial", "Helvetica", "Lucida Grande", "Verdana", "Gill Sans", "Droid Sans", sans-serif;
+$blockquote-font-family: $header-font-family;
+//$monospaced-font-family: Menlo, Courier New, Courier, Mono, "Droid Sans Mono", monospace; 
+
+$body-font-size: 16px; 
+$body-line-height: 1.5em;
+
+///// body
+$body-background-color: nth($black , 6);
+$body-background-rgba: rgba($body-background-color, 1);
+$body-border-width: false;
+$body-border-color-rgba: rgba(0,0,0,0); 
+$body-margin: 0 auto;
+$body-padding: 0;
+
+$html-border-width: false;
+$html-border-color: nth($primary, 1);
+$html-background-color: $body-background-color;
+
+// Links
+$link-color: nth($primary, 1);
+$link-text-decoration: none;
+$link-border-width: false;
+///// Visited
+$link-visited-link-color: nth($primary, 2);
+$link-visited--border-width: $link-border-width;
+///// Hover
+$link-hover-link-color: lighten($link-color, 10%);
+// $link-hover-text-decoration: none; 
+$link-hover-border-width: $link-border-width;
+$link-hover-border-color: $link-color;
+///// Active
+$link-active-link-color: $link-color; 
+
+$article-fl-float: none;
+$article-fl-font-family: inherit;
+$article-fl-font-bold: false; 
+$article-fl-font-size: inherit;
+$article-fl-line-height: inherit;
+$article-fl-letter-spacing: inherit;
+$article-fl-margin: 0;
+$article-fl-margin-pos: false;
+$article-fl-background-color: inherit;
+$article-fl-color: inherit; 
+
+$article-font-size: inherit;
+$article-line-height: inherit;
+$article-word-spacing: inherit;
+$article-margin: 1em 0;
+
+$time-display: block;
+$time-text-align: left;
+$time-font-family: $body-font-family;
+$time-font-bold: false; // normal
+$time-font-italic: false; // normal
+$time-font-uppercase: false; // uppercase
+$time-font-variant: false; // normal
+$time-font-size: 1em;
+$time-line-height: 1.5em;
+$time-letter-spacing: 0.05em;
+$time-color: nth($black , 2);
+$time-content: '';
+
+$h1-border-width: false;
+$h2-border-width: false;
+$h3-border-width: false;
+
+$button-font-family: $header-font-family;
+$button-padding: 0.33em .66em;
+$button-border-color: #bbb;
+$button-border-radius: .5em;
+$button-color: #333;
+$button-text-shadow: 0 -1px 0 rgba(#fff, 0.25);
+$button-gradient-stop-1: #fff;
+$button-gradient-stop-2: #e6e6e6;
+
+$button-hover-color: $button-color;
+$button-hover-gradient-stop-1: #ccc;
+$button-hover-gradient-stop-2: #e6e6e6;
+
+$button-active-gradient-stop-1: #a6a6a6;
+$button-active-gradient-stop-2: #d9d9d9;
+
+$search-border-radius: 0.25em;
+$search-padding: 0 0.75em;
+$search-border-width: false; 
+$search-border-style: solid;
+$search-border-color: #ccc;
+
+//// Search Input
+$search-input-border-width: false; 
+$search-input-border-style: solid;
+$search-input-border-color: #ccc;
+$search-input-border-radius: .5em;
+
+//// Search Input Image
+$search-image-width: 0.9375em;
+$search-image-top: 0.2em;
+$search-image-right: 0.6em;
+$search-image-padding: 0.2em 0.2em;
+
+//// Forms
+$forms-input-width: auto;

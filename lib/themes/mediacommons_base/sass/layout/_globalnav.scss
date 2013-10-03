@@ -1,0 +1,9 @@
+//////////////////////////////
+// LAYOUT: Layout dependent css and media queries only 
+//////////////////////////////
+
+nav[role="navigation"].global {
+	@include respond-to('narrow navigation') {
+   	// add mobile navigation specific style
+  }
+}

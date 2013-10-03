@@ -1,0 +1,42 @@
+//////////////////////////////
+// LAYOUT: Layout dependent css and media queries only 
+//////////////////////////////
+
+#comments {  
+  background: nth($black, 5);
+  padding: 0 1em;
+  @include respond-to-ie('desktop content') {
+    float: left;
+    width: 40%;
+    max-width: ms(12); 
+    @include type-size($body-font-size - 1, $body-line-height - .1); // 16px
+  }
+  @include respond-to-ie('extra wide content') {
+    float: left;
+    width: 40%;
+    max-width: ms(12); 
+    @include type-size($body-font-size + 1, $body-line-height - .1); // 16px
+  }
+  @include respond-to-ie('wide content') {
+    float: left;
+    width: 40%;
+    max-width: ms(12);
+    @include type-size($body-font-size, $body-line-height - .1); // 16px
+  }
+  @include respond-to-ie('medium wide content') {
+    float: left;
+    width: 40%;
+    max-width: ms(12);
+    @include type-size($body-font-size - 2, $body-line-height - .1); // 16px
+  }
+  @include respond-to-ie('medium content') {
+    float: left;
+    width: 40%;
+    max-width: ms(12);    
+    @include type-size($body-font-size - 3, $body-line-height - .1); // 16px
+  }
+  @include respond-to-ie('medium only content') {
+    max-width: ms(14);
+    @include type-size($body-font-size - 3, $body-line-height - .1); // 16px
+  }
+}

@@ -1,0 +1,53 @@
+
+/** Fields */
+.page-node-edit.node-type-contributed-piece .field-name-field-attached-images thead,
+.page-node-edit.node-type-contributed-piece .field-name-field-attached-images .file,
+.page-node-edit.node-type-contributed-piece .field-name-field-attached-images .file-size,
+.page-node-add.page-node-add-contributed-piece .field-name-field-attached-images thead,
+.page-node-add.page-node-add-contributed-piece .field-name-field-attached-images .file,
+.page-node-add.page-node-add-contributed-piece .field-name-field-attached-images .file-size,
+
+/** Tao theme */
+.tao #edit-field-document-textarea-body label,
+.tao #edit-field-document-textarea-body-und-0-format,
+.tao .field-name-field-period .date-float,
+.tao .field-name-field-period .description,
+.tao .links.secondary-menu,
+.tao .toolbar-drawer {
+  display: none;
+  visibility: hidden;  
+}
+
+.contributor.no-privilege #edit-actions {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+}
+
+.page-node-add-cluster .field-name-field-representative-image,
+.node-cluster-type-video .field-name-field-video-embed-link,
+.node-cluster-type-video field-name-field-tease-image, 
+.node-cluster-type-image .field-name-field-representative-image {
+  display: block;
+}
+
+.tao .messages {
+  padding: .5em 1em;
+}
+
+.image-preview img {
+  height: 80px;
+}
+
+.image-preview img:hover {
+  cursor: move;
+}
+
+.image-preview .image-preview-actions, .image-preview .image-preview-actions {
+	display: block;
+	margin: 0;
+}
+
+.image-preview .crop, .image-preview .	delete {
+	text-decoration: underline;
+	font-size: small;
+}

@@ -1,0 +1,6 @@
+name = Manhattanville
+description = Installs Drupal with the Manhattanville feature and theme
+core = 7.x
+dependencies[] = manhattanville_features
+dependencies[] = construction_update_features
+dependencies[] = research_initiatives

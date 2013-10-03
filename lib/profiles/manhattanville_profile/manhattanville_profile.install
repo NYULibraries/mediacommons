@@ -1,0 +1,666 @@
+<?php
+/**
+ * Implement hook_install().
+ *
+ * Perform actions to set up the site for this profile.
+ */
+function manhattanville_profile_install() {
+
+}
+
+
+function manhattanville_profile_install_tasks() {
+
+  $tasks['enable_themes'] = array(
+    'display_name' => st('Enable Themes'),
+    'function' => 'mville_themes',
+  );
+
+  $tasks['load_content'] = array(
+    'display_name' => st('Install Site Content'),
+    'function' => 'mville_site_content',
+  );
+
+  $tasks['user_permissions'] = array(
+    'display_name' => st('Setup permissions'),
+    'function' => 'mville_permissions',
+  );
+
+  return $tasks;
+}
+
+function mville_themes() {
+  $enable = array(
+    'theme_default' => 'manhattanville',
+    'admin_theme' => 'rubik',
+  );
+
+  theme_enable($enable);
+
+  foreach ($enable as $var => $theme) {
+    if (!is_numeric($var)) {
+      variable_set($var, $theme);
+    }
+  }
+
+  theme_disable(array('bartik'));
+}
+
+function mville_permissions() {
+  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content'));
+                              user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content'));
+}
+
+
+function mville_site_content() {
+  $footer_links = array('Community Services', 'Resources', 'Contact Us');
+
+  $nodes = array(
+    array(
+      'title' => 'Home',
+      'language' => LANGUAGE_NONE,
+      'type' => 'page',
+      'bodytext' => '
+                    <p>Columbia Manhattanville campus will be a vibrant center of academic and civic life, ensuring that Upper Manhattan remains a world-class center of pioneering research and teaching. With its open, environmentally sustainable design, local retail amenities, and publicly accessible green spaces, the campus will provide a pedestrian-friendly connection between West Harlem and the scenic Harlem Piers Park along the Hudson River. The life of the project will span some three decades. The first phase of development includes innovative new buildings for Columbia’s Nobel Prize-winning neuroscience, Columbia Business School, the School of the Arts, an academic conference center and new spaces for art, culture and community.</p>
+                    <p>A globally respected academic center, Columbia is also a vital local institution, committed to the economic, intellectual, social and cultural vitality of our neighborhoods and New York City. In that spirit, together with our West Harlem neighbors, elected representatives and civic leaders, we have developed a plan for a mixed-use academic center that provides a long-term future of shared opportunity.</p>
+                    <iframe width="560" height="315" src="http://www.youtube.com/embed/CRdncAfENpY" frameborder="0" allowfullscreen></iframe>
+                    <p>The Jerome L. Greene Science Center, home to the Mortimer B. Zuckerman Mind, Brain, Behavior Institute, will open in 2015.</p>',
+      'banner' => 'home_oct1.jpg',
+    ),
+    array(
+      'title' => 'Team',
+      'language' => LANGUAGE_NONE,
+      'type' => 'page',
+      'bodytext' => filter_xss('<p>The planning, design and construction of the Manhattanville campus are being managed by a University-led planning team. Four preeminent architectural and planning firms are planning and design the campus: Renzo Piano Building Workshop; Skidmore, Owings & Merrill; Diller Scofidio + Renfro; and Field Operations. Our construction partners are Lend Lease and McKissack & McKissack.</p>'),
+    ),
+    array(
+      'title' => 'Academics',
+      'language' => LANGUAGE_NONE,
+      'type' => 'page',
+      'banner' => 'academics_oct1.jpg',
+      'bodytext' => manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum(),
+    ),
+    array(
+      'title' => 'Community',
+      'language' => LANGUAGE_NONE,
+      'type' => 'page',
+      'bodytext' => manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_video() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum(),
+      'banner' => 'community_oct1.jpg',
+    ),
+    array(
+      'title' => 'Planning and Design',
+      'language' => LANGUAGE_NONE,
+      'type' => 'page',
+       'bodytext' => manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum(),
+      'banner' => 'planning_oct1.jpg',
+    ),
+    array(
+      'title' => 'Planning',
+      'language' => LANGUAGE_NONE,
+      'bodytext' => manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_video() . manhattanville_profile_generate_lorum_ipsum(),
+      'type' => 'page',
+    ),
+    array(
+      'title' => 'Stories',
+      'language' => LANGUAGE_NONE,
+      'type' => 'page',
+    ),
+    array(
+      'title' => 'Design Goals',
+      'language' => LANGUAGE_NONE,
+      'bodytext' => manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_video() . manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_lorum_ipsum(),
+      'type' => 'page',
+    ),
+    array(
+      'title' => 'Construction',
+      'language' => LANGUAGE_NONE,
+      'type' => 'page',
+      'banner' => 'construction_oct1.jpg',
+    ),
+
+    array(
+      'title' => filter_xss('Renzo Piano'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'field_team' => 'Design Team',
+      'field_organization' => 'Renzo Piano Building Workshop',
+      'photo' => 'piano.jpg',
+      'field_profile' => filter_xss("<p>Born in Beirut, Chaaya is a graduate of Kaslik Saint-Esprit University. He joined the Paris office of Renzo Piano Building Workshop in 1988 and has worked as lead architect on a variety of projects including the Kanak Cultural Center in New Caledonia and the Potsdamer Platz project in Berlin. In 1997, he became a partner at RPBW. He was partner-in-charge of the new Il Sole 24 Ore headquarters in Milan and is now in charge of the Los Angeles County Museum of Art expansion project and phase one of Columbia�s proposed Manhattanville urban academic community."),
+    ),
+
+    array(
+      'title' => filter_xss('Antoine Chaaya'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'field_team' => 'Design Team',
+      'field_organization' => 'Renzo Piano Building Workshop',
+      'photo' => 'chaaya.jpg',
+      'field_organization' => 'Renzo Piano Building Workshop',
+      'field_profile' => filter_xss("<p>Renzo Piano is the founder of Renzo Piano Building Workshop, an architectural firm with offices
+                          in Paris and Genoa. Before starting RPBW in 1993, he founded the Piano & Rogers agency with Richard
+                          Rogers in 1971 and l'Atelier Piano & Rice with engineer Peter Rice in 1977. RPBW has designed a number
+                          of venues and buildings around the world including the reconstruction of the Potsdamer Platz in Berlin.
+                          They are currently the architects of the new headquarters for the New York Times and Morgan Library addition
+                          in Manhattan and were recently commissioned as the architects for the London Bridge Tower. His firm has
+                          garnered several prestigious architectural honors, including the Pritzker Architecture Prize in 1998. He
+                          graduated in 1964 from the school of Architecture of the Milan Polytechnic.</p>"),
+    ),
+
+    array(
+      'title' => filter_xss('Anthony Vacchione'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'photo' => 'vacchione.jpg',
+      'field_team' => 'Design Team',
+      'field_profile' => filter_xss("<p>Vacchione joined SOM in 1978 and was named a Managing Partner in 1999. In addition to being involved
+                         in ongoing strategic campus planning for Columbia University since the SOM's work on the East Campus
+                         Master Plan in the early 1990s, Vacchione has managed many of SOM's major planning and design projects,
+                         including major airport terminals and terminal expansions at JFK, Newark, Boston Logan, Toronto, and
+                         Singapore Changi airports; Riverside South, the East River Master Plan, the Tzu Chi Cultural Campus in
+                         Hualien, Taiwan; and the Columbia-Presbyterian Medical Center (now the Columbia University Medical
+                         Center). He received a master of architecture degree from Columbia University.</p>"),
+      'field_organization' => 'Skidmore, Owings and Merrill',
+    ),
+
+    array(
+      'title' => filter_xss('James Corner'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'photo' => 'corner.jpg',
+      'field_team' => 'Design Team',
+      'field_profile' => filter_xss("<p>James Corner is a registered landscape architect and urban designer, and director of Field Operations,
+                          an internationally recognized landscape architecture and urban design practice based in New York City.
+                          Corner is also chair and professor in the Department of Landscape Architecture and Regional Planning
+                          at the University of Pennsylvania School of Design. Field Operations is presently directing the design
+                          of the High Line, a 1.5-mile-long elevated promenade along the west side of Manhattan; Fresh Kills Park,
+                          Staten Island; and a variety of other major public open spaces in New York. Other projects include large
+                           parks, urban redevelopment plans and public spaces in Toronto, London, Seoul, San Juan and Busan, South
+                           Korea. Corner's work has been recognized with numerous awards: the NYC Arts Commission Award for
+                           Excellence in Design (2005), the American Academy of Arts and Letters Academy Award in
+                           Architecture (2004), the Daimler-Chrysler Award for Design Innovation (2000) and the
+                           Architectural League of New York Design Award (2000).</p>"),
+      'field_organization' => 'Field Operations',
+    ),
+
+    array(
+      'title' => filter_xss('La-Verna Fountain'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'photo' => 'fountain.jpg',
+      'field_profile' => filter_xss("<p>La-Verna Fountain currently serves as the Vice President for Construction Business Services
+                          and Communications at Columbia University in the City of New York. As the Vice President,
+                          Ms. Fountain will help lead our outreach and communications efforts regarding construction
+                          business opportunities and activities.</p><p>Prior to assuming the role in Facilities, Ms.
+                          Fountain served as the Associate Vice President of Public Affairs where she served as the Chief
+                          Operating Officer of Columbia's Office of Communications and Public Affairs and as the public
+                          affairs liaison on the University's top initiative� the expansion of the University.</p>
+                          <p>In addition to her work at the University, Ms. Fountain is the President and founder of the
+                          Defiant Hope Consulting and Training Company. For the past 25 years, she has provided motivational
+                          speeches, training and facilitation on topics of conflict resolution, cultural diversity/human awareness,
+                          nonviolence as a way of life, working with teenagers, spirituality in the workplace, staff development
+                          and organizational development.</p><p>La-Verna also served as the Director of Communications for the
+                          Pennsylvania Department of Education, Senior Advisor to Save the Children for its U.S. programs,
+                          served as the State Office Director for former U.S. Senator Harris Wofford, and as Deputy Communications
+                          Director for the late Pennsylvania Governor Robert P. Casey.</p>"),
+      'field_team' => 'Columbia Project Team',
+      'field_organization' => 'Columbia University, Facilities',
+    ),
+
+    array(
+      'title' => filter_xss('Maxine F. Griffith'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'photo' => 'griffith.jpg',
+      'field_team' => 'Columbia Project Team',
+      'field_profile' => filter_xss("
+                         <p>Maxine Griffith is Executive Vice President for Government and Community Affairs at Columbia and Special Advisor for Campus Planning. She is responsible for the oversight and coordination of the University's collaborations with government at the local, state, and federal levels, as well as the strengthening of Columbia's many partnerships with local organizations.</p>
+                         <p>From 2000 to 2005, Griffith served as Executive Director of the Philadelphia City Planning Commission and as that city's Secretary (Deputy Mayor) for Strategic Planning. Previously, Griffith served in the Clinton administration at the U.S. Department of Housing and Urban Development as Regional Representative for New York and New Jersey and as Assistant Deputy Secretary. From 1988 to 1996, she was Principal of Griffith Planning & Design, a firm providing planning, urban design, and development services.</p>
+                         <p>Griffith has also served on the New York City Planning Commission and currently sits on the boards of the Architectural League of New York, the Regional Plan Association, and Seeds, an organization building schools and libraries in West Africa.</p>
+                         <p>Griffith was born in Harlem, graduated cum laude from Hunter College, and holds a master's degree in architecture from the University of California, Berkeley. She has taught city planning and urban design at Columbia, New York University, and the University of Pennsylvania and is an accredited member of the American Institute of Certified Planners.</p>
+      "),
+      'field_organization' => 'Office of Government and Community Affairs',
+    ),
+
+    array(
+      'title' => filter_xss('Joe Ienuso'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'field_team' => 'Columbia Project Team',
+      'photo' => 'ienuso.jpg',
+      'field_team' => 'Columbia Project Team',
+      'field_profile' => filter_xss("<p>Ienuso is the Executive Vice President for CU Facilities, having joined Columbia in 1989 and having held a number of senior administrative roles in Admissions, Financial Aid, Student Services, and Facilities Management. As part of the Facilities Management Executive Team since 2001, he well understands the Facilities agenda and is currently responsible for facilities operations, security, design and construction, and planning services for the Morningside Heights campus. Ienuso holds a B.S. and an M.S. from St. John's University and an M.B.A. from Columbia Business School.</p>"),
+      'field_organization' => 'Columbia University, Facilities',
+    ),
+
+    array(
+      'title' => filter_xss('Victoria Mason-Ailey'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'field_team' => 'Columbia Project Team',
+      'photo' => 'mason-ailey.jpg',
+      'field_team' => 'Columbia Project Team',
+      'field_profile' => filter_xss("
+                         <p>Mason-Ailey is the Assistant Vice President for Planning and Project Coordination within the Office of
+                         Government and Community Affairs. She is charged with the coordination and communication of urban planning
+                         and development matters; in particular those activities associated with the University's proposed campus
+                         expansion into Manhattanville. Her work requires that she maintain frequent contact with community leaders
+                         and public officials, as well as University officials, staff, and consultants. In addition, her activities
+                         extend from initiatives on the Morningside campus to those of the Medical Center in Upper Manhattan.</p>
+                         <p>Trained as an urban planner, with a master's degree in urban planning from Columbia and 20-plus years
+                         of experience, Mason-Ailey has participated in a range of interagency, as well as public and private,
+                         planning initiatives in several major cities, including New York and Philadelphia.</p>
+                         <p>She holds a bachelor's degree from Brown University and is professionally certified by the American
+                         Institute of Certified Planners.</p>
+      "),
+      'field_organization' => 'Office of Government and Community Affairs',
+    ),
+
+    array(
+      'title' => filter_xss('Philip Pitruzzello'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'field_team' => 'Columbia Project Team',
+      'photo' => 'pitruzzello.jpg',
+      'field_team' => 'Columbia Project Team',
+      'field_profile' => filter_xss("
+                         <p>Pitruzzello is the Vice President for Manhattanville Development. He serves as the Columbia University Facilities point person on all aspects of the development, design and construction of the University's 6.8 million sq. ft. Manhattanville in West Harlem campus expansion.</p>
+                         <p>Previously, he was Vice President for Real Estate at Time Warner, where he was responsible for corporate real estate, design and project management, and operations. He led Time Warner's team in the planning, design, and construction of the company's one million square foot office, broadcast center and corporate headquarters interiors within Time Warner Center in New York City.</p>
+                         <p>Prior to joining Time Warner, Pitruzzello was a partner in a real estate banking firm and served with the Battery Park City Authority in several senior management capacities including President and Chief Executive Officer, at a time when the 92-acre Battery Park City project became a thriving office, residential, and retail community.</p>
+                         <p>Earlier in his career, Pitruzzello specialized in finance and construction law in the fields of affordable housing, health care, and higher education. He has also served as Assistant Counsel to former New York Gov. Mario M. Cuomo and was general counsel to several public benefit corporations.<p>Additionally, he is a director of New Yorkers for Parks, a director of the Bowery Residents Committee and the Apollo Theater Foundation, and a member of the Urban Land Institute. He received a B.A. from the University of Chicago and a J.D. from Boston University.</p>")
+      ,
+      'field_organization' => 'Columbia University, Manhattanville Development',
+    ),
+
+    array(
+      'title' => filter_xss('Marcelo Velez'),
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'field_team' => 'Columbia Project Team',
+      'photo' => 'velez.jpg',
+      'field_team' => 'Columbia Project Team',
+      'field_profile' => filter_xss("
+	                     <p>Marcelo Velez is Associate Vice President for Manhattanville Capital Construction in Columbia University Facilities. He is a professional engineer with almost 20 years of diverse construction project management experience. Velez has a record of accomplishments in managing large and complex construction projects through the planning, design, and construction phases. Over the years, he has managed, supervised, and otherwise presided over $1 billion worth of capital construction. His recent projects include the Columbia University School of Social Work, 2700 Broadway, the School at 110th Street, Lenfest Hall, Broadway Residence, and the renovation of River Hall.</p>
+      "),
+      'field_organization' => 'Columbia University, Manhattanville Capital Construction',
+    ),
+
+    array(
+      'title' => filter_xss('Geoffrey R. Wiener Jr.'),
+      'photo' => 'wiener.jpg',
+      'language' => LANGUAGE_NONE,
+      'type' => 'team',
+      'field_team' => 'Columbia Project Team',
+      'field_profile' => filter_xss("
+	                     <p>Weiner heads Columbia's Facilities Planning and Space Management group, which is responsible for developing solutions to space problems ranging from how to free up an office for a new administrator, to where and how to create a third major campus. He and his staff are constantly responding to requests for new space from schools, departments, centers, institutes, administrative units, and related entities at the Morningside campus. As a land use planner, Weiner works on rezoning, zoning variances,
+	                     and other discretionary land use approvals for Columbia properties.</p>
+	                     <p>Before joining Columbia in 1984, he was a partner in a planning and development consulting firm in New York City, Abeles Schwartz Associates, which specialized in market, environmental, and economic feasibility analyses for new projects, subsidized housing development, and
+	                     procurement of zoning and other land use approvals.</p>
+	                     <p>Wiener received a B.A. in urban geography from Clark University in 1975 and a master's of city and regional planning from Pratt Institute in 1978. He serves on the boards of Hamilton Madison House, a social services agency on the Lower East Side, and the Interchurch Center, a nonprofit office
+	                     building located near Columbia's main campus.</p>
+      "),
+      'field_organization' => 'Assistant Vice President for Facilities Planning, Columbia University',
+    ),
+
+
+
+  );
+
+  $i = 1;
+
+  while($i < 10) {
+
+    $news_item = array(
+      'title' => 'Sample News Item ' . $i,
+      'type' => 'news',
+      'body' => manhattanville_profile_generate_lorum_ipsum(),
+      'image' => manhattanville_profile_get_image(),
+    );
+
+    $construction_update = array(
+      'title' => 'Sample Construction Update'  . $i,
+      'type' => 'construction_updates',
+      'body' => manhattanville_profile_generate_lorum_ipsum(),
+    );
+
+    $story_item = array(
+      'title' => 'Sample story item' . $i,
+      'type' => 'story',
+      'body' => manhattanville_profile_generate_lorum_ipsum() . manhattanville_profile_generate_video(),
+    );
+
+    array_push($nodes, $news_item);
+
+    array_push($nodes, $construction_update);
+
+	array_push($nodes, $story_item);
+
+    $i = $i + 1;
+  }
+
+  $research_initiatives = array(
+    array(
+      'title' => 'Addiction and Reward',
+      'bodytext' => 'Substance abuse and addiction have a profound impact on individuals, families, the workplace, and communities. The initiative on addiction and reward seeks to elucidate the neural circuitry and mechanisms of addiction and reward in order to enable the development of targeted biological treatments for addiction.',
+      'image' => 'slide_1.jpg',
+    ),
+    array(
+      'title' => 'Affective Disorders',
+      'bodytext' => 'Schizophrenia and bipolar illness are two of the most devastating mental health disorders, together affecting 3 to 4 percent of the population. This effort will establish a core program of brain science that will help determine the biological function of genes discovered to have a role in affective disorders –a decisive step toward deciphering the causes of these major mental illnesses.',
+      'image' => 'slide_2.jpg',
+    ),
+    array(
+      'title' => 'Brain Imaging',
+      'bodytext' => 'Some of the biggest breakthroughs in brain science have emerged from the development of technologies for imaging the human brain. This initiative will support the development of the next breakthroughs in imaging technology, advancing our capacity to image the activity of a small number of neurons, as well as the organization of many billions of neurons, all within the moment that it takes the mind to generate a thought.',
+      'image' => 'slide_6.jpg',
+    ),
+    array(
+      'title' => 'Brain Viability',
+      'bodytext' => 'This initiative will define the core principles and mechanisms that regulate the delicate balance between neuronal maintenance and degeneration – a tension that lies at the heart of contemporary studies of neuronal plasticity. Basic advances on neuronal viability should inform us about the critical triggers for neurodegenerative disease.',
+      'slide_5.jpg',
+    ),
+    array(
+      'title' => 'Cortex and Cognition',
+      'bodytext' => 'The cerebral cortex is responsible for high-order cognitive functions, from problem-solving to language. Defects in cortical development have been associated with a range of disorders, including anxiety and certain forms of epilepsy. The work on cortex and cognition will focus on understanding the organization of the cerebral cortex and neurodevelopmental processes that make the difference between health and disability.',
+      'image' => 'slide_3.jpg',
+    ),
+    array(
+      'title' => 'Decision Making',
+      'bodytext' => 'This effort will draw together research on brain processes responsible for higher cognitive functions. Research will focus on decision-making, an area that exemplifies the flexible, contingent, goal-directed behaviors that are the hallmarks of cognition. It will build on the idea that neural mechanisms supporting human decision-making may be viewed as elaborations of more easily understood mechanisms in simpler mammals.',
+      'image' => 'slide_4.jpg',
+    ),
+    array(
+      'title' => 'Language and Communication',
+      'bodytext' => 'The capacity to learn and use spoken language relies on neural systems that transform sound into information and thoughts into vocal sounds. Efforts in language and communication will focus on understanding circuitry and activity in auditory, cognitive processing and motor regions of the brain that are crucial for vocal communication.',
+      'image' => 'slide_7.jpg',
+    ),
+    array(
+      'title' => 'Learning and Memory',
+      'bodytext' => 'The goal of the Institute’s work in this area is to understand how memories are acquired, how they are stored, and how they can be retained and recalled for the lifetime of an individual. We expect these research programs to help our basic understanding of memory storage in the normal brain, as well as lead to more direct and effective therapeutic approaches to disorders of learning and memory.',
+      'image' => 'slide_8.jpg',
+    ),
+    array(
+      'title' => 'Movement Control',
+      'bodytext' => 'The human brain devotes vast resources to endow us with seemingly effortless control over our bodies that cannot be equaled by the most sophisticated software controlling the most advanced robots. Institute researchers will study the neural circuitry that produces and guides movement and the neural code underlying movement. They will engineer approaches that leverage our scientific knowledge to aid patients who are paralyzed.',
+      'image' => 'slide_9.jpg',
+    ),
+    array(
+      'title' => 'Neurotheory',
+      'bodytext' => 'Never in the history of neuroscience research has the need been greater for theoretical modeling and sophisticated data analysis. Columbia’s Center for Theoretical Neuroscience will strive to link theoretical studies to experimental data, applying methods from mathematics, physics, statistics, computer science, and engineering to problems in neuroscience',
+      'image' => 'slide_11.jpg',
+    ),
+    array(
+      'title' => 'Sensory Perception',
+      'bodytext' => 'We are who we are in large part because of the way that we process the world around us. All of this depends on our sensory systems - the crucial conduit that links the external world to the inner workings of our brain and mind. This initiative will approach the major challenges in the field of sensory biology –to understand how sensory representations are constructed, stored, recalled, and modified by experience.',
+      'image' => 'slide_10.jpg',
+    )
+  );
+
+  foreach($research_initiatives as $ri) {
+    $ri['type'] = 'research_initiative';
+    $ri['language'] = LANGUAGE_NONE;
+    array_push($nodes, $ri);
+  }
+
+  foreach($footer_links as $title) {
+    $n = array(
+      'title' => $title,
+      'language' => LANGUAGE_NONE,
+      'type' => 'page',
+      'bodytext' => manhattanville_profile_generate_lorum_ipsum(),
+    );
+    array_push($nodes, $n);
+  }
+
+  $node_map = array();
+
+  foreach ($nodes as $nodo) {
+
+    $node = new stdClass();
+	$node->language = LANGUAGE_NONE;
+    $node->type = $nodo['type'];
+    $node->promote = 0;
+    $node->sticky = 0;
+
+    node_object_prepare($node);
+
+    $node->title = $nodo['title'];
+
+	switch ($node->type) {
+      case 'page':
+        $node->body['und'][0]['format'] = 'full_html';
+        if (array_key_exists('bodytext', $nodo)) {
+          $node->body['und'][0]['summary'] = text_summary($nodo['bodytext']);
+          $node->body['und'][0]['value'] = $nodo['bodytext'];
+        }
+
+        if (array_key_exists('banner', $nodo)) {
+          $file_path = drupal_get_path('profile', 'manhattanville_profile') . '/images/' . $nodo['banner'];
+          $file = mville_add_file($file_path);
+          $node->field_banner['und'][0] = (array)$file;
+        }
+
+        break;
+
+	    case 'research_initiative':
+            if (array_key_exists('bodytext', $nodo)) {
+              $node->body['und'][0]['value'] = $nodo['bodytext'];
+            }
+            if (array_key_exists('image', $nodo)) {
+              $file_path = drupal_get_path('profile', 'manhattanville_profile') . '/research_initiative_images/' . $nodo['image'];
+              $file = mville_add_file($file_path);
+              $node->field_image['und'][0] = (array)$file;
+            }
+
+		  break;
+
+        case 'team':
+
+           $node->field_name['und'][0]['value'] = $nodo['title'];
+
+	       if (array_key_exists('field_profile', $nodo)) {
+	         $node->field_profile['und'][0]['value'] = $nodo['field_profile'];
+	       }
+
+           if (array_key_exists('field_organization', $nodo)) {
+             $node->field_organization['und'][0] = array('value' => $nodo['field_organization']);
+           }
+
+           if (array_key_exists('field_team', $nodo)) {
+             $node->field_team['und'][0] = array('value' => $nodo['field_team']);
+           }
+
+           if (array_key_exists('photo', $nodo)) {
+
+              $file_path = drupal_get_path('profile', 'manhattanville_profile') . '/images/' . $nodo['photo'];
+
+              $file = (object)array(
+                'uid' => 1,
+                'uri' => $file_path,
+                'filemime' => file_get_mimetype($file_path),
+                'status' => 1
+              );
+
+              $file = file_copy($file, 'public://', FILE_EXISTS_REPLACE);
+
+              $node->field_photo['und'][0] = (array)$file;
+
+            }
+		  break;
+
+        case 'construction_updates':
+			
+          if (array_key_exists('body', $nodo)) {
+          	$node->body['und'][0]['format'] = 'full_html';
+            $node->body['und'][0]['summary'] = text_summary(filter_xss($nodo['body']));
+            $node->body['und'][0]['value'] = filter_xss($nodo['body']);
+          }
+		  
+	      $node->field_date['und'][0] = array( 'value' => date('Y-m-d H:i:s', strtotime('now')));
+
+          break;
+
+		case 'news':
+		case 'story':
+
+		  $node->body['und'][0]['format'] = 'full_html';
+		  $node->body['und'][0]['summary'] = text_summary($nodo['body']);
+          $node->body['und'][0]['value'] = $nodo['body'];
+          
+          if (array_key_exists('image', $nodo)) {
+            $file_path = drupal_get_path('profile', 'manhattanville_profile') . '/images/' . $nodo['image'];
+            $file = mville_add_file($file_path);
+			$file->type = 'image';
+			$file->display = 1;
+            $node->field_media['und'][0] = (array)$file;
+          }
+          break;
+    }
+
+    $node->uid = 1;
+    $node->status = 1;
+    $node->promote = 0;
+    $node->comment = 0;
+    $node = node_submit($node);
+    node_save($node);
+    $node_map[$node->title] = "node/" . $node->nid;
+
+  }
+
+  $menu_ids = array();
+
+  $item = array(
+    'link_title' => st('Home'),
+    'link_path' => $node_map['Home'],
+    'menu_name' => 'main-menu',
+    'weight' => 0,
+  );
+  $menu_ids['Home'] = menu_link_save($item);
+
+  $item = array(
+    'link_title' => st('Academics'),
+    'link_path' => $node_map['Academics'],
+    'menu_name' => 'main-menu',
+    'weight' => 1,
+  );
+  $menu_ids['Academics'] = menu_link_save($item);
+
+  $item = array(
+    'link_title' => st('Planning and Design'),
+    'link_path' => $node_map['Planning and Design'],
+    'menu_name' => 'main-menu',
+    'weight' => 2,
+  );
+  $menu_ids['Planning and Design'] = menu_link_save($item);
+
+  $item = array(
+    'link_title' => st('Construction'),
+    'link_path' => $node_map['Construction'],
+    'menu_name' => 'main-menu',
+    'weight' => 3,
+  );
+  $menu_ids['Construction'] = menu_link_save($item);
+
+  $item = array(
+    'link_title' => st('Community'),
+    'link_path' => $node_map['Community'],
+    'menu_name' => 'main-menu',
+    'weight' => 4,
+  );
+  $menu_ids['Community'] = menu_link_save($item);
+
+  $item = array(
+    'link_title' => st('Stories'),
+    'link_path' => $node_map['Stories'],
+    'menu_name' => 'main-menu',
+    'plid' => $menu_ids['Planning and Design'],
+  );
+
+  menu_link_save($item);
+
+  $item = array(
+    'link_title' => st('Team'),
+    'link_path' => $node_map['Team'],
+    'menu_name' => 'main-menu',
+    'plid' => $menu_ids['Planning and Design'],
+  );
+
+  menu_link_save($item);
+
+  $item = array(
+    'link_title' => st('Planning'),
+    'link_path' => $node_map['Planning'],
+    'menu_name' => 'main-menu',
+    'plid' => $menu_ids['Planning and Design'],
+  );
+
+  menu_link_save($item);
+
+  $item = array(
+    'link_title' => st('Design Goals'),
+    'link_path' => $node_map['Design Goals'],
+    'menu_name' => 'main-menu',
+    'plid' => $menu_ids['Planning and Design'],
+  );
+
+  menu_link_save($item);
+
+  foreach ($footer_links as $title) {
+    $item = array(
+      'link_title' => st($title),
+      'link_path' => $node_map[$title],
+      'menu_name' => 'menu-footer-menu',
+    );
+
+    menu_link_save($item);
+  }
+
+  // Set the Home page
+  variable_set('site_frontpage', $node_map['Home']);
+}
+
+
+function mville_add_file($path) {
+  $file = (object)array(
+    'uid' => 1,
+    'uri' => $path,
+    'filemime' => file_get_mimetype($path),
+    'status' => 1,
+  );
+  $file = file_copy($file, 'public://', FILE_EXISTS_REPLACE);
+  return $file;
+}
+
+
+function manhattanville_profile_generate_lorum_ipsum() {
+
+   $text = array(
+     '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam molestie convallis est, quis interdum urna mollis euismod. Phasellus euismod bibendum pretium. Nam vestibulum accumsan ullamcorper. Nullam nec diam tortor. Suspendisse id risus adipiscing, ullamcorper risus vehicula, pellentesque felis. Sed mattis non orci vel viverra. Sed malesuada diam mauris, non eleifend risus elementum at. Mauris accumsan dolor sit amet tellus luctus sollicitudin. Sed consequat diam eget gravida interdum. Phasellus arcu risus, vulputate vel dapibus vel, vulputate condimentum ipsum. Vestibulum orci nibh, tincidunt eu facilisis adipiscing, viverra ut enim. Nam varius dui sit amet accumsan iaculis. Vestibulum non sodales ligula. .</p>'
+   , '<p>Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida. Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis, id tincidunt sapien risus a quam. Maecenas fermentum consequat mi. Donec fermentum. Pellentesque malesuada nulla a mi. Duis sapien sem, aliquet nec, commodo eget, consequat quis, neque. Aliquam faucibus, elit ut dictum aliquet, felis nisl adipiscing sapien, sed malesuada diam lacus eget erat. Cras mollis scelerisque nunc. Nullam arcu. Aliquam consequat..</p>'
+   , '<p>Fusce convallis, mauris imperdiet gravida bibendum, nisl turpis suscipit mauris, sed placerat ipsum urna sed risus. In convallis tellus a mauris. Curabitur non elit ut libero tristique sodales. Mauris a lacus. Donec mattis semper leo. In hac habitasse platea dictumst. Vivamus facilisis diam at odio. Mauris dictum, nisi eget consequat elementum, lacus ligula molestie metus, non feugiat orci magna ac sem. Donec turpis. Donec vitae metus. Morbi tristique neque eu mauris. Quisque gravida ipsum non sapien. Proin turpis lacus, scelerisque vitae, elementum at, lobortis ac, quam. Aliquam dictum eleifend risus. In hac habitasse platea dictumst. Etiam sit amet diam. Suspendisse odio. Suspendisse nunc. In semper bibendum libero.</p>'
+   , '<p>Proin nonummy, lacus eget pulvinar lacinia, pede felis dignissim leo, vitae tristique magna lacus sit amet eros. Nullam ornare. Praesent odio ligula, dapibus sed, tincidunt eget, dictum ac, nibh. Nam quis lacus. Nunc eleifend molestie velit. Morbi lobortis quam eu velit. Donec euismod vestibulum massa. Donec non lectus. Aliquam commodo lacus sit amet nulla. Cras dignissim elit et augue. Nullam non diam. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In hac habitasse platea dictumst. Aenean vestibulum. Sed lobortis elit quis lectus. Nunc sed lacus at augue bibendum dapibus.</p>'
+   , '<p>Aliquam vehicula sem ut pede. Cras purus lectus, egestas eu, vehicula at, imperdiet sed, nibh. Morbi consectetuer luctus felis. Donec vitae nisi. Aliquam tincidunt feugiat elit. Duis sed elit ut turpis ullamcorper feugiat. Praesent pretium, mauris sed fermentum hendrerit, nulla lorem iaculis magna, pulvinar scelerisque urna tellus a justo. Suspendisse pulvinar massa in metus. Duis quis quam. Proin justo. Curabitur ac sapien. Nam erat. Praesent ut quam.</p>'
+   , '<p>Vivamus commodo, augue et laoreet euismod, sem sapien tempor dolor, ac egestas sem ligula quis lacus. Donec vestibulum tortor ac lacus. Sed posuere vestibulum nisl. Curabitur eleifend fermentum justo. Nullam imperdiet. Integer sit amet mauris imperdiet risus sollicitudin rutrum. Ut vitae turpis. Nulla facilisi. Quisque tortor velit, scelerisque et, facilisis vel, tempor sed, urna. Vivamus nulla elit, vestibulum eget, semper et, scelerisque eget, lacus. Pellentesque viverra purus. Quisque elit. Donec ut dolor.</p>'
+   , '<p>Duis volutpat elit et erat. In at nulla at nisl condimentum aliquet. Quisque elementum pharetra lacus. Nunc gravida arcu eget nunc. Nulla iaculis egestas magna. Aliquam erat volutpat. Sed pellentesque orci. Etiam lacus lorem, iaculis sit amet, pharetra quis, imperdiet sit amet, lectus. Integer quis elit ac mi aliquam pretium. Nullam mauris orci, porttitor eget, sollicitudin non, vulputate id, risus. Donec varius enim nec sem. Nam aliquam lacinia enim. Quisque eget lorem eu purus dignissim ultricies. Fusce porttitor hendrerit ante. Mauris urna diam, cursus id, mattis eget, tempus sit amet, risus. Curabitur eu felis. Sed eu mi. Nullam lectus mauris, luctus a, mattis ac, tempus non, leo. Cras mi nulla, rhoncus id, laoreet ut.</p>'
+   , '<p>Donec imperdiet. Vestibulum auctor tortor at orci. Integer semper, nisi eget suscipit eleifend, erat nisl hendrerit justo, eget vestibulum lorem justo ac leo. Integer sem velit, pharetra in, fringilla eu, fermentum id, felis. Vestibulum sed felis. In elit. Praesent et pede vel ante dapibus condimentum. Donec magna. Quisque id risus. Mauris vulputate pellentesque leo. Duis vulputate, ligula at venenatis tincidunt, orci nunc interdum leo, ac egestas elit sem ut lacus. Etiam non diam quis arcu egestas commodo. Curabitur nec massa ac massa gravida condimentum. Aenean id libero. Pellentesque vitae tellus. Fusce lectus est, accumsan ac, bibendum sed, porta eget, augue. Etiam faucibus. Quisque tempus purus eu ante.</p>'
+   ,
+   );
+
+  return $text[rand(0,7)];
+
+}
+
+function  manhattanville_profile_generate_video() {
+  return '<iframe width="560" height="315" src="http://www.youtube.com/embed/CRdncAfENpY" frameborder="0" allowfullscreen></iframe>';
+}
+
+function manhattanville_profile_get_image() {
+
+   $img = array(
+     'n1.jpg'
+   , 'n2.jpg'
+   , 'n3.jpg'
+   );
+
+  return $img[rand(0,2)];
+
+}
