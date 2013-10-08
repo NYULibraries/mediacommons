@@ -12,6 +12,7 @@ Install make_local
 	drush dl make_local
 	
 Quick start
+============
 
 Clone the repo: git@github.com:NYULibraries/mediacommons.git
 
