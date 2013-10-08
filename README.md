@@ -16,6 +16,9 @@ Quick start
 
 Clone the repo: git@github.com:NYULibraries/mediacommons.git
 
+Configure and build
+============
+
 Configure the build script by copying the default template default.project.conf as project.conf and fill out the blanks
 
 	cp default.project.conf project.conf
