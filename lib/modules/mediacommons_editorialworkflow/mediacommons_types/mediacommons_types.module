@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the MediaCommons Types feature.
- */
-
-include_once 'mediacommons_types.features.inc';

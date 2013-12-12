@@ -1,7 +1,0 @@
-name = MediaCommons Editorial Workflow
-core = 7.x
-package = MediaCommons
-version = 7.x-1.0-beta3
-project = mediacommons_editorialworkflow
-
-dependencies[] = mediacommons_types

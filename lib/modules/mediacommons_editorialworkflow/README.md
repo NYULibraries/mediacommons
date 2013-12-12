@@ -1,2 +1,0 @@
-MediaCommons Editorial Workflow
-==============================

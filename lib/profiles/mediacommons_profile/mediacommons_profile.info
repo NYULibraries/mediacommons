@@ -1,5 +1,0 @@
-name = MediaCommons profile
-description = Installs Drupal with the MediaCommons feature and theme
-core = 7.x
-
-dependencies[] = mediacommons_editorialworkflow
