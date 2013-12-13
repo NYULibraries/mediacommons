@@ -63,7 +63,11 @@ fi
 
 . $CONF_FILE
 
-[ -d $BUILD_DIR ] || die "Build directory $BUILD_DIR does not exist" 
+[ -d $BUILD_DIR ] || die "Build directory $BUILD_DIR does not exist"
+
+if [ -z "$DRUPAL_ACCOUNT_PASS" -a "$DRUPAL_ACCOUNT_PASS"==" " ]; then
+  DRUPAL_ACCOUNT_PASS=`drush php-eval 'print MD5(microtime());'`
+fi
 
 echo Preparing new site using $MAKE_FILE
 
@@ -75,7 +79,7 @@ echo Install new site
 
 cd $BUILD_DIR/$BUILD_NAME
 
-drush -v site-install $DRUPAL_INSTALL_PROFILE_NAME --site-name="$DRUPAL_SITE_NAME" --account-name=$DRUPAL_ACCOUNT_NAME --account-mail=$DRUPAL_ACCOUNT_MAIL --site-mail=$DRUPAL_SITE_MAIL --db-url=$DRUPAL_SITE_DB_TYPE://$DRUPAL_SITE_DB_USER:$DRUPAL_SITE_DB_PASS@$DRUPAL_SITE_DB_ADDRESS/$DRUPAL_DB_NAME
+drush -v site-install $DRUPAL_INSTALL_PROFILE_NAME --site-name="$DRUPAL_SITE_NAME" --account-pass="$DRUPAL_ACCOUNT_PASS" --account-name=$DRUPAL_ACCOUNT_NAME --account-mail=$DRUPAL_ACCOUNT_MAIL --site-mail=$DRUPAL_SITE_MAIL --db-url=$DRUPAL_SITE_DB_TYPE://$DRUPAL_SITE_DB_USER:$DRUPAL_SITE_DB_PASS@$DRUPAL_SITE_DB_ADDRESS/$DRUPAL_DB_NAME
 
 cd $BUILD_DIR/$BUILD_NAME/sites/all/themes/mediacommons_base
 
