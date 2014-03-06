@@ -3,14 +3,10 @@ MediaCommons README
 
 # Building the Drupal Distribution
 
-Install drush 5.9.0. (drush make-local fail with drush 6)
+Install drush
 
-	pear install drush/drush-5.9.0
-    
-Install make_local
+	pear install drush/drush
 
-	drush dl make_local
-	
 Quick start
 ============
 
@@ -25,7 +21,7 @@ Configure the build script by copying the default template default.project.conf 
 
 Build the drupal distribution, e.g.
 
-	sh dev_scripts/deploy_build.sh mediacommons.make
+	sh scripts/deploy_build.sh mediacommons.make
 
 
 
