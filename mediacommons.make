@@ -7,11 +7,11 @@ projects[drupal][version] = "7.x"
 ; Modules
 projects[auto_nodetitle][version] = "1.0"
 
-projects[ctools][version] = "1.3"
+projects[ctools][version] = "1.4"
 
 projects[context][version] = "3.0-beta7"
 
-projects[date][version] = "2.6"
+projects[date][version] = "2.7"
 
 projects[devel][version] = "1.3"
 
@@ -23,7 +23,7 @@ projects[entity][version] = "1.2"
 
 projects[features_extra][version] = "1.0-beta1"
 
-projects[features][version] = "2.0-rc3"
+projects[features][version] = "2.0"
 
 projects[media][version] = "1.3"
 
@@ -53,13 +53,13 @@ projects[libraries][version] = "2.1"
 
 projects[references][version] = "2.1"
 
-projects[video_embed_field][version] = "2.0-beta5"
+projects[video_embed_field][version] = "2.0-beta7"
 
 projects[views][version] = "3.7"
 
 ; Themes
 
-projects[rubik][version] = "4.0-beta9"
+projects[rubik][version] = "4.0-rc1"
 
 projects[tao][version] = "3.0-beta4"
 
