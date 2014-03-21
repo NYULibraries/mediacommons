@@ -85,6 +85,8 @@ cd $BUILD_DIR/$BUILD_NAME/sites/all/themes/mediacommons_base
 
 echo Compile CSS
 
+bundle install
+
 compass compile --force .
 
 # Test if site is up and running

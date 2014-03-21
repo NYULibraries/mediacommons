@@ -59,9 +59,9 @@ projects[views][version] = "3.7"
 
 ; Themes
 
-projects[rubik][version] = "4.0-rc1"
+projects[rubik][version] = "4.0"
 
-projects[tao][version] = "3.0-beta4"
+projects[tao][version] = "3.1"
 
 projects[mediacommons_editorialworkflow][download][type] = "git"
 projects[mediacommons_editorialworkflow][download][url] = "https://github.com/NYULibraries/mediacommons_editorialworkflow.git"
