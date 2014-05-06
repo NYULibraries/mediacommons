@@ -35,13 +35,13 @@ while test $# -gt 0; do
       echo "-c, --configuration=example.conf    specify the configuration file to use"
       exit 0
     ;;
-    
+
     -c|--configuration)
       CONF_FILE=$2
       MAKE_FILE=$3
       shift
     ;;
-    
+
     *)
       break
     ;;
@@ -84,8 +84,6 @@ drush -v site-install $DRUPAL_INSTALL_PROFILE_NAME --site-name="$DRUPAL_SITE_NAM
 cd $BUILD_DIR/$BUILD_NAME/sites/all/themes/mediacommons_base
 
 echo Compile CSS
-
-bundle install
 
 compass compile --force .
 

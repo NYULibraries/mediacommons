@@ -1,0 +1,34 @@
+<?php
+
+$base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';
+
+function mediacommons_mc_import_init() {
+
+  $commands = array(
+    array(
+      'label' => t('Migrate front page content'),
+      'callback' => array(
+        'mediacommons_mc_import_test',
+      ),
+    ),
+
+    array(
+      'label' => t('Delete all front page nodes and files'),
+      'callback' => array(
+        'mediacommons_mc_import_delete_content',
+        'mediacommons_base_import_delete_files',
+      ),
+    ),    
+    
+  );
+  
+  mediacommons_base_import_init(
+    array('commands' => $commands )
+  );
+  
+}
+
+if (file_exists($base_file)) {
+  include_once($base_file);
+  mediacommons_mc_import_init();
+}

@@ -348,7 +348,7 @@ function mediacommons_base_import_create_spoke(array $old_node) {
       'alias' => $path_alias->dst, // The URL alias.
     );
         
-    path_save(&$path);
+    path_save($path);
         
     mediacommons_base_import_comment($new_node->nid, $old_node->onid);
         
@@ -466,27 +466,6 @@ function mediacommons_base_import_create_hub(array $old_node) {
     'format' => 'full_html',
   );
         
-  /** 
-   * Media type 
-   * Hubs no longer have media type
-   */
-  //if (isset($old_node->field_type)) {
-  //  $new_node->field_type[$old_node->language][0]['value'] = $old_node->field_type;
-  //}
-      
-  /**
-   * Tags 
-   * Hubs no longer have tags
-   */
-  //if (isset($old_node->field_tags)) {
-    //$new_node->field_tags = array();
-    //foreach ($old_node->field_tags as $tag_id) {
-      //if ($tag = mediacommons_base_import_find_term_id($tag_id)) {
-        //$new_node->field_tags[$old_node->language][] = array('tid' => $tag);
-      //}
-    //}
-  //}
-  
   /**
    * Contributors
    */
@@ -615,7 +594,7 @@ function mediacommons_base_import_create_hub(array $old_node) {
       'alias' => $path_alias->dst, // The URL alias.
     );
 
-    path_save(&$path);
+    path_save($path);
         
     mediacommons_base_import_comment($new_node->nid, $old_node->onid);
         
