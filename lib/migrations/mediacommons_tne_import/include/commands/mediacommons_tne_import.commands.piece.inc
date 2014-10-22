@@ -114,7 +114,9 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
      * Tags
      */
     foreach (explode(', ', $spoke->terms) as $tid) {
-      $node['field_tags'][] = $tid;
+      // $node['field_tags'][] = $tid;
+      $node['field_taxonomy'][] = $tid;      
+      
     }
       
     /** Additional authors */
