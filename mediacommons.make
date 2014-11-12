@@ -47,3 +47,15 @@ projects[zen][version] = "5.5"
 projects[mediacommons][download][type] = "git"
 projects[mediacommons][download][url] = "https://github.com/lhenze/mediacommons.git"
 projects[mediacommons][type] = "theme"
+
+; Libraries
+
+libraries[Mobile_Detect][download][type] = "git"
+libraries[Mobile_Detect][download][url] = "https://github.com/serbanghita/Mobile-Detect.git"
+libraries[Mobile_Detect][directory_name] = "Mobile_Detect"
+libraries[Mobile_Detect][type] = "library"
+
+libraries[flexslider][download][type] = "git"
+libraries[flexslider][download][url] = "https://github.com/woothemes/FlexSlider.git"
+libraries[flexslider][directory_name] = "flexslider"
+libraries[flexslider][type] = "library"
