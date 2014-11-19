@@ -1,7 +1,5 @@
-MediaCommons README
+MediaCommons build and migration
 ============
-
-# Building the Drupal Distribution
 
 <a href="https://github.com/drush-ops/drush">Drush</a> is require to run the script, you also need to have <a href="http://compass-style.org/">Compass</a> to compile the default theme SASS into CSS.
 
