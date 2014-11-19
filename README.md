@@ -13,6 +13,3 @@ Configure the build script by copying the default template default.project.conf 
 Build the drupal distribution, e.g.
 
 	sh scripts/deploy_build.sh mediacommons.make
-
-
-

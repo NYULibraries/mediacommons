@@ -49,9 +49,13 @@ while test $# -gt 0; do
   esac
 done
 
+echo $1
+
 [ -f $CONF_FILE ] || die "Configuration file does not exist"
 
 [ -f $MAKE_FILE ] || die "Please provide make file"
+
+[ ! -z  $MAKE_FILE ] || die "Please provide make file"
 
 CONF_PERM=`ls -l $CONF_FILE | awk '{print $1}'`
 
@@ -83,11 +87,24 @@ cd $BUILD_DIR/$BUILD_NAME
 
 drush -v site-install $DRUPAL_INSTALL_PROFILE_NAME --site-name="$DRUPAL_SITE_NAME" --account-pass="$DRUPAL_ACCOUNT_PASS" --account-name=$DRUPAL_ACCOUNT_NAME --account-mail=$DRUPAL_ACCOUNT_MAIL --site-mail=$DRUPAL_SITE_MAIL --db-url=$DRUPAL_SITE_DB_TYPE://$DRUPAL_SITE_DB_USER:$DRUPAL_SITE_DB_PASS@$DRUPAL_SITE_DB_ADDRESS/$DRUPAL_DB_NAME
 
-# cd $BUILD_DIR/$BUILD_NAME/sites/all/themes/mediacommons_base
+# Reuse code that has been linked in the lib folder
+sh $DIR/link_build.sh
 
-# echo Compile CSS
+# remove text files and rename install.php to install.php.off
+sh $DIR/cleanup.sh
 
-# compass compile --force .
+if [ -d $BUILD_DIR/$BUILD_NAME/sites/all/themes/mediacommons ]
+  then 
+  
+    echo Compile CSS
+
+    cd $BUILD_DIR/$BUILD_NAME/sites/all/themes/mediacommons
+    
+    bundle install
+    
+    compass compile --force .
+
+fi
 
 # Test if site is up and running
 
