@@ -3,14 +3,7 @@ MediaCommons README
 
 # Building the Drupal Distribution
 
-Install drush
-
-	pear install drush/drush
-
-Quick start
-============
-
-Clone the repo: git@github.com:NYULibraries/mediacommons.git
+<a href="https://github.com/drush-ops/drush">Drush</a> is require to run the script
 
 Configure and build
 ============
