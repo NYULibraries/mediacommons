@@ -49,8 +49,6 @@ while test $# -gt 0; do
   esac
 done
 
-echo $1
-
 [ -f $CONF_FILE ] || die "Configuration file does not exist"
 
 [ -f $MAKE_FILE ] || die "Please provide make file"
@@ -81,17 +79,17 @@ drush -v make --prepare-install $MAKE_FILE $BUILD_DIR/$BUILD_NAME
 
 [ -d $BUILD_DIR/$BUILD_NAME ] || die "Unable to install new site. Build does not exist" 
 
+# Reuse code that has been linked in the lib folder
+sh $DIR/link_build.sh $BUILD_DIR/$BUILD_NAME
+
 echo Install new site
 
 cd $BUILD_DIR/$BUILD_NAME
 
 drush -v site-install $DRUPAL_INSTALL_PROFILE_NAME --site-name="$DRUPAL_SITE_NAME" --account-pass="$DRUPAL_ACCOUNT_PASS" --account-name=$DRUPAL_ACCOUNT_NAME --account-mail=$DRUPAL_ACCOUNT_MAIL --site-mail=$DRUPAL_SITE_MAIL --db-url=$DRUPAL_SITE_DB_TYPE://$DRUPAL_SITE_DB_USER:$DRUPAL_SITE_DB_PASS@$DRUPAL_SITE_DB_ADDRESS/$DRUPAL_DB_NAME
 
-# Reuse code that has been linked in the lib folder
-sh $DIR/link_build.sh
-
 # remove text files and rename install.php to install.php.off
-sh $DIR/cleanup.sh
+sh $DIR/cleanup.sh $BUILD_DIR/$BUILD_NAME
 
 if [ -d $BUILD_DIR/$BUILD_NAME/sites/all/themes/mediacommons ]
   then 
@@ -108,9 +106,16 @@ fi
 
 # Test if site is up and running
 
-STATUS=`curl -s -o /dev/null -w "%{http_code}" $BASE_URL`
+STATUS=`curl -s -o /dev/null -w "%{http_code}" $BASE_URL/`
 
 if [ "$STATUS" != "404" ] 
   then 
-  echo Build done. Status report $STATUS
+  echo Build done
+  echo Build path $BUILD_DIR/$BUILD_NAME
+  echo Base URL $BASE_URL Status report $STATUS
+  
+  if [ "$STATUS" == "200" ] 
+    then 
+      drush uli --root=$BUILD_DIR/$BUILD_NAME --uri=$BASE_URL/
+    fi    
 fi

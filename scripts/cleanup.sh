@@ -5,37 +5,28 @@ die () {
   exit 1
 }
 
-SOURCE="${BASH_SOURCE[0]}"
+BUILD=$1
 
-# resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do 
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve it relative to the path where
-  # the symlink file was located
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
+[ ! -z  $BUILD ] || die "Please provide build derectory path"
 
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+[ -d $BUILD ] || die "Build directory $BUILD does not exist"
 
-LIBRARY="$(dirname "$DIR")"/lib
+[ ! `grep -q 'DRUPAL_ROOT' $BUILD/index.php` ] || die "$BUILD does not look like a Drupal installation folder."
 
-. $DIR/../project.conf
+mv $BUILD/robots.txt $BUILD/robots.txt.bk
 
-[ -d $LIBRARY ] || die "Library directory $LIBRARY does not exist"
+# remove any file that can easily "reveal" (not prevent) our Drupal set-up
+rm $BUILD/*.txt
 
-[ -d $BUILD_DIR ] || die "Build directory $BUILD_DIR does not exist" 
+# we run on Apache; no need for IIS configuration file
+rm $BUILD/web.config
 
-[ -d $BUILD_DIR/$BUILD_NAME ] || die "Build directory $BUILD_DIR/$BUILD_NAME does not exist" 
+# do the robot
+mv $BUILD/robots.txt.bk $BUILD/robots.txt
 
-cd $BUILD_DIR/$BUILD_NAME
+# keep the file around
+mv $BUILD/install.php $BUILD/install.php.off
 
-mv robots.txt robots.txt.bk
+# but no one should read it (unless super user)
+chmod 000 $BUILD/install.php.off
 
-rm *.txt
-
-mv robots.txt.bk robots.txt
-
-mv install.php install.php.off
-
-cd -
