@@ -36,6 +36,7 @@ for site_dir in "${site_dirs[@]}"
     for dir in $LIBRARY/${site_dir}/*
       do
         base=${dir##*/}
+        echo $base
         if [ -d $BUILD_DIR/$BUILD_NAME/sites/all/${site_dir}/${base} ] && [ -d $LIBRARY/${site_dir}/${base} ]
           then
             rm -rf $BUILD_DIR/$BUILD_NAME/sites/all/${site_dir}/${base}
