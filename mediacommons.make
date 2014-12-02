@@ -30,6 +30,8 @@ projects[strongarm][version] = "2.0"
 projects[token][version] = "1.5"
 projects[views][version] = "3.8"
 projects[admin_menu][version] = "3.0-rc4"
+projects[field_group][version] = "1.4"
+projects[devel][version] = "1.5"
 
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
