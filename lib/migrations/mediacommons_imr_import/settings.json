@@ -1,7 +1,7 @@
 {
     "name": "mediacommons_imr_import",
     "version": "0.0.1",
-    "environment" : "local",
+    "environment" : "production",
     "dependencies": [
         "mediacommons_editorialworkflow"
     ],
@@ -10,7 +10,7 @@
             "url" : "http://localhost/imr/"
         },
         "development" : {
-            "url" : "http://dev-dl-pa.home.nyu.edu/imr/"
+            "url" : "http://devmc.dlib.nyu.edu/redesign/imr/"
         },
         "production" : {
             "url" : "http://mediacommons.futureofthebook.org/imr/"

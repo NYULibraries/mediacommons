@@ -6,12 +6,15 @@ function mediacommons_tne_import_init() {
 
   $commands = array(
     array(
-      'label' => t('Import TNE D6 Content (all the stepts)'),
+      'label' => t('Import all TNE D6 Content'),
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
         'mediacommons_base_import_generate_terms',
         'mediacommons_base_import_generate_roles',
         'mediacommons_base_import_generate_all_users',
+        'mediacommons_tne_import_migrate_all_contributed_pieces',        
+        'mediacommons_tne_import_migrate_all_clusters',        
+        'mediacommons_tne_import_migrate_all_response',        
       ),
     ),
     array(

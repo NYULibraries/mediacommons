@@ -5,11 +5,24 @@ $base_file = __DIR__ . '/../mediacommons_base_import/' . 'mediacommons_base_impo
 function mediacommons_altac_import_init() {
 
   $commands = array(
+
+    array(
+      'label' => t('Import all ALT-AC D6 Content'),
+      'callback' => array(
+        'mediacommons_base_import_generate_vocabulary',
+        'mediacommons_base_import_generate_terms',
+        'mediacommons_base_import_generate_roles',
+        'mediacommons_base_import_generate_all_users',
+        'mediacommons_altac_import_migrate_all_contributed_pieces',        
+        'mediacommons_altac_import_migrate_all_clusters',        
+        'mediacommons_altac_import_migrate_all_response',        
+      ),
+    ),
     
-    //array(
-    //  'label' => t('Import D6 Content (all the stepts)'),
-    //  'callback' => array(),
-    //),
+    array(
+      'label' => t('Import D6 Content (all the stepts)'),
+      'callback' => array(),
+    ),
     
     array(
       'label' => t('Migrate Contributed Pieces'),
@@ -39,13 +52,6 @@ function mediacommons_altac_import_init() {
         'mediacommons_base_import_delete_alias'
       ),
     ),
-    
-    //array(
-    //  'label' => t('Run test'),
-    //  'callback' => array(
-    //    'mediacommons_altac_import_quickhack'
-    //  ),
-    //),
     
   );
   

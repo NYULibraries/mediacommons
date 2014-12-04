@@ -38,6 +38,7 @@
  * );
  */
 function mediacommons_base_import_d6_configured() {
+
   global $databases;
 
   if (isset($databases['drupal6'])) {
@@ -215,8 +216,8 @@ function mediacommons_base_import_show_options(array $commands = array()) {
 
 function mediacommons_base_import_init(array $options = array()) {
 
-	// We need extra memory for GD
-	ini_set("memory_limit", "512MM");
+  // We need extra memory for GD
+  ini_set("memory_limit", "512MM");
 	
   mediacommons_base_import_d6_configured();
 
@@ -224,6 +225,8 @@ function mediacommons_base_import_init(array $options = array()) {
 
   $caller = (isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__);
   
+  $task = drush_get_option('task');
+
   $default_commands = mediacommons_base_import_default_commands();
   
   $commands = array_merge($default_commands, $options['commands']);
@@ -238,8 +241,26 @@ function mediacommons_base_import_init(array $options = array()) {
   
   mediacommons_base_import_prepare($caller);
   
-  if (isset($args[1])) {
-    mediacommons_base_import_run($args[1], $commands);
+  if ( $task ) {
+    
+    $action = FALSE;
+    
+    foreach ($commands as $key => $command) {
+      
+      if ($commands[$key]['label'] == $task) {
+        $action = $key;
+      }
+      
+    }
+    
+    if ($action) {
+      mediacommons_base_import_run($action, $commands);
+    }
+    
+    else {
+      drush_log('Unable to load task', 'error');
+    }
+    
   }
   else {
     mediacommons_base_import_show_options($commands);
@@ -254,5 +275,7 @@ $caller = (isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__);
  * This script is meant to be "extended", not to be used by itself. 
  */
 if (preg_match('/core.drush.inc/', $caller)) {
-  drush_print(t('Mama told me never talk to strangers!'));
+
+  drush_print(t('Mama\' told me never talk to strangers!'));
+  
 }

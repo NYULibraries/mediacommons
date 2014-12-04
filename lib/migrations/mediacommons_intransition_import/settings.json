@@ -1,7 +1,7 @@
 {
     "name": "mediacommons_intransition_import",
     "version": "0.0.1",
-    "environment" : "local",
+    "environment" : "production",
     "dependencies": [
         "mediacommons_editorialworkflow"
     ],

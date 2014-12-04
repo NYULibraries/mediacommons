@@ -7,10 +7,10 @@
     ],
     "settings" : {
         "local" : {
-            "url" : "http://localhost/alt-ac/"
+            "url" : "http://localhost:8000/alt-ac/"
         },
         "development" : {
-            "url" : "http://devmc.dlib.nyu.edu/alt-ac/"
+            "url" : "http://devmc.dlib.nyu.edu/redesign/alt-ac/"
         },
         "production" : {
             "url" : "http://mediacommons.futureofthebook.org/alt-ac/"

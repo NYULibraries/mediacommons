@@ -3,14 +3,14 @@
 /**
  * Test callback
  */
-function mediacommons_imr_import_test() {
+function mediacommons_intransition_import_test() {
   drush_print('Running test command at ' . date('Y-m-j H:i:s', time()));
 }
 
 /**
  * Echo 5 random Hubs and generate the link for prodcution site and dev
  */
-function mediacommons_imr_import_test_content() {
+function mediacommons_intransition_import_test_content() {
 
   global $settings;
   
@@ -43,12 +43,12 @@ function mediacommons_imr_import_test_content() {
 /**
  * Migrate Theme Weeks.
  */
-function mediacommons_imr_import_migrate_theme_weeks() {
+function mediacommons_intransition_import_migrate_theme_weeks() {
   
   /**
    * Load data, this will take time; go get yourself a coffee 
    */
-  $data = mediacommons_imr_import_d6_theme_week_list();
+  $data = mediacommons_intransition_import_d6_theme_week_list();
 
   /**
    * If we have $data proceed 
@@ -62,7 +62,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
        */
       $node = array();
 
-      $node['title'] =  mediacommons_imr_import_theme_weeks_title($hub->title);
+      $node['title'] =  mediacommons_intransition_import_theme_weeks_title($hub->title);
 
       $node['ouid'] = $hub->uid;
 
@@ -141,13 +141,13 @@ function mediacommons_imr_import_migrate_theme_weeks() {
       $node['field_contributors'] = array();
              
       foreach ($node['field_spokes'] as $onid) {
-        $node['field_contributors'][] = mediacommons_imr_import_d6_uid_by_node($onid);
+        $node['field_contributors'][] = mediacommons_intransition_import_d6_uid_by_node($onid);
       }
       
       /**
        * Subtract the dates from the title of the Theme Week
        */
-      $dates = mediacommons_imr_import_find_hub_dates($hub->title);
+      $dates = mediacommons_intransition_import_find_hub_dates($hub->title);
 
       /** 
        * Dates
@@ -157,10 +157,6 @@ function mediacommons_imr_import_migrate_theme_weeks() {
          isset($dates['start']) && 
          isset($dates['end'])
        ) {
-       
-        // Y-m-d H:i:s
-        // $node['field_period_1'] = date('Y-m-d', strtotime($dates['start']));
-        // $node['field_period_2'] = date('Y-m-d', strtotime($dates['end']));
         $node['field_period_1'] = strtotime($dates['start']);
         $node['field_period_2'] = strtotime($dates['end']);
       }
@@ -168,20 +164,18 @@ function mediacommons_imr_import_migrate_theme_weeks() {
     }
   }
   
-  drush_print(
-    t('Done')
-  );
+  drush_print( t('Done') );
 }
 
 /**
  * Migrate IMR post.
  */
-function mediacommons_imr_import_migrate_posts() {
+function mediacommons_intransition_import_migrate_posts() {
 
   /**
    * Load data, this will take time; go get yourself a coffee 
    */
-  $data = mediacommons_imr_import_d6_post_list();
+  $data = mediacommons_intransition_import_d6_post_list();
 
   /** 
    * If we have $data proceed 
@@ -289,7 +283,7 @@ function mediacommons_imr_import_migrate_posts() {
 /**
  * Callback to set any non-standard MC distribution field
  */
-function mediacommons_imr_import_extend_fields() {
+function mediacommons_intransition_import_extend_fields() {
   return array(
     'field_embed',
   );
@@ -298,7 +292,7 @@ function mediacommons_imr_import_extend_fields() {
 /**
  * Title include Theme Week dates; remove the dates from the title
  */
-function mediacommons_imr_import_theme_weeks_title($title_source) {
+function mediacommons_intransition_import_theme_weeks_title($title_source) {
 
   $title_source = trim($title_source);
 
@@ -316,7 +310,7 @@ function mediacommons_imr_import_theme_weeks_title($title_source) {
  * Crazy but the only realible source of dates is the title 
  * of the Theme Week
  */
-function mediacommons_imr_import_find_hub_dates($date_source) {
+function mediacommons_intransition_import_find_hub_dates($date_source) {
 
   $start_month = $end_month = $start_day = $end_day = NULL;
   

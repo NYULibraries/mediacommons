@@ -1,7 +1,7 @@
 <?php
 
 /** Implements hook_schema(). */
-function mediacommons_imr_import_schema() {
+function mediacommons_intransition_import_schema() {
 
   $schema = array();
 

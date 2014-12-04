@@ -2,28 +2,30 @@
 
 $base_file = __DIR__ . '/../mediacommons_base_import/' . 'mediacommons_base_import.module';
 
-function mediacommons_imr_import_init() {
+function mediacommons_intransition_import_init() {
 
   $commands = array(
     array(
-      'label' => t('Import IMR D6 Content (all the stepts)'),
+      'label' => t('Migrate Intransition Content'),
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
         'mediacommons_base_import_generate_terms',   
         'mediacommons_base_import_generate_roles',             
         'mediacommons_base_import_generate_all_users',
+        'mediacommons_intransition_import_migrate_posts',        
+        'mediacommons_intransition_import_migrate_theme_weeks',
       ),
     ),
     array(
       'label' => t('Migrate posts'),
       'callback' => array(
-        'mediacommons_imr_import_migrate_posts',
+        'mediacommons_intransition_import_migrate_posts',
       ),
     ),
     array(
       'label' => t('Migrate Theme Weeks'),
       'callback' => array(
-        'mediacommons_imr_import_migrate_theme_weeks'
+        'mediacommons_intransition_import_migrate_theme_weeks'
       ),
     ),
     array(
@@ -39,7 +41,7 @@ function mediacommons_imr_import_init() {
     array(
       'label' => t('Echo 5 random Hubs URL'),
       'callback' => array(
-        'mediacommons_imr_import_test_content',
+        'mediacommons_intransition_import_test_content',
       ),
     ),    
     array(
@@ -51,13 +53,14 @@ function mediacommons_imr_import_init() {
     
   );
 
-  mediacommons_base_import_init(
-    array('commands' => $commands)
-  );
+  mediacommons_base_import_init( array('commands' => $commands) );
 
 }
 
 if (file_exists($base_file)) {
+
   include_once($base_file);
-  mediacommons_imr_import_init();
+  
+  mediacommons_intransition_import_init();
+
 }

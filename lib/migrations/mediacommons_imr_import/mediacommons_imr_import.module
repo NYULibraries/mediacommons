@@ -6,12 +6,14 @@ function mediacommons_imr_import_init() {
 
   $commands = array(
     array(
-      'label' => t('Import IMR D6 Content (all the stepts)'),
+      'label' => t('Import IMR D6 Content'),
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
         'mediacommons_base_import_generate_terms',   
         'mediacommons_base_import_generate_roles',             
         'mediacommons_base_import_generate_all_users',
+        'mediacommons_imr_import_migrate_posts',
+        'mediacommons_imr_import_migrate_theme_weeks',        
       ),
     ),
     array(
@@ -23,7 +25,7 @@ function mediacommons_imr_import_init() {
     array(
       'label' => t('Migrate Theme Weeks'),
       'callback' => array(
-        'mediacommons_imr_import_migrate_theme_weeks'
+        'mediacommons_imr_import_migrate_theme_weeks',
       ),
     ),
     array(

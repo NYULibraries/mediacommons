@@ -1,6 +1,6 @@
 <?php
 
-function mediacommons_imr_import_d6_load_post( int $onid) {
+function mediacommons_intransition_import_d6_load_post( int $onid) {
   
   $type = 'post';
   
@@ -45,7 +45,7 @@ function mediacommons_imr_import_d6_load_post( int $onid) {
 
 }
 
-function mediacommons_imr_import_d6_post_list() {
+function mediacommons_intransition_import_d6_post_list() {
   
   $type = 'post';
   
@@ -89,7 +89,7 @@ function mediacommons_imr_import_d6_post_list() {
 
 }
 
-function mediacommons_imr_import_d6_theme_week_list() {
+function mediacommons_intransition_import_d6_theme_week_list() {
   
   $type = 'theme_week_page';
   
@@ -132,7 +132,7 @@ function mediacommons_imr_import_d6_theme_week_list() {
 
 }
 
-function mediacommons_imr_import_d6_uid_by_node($onid) {
+function mediacommons_intransition_import_d6_uid_by_node($onid) {
 
   $query = "SELECT uid FROM {node} WHERE nid = :onid";
 
@@ -143,7 +143,7 @@ function mediacommons_imr_import_d6_uid_by_node($onid) {
 
 }
 
-function mediacommons_imr_import_d6_theme_week_load($onid) {
+function mediacommons_intransition_import_d6_theme_week_load($onid) {
   
   $query = "
     SELECT
