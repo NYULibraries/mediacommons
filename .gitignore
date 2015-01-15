@@ -2,12 +2,14 @@
 
 .DS_Store
 .project
-project.conf
 .sass-cache
 settings.php
 settings.json
 *.local.make
 builds
+*.conf
+!default.project.conf
+!default.migrations.conf
 
 lib/modules/*
 lib/themes/*
