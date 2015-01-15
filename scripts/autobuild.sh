@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Don't use me! ... well do it if you know what you are doing.
+#
+# In theory I should work; but in practice I'm almost certain that I will
+# fail if you run me in a machine that does not looks like the one
+# I'm intended to run it. So, don't use me if you are not sure, I can 
+# easily get you into trouble.
+
 # Get the latest make file and do any other task before running jobs
 ./scripts/update.sh
 
