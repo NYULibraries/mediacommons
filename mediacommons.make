@@ -32,6 +32,7 @@ projects[views][version] = "3.8"
 projects[admin_menu][version] = "3.0-rc4"
 projects[devel][version] = "1.5"
 projects[field_group][version] = "1.4"
+projects[email][version] = "1.3"
 
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"

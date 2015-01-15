@@ -42,7 +42,8 @@ echo "Find and remove old databases used for sites migration from $DATABASES_DIR
 
 find $DATABASES_DIRECTORY -type f -name "*.sql" -exec rm {} \;
 
-# Sites back-up script runs around 4am
+# Rasan's script back up database production around 4am on mounted 
+# drive: /content/prod/pa/backup/mc/mysql
 
 # Copy over the latest production database shared and sites databases
 

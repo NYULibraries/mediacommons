@@ -1,5 +1,5 @@
 {
-    "name": "mediacommons_altac_import",
+    "name": "mediacommons_survey_import",
     "version": "0.0.1",
     "environment" : "local",
     "dependencies": [
@@ -7,13 +7,13 @@
     ],
     "settings" : {
         "local" : {
-            "url" : "http://localhost:8000/alt-ac/"
+            "url" : "http://local.example.com/"
         },
         "development" : {
-            "url" : "http://devmc.dlib.nyu.edu/redesign/alt-ac/"
+            "url" : "http://dev.example.com/"
         },
         "production" : {
-            "url" : "http://mediacommons.futureofthebook.org/alt-ac/"
+            "url" : "http://example.com/"
         }
     }
 }

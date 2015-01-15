@@ -5,6 +5,7 @@
 project.conf
 .sass-cache
 settings.php
+settings.json
 *.local.make
 builds
 

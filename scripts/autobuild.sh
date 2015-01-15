@@ -13,5 +13,4 @@
 
 ./scripts/deploy_build.sh -c mediacommons.conf mediacommons.make
 
-# migrate the content
 ./scripts/migrate_d6_to_d7.sh
