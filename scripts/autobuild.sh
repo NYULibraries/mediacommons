@@ -3,6 +3,9 @@
 # Get the latest make file and do any other task before running jobs
 ./scripts/update.sh
 
+# Do some house cleaning before running job
+./scripts/maintenances.sh
+
 # Takes care of grabbing the most recent production databases and import them 
 ./scripts/prepare.sh
 
