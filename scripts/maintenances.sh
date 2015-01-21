@@ -37,7 +37,6 @@ remove_if_symlink_does_not_link () {
   fi
 }
 
-# remove if a symlink in the same directory does not point to it
 disable_drupal_clean_url () {
   if [ -d $1 ]
     then

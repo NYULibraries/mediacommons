@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Don't use me! ... well do it if you know what you are doing.
+# Don't use me! ... well, do it if you know what you are doing.
 #
 # In theory I should work; but in practice I'm almost certain that I will
 # fail if you run me in a machine that does not looks like the one
