@@ -11,6 +11,7 @@ builds
 !default.project.conf
 !default.migrations.conf
 !default.build.conf
+.out
 
 lib/modules/*
 lib/themes/*
