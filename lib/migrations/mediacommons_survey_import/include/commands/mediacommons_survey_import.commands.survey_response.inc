@@ -11,140 +11,127 @@ function mediacommons_survey_import_migrate_all_survey_response() {
    * Migrate data
    */
   mediacommons_survey_import_migrate_survey_response( $nodes );
-  
+
 }
 
 function mediacommons_survey_import_migrate_survey_response( $data = array() ) {
-  
+
   /**
    * Files folder real path
    */
-  $dupal_public_file_path = variable_get('file_public_path', conf_path() . '/files');   
-  
-  foreach ($data as $key => $spoke) {
-  	
-    $path_alias = mediacommons_base_import_find_url_alias('node/' . $spoke->nid);
+	$dupal_public_file_path = variable_get('file_public_path', conf_path() . '/files');
 
-    /** 
-     * Find out if node is already in the system 
-     */
-    $node_exist = mediacommons_base_import_node_exists($spoke->nid);
+	foreach ( $data as $key => $spoke ) {
 
-    /**
-     * Find out if user is already in the system 
-     */
-    $author_uid = mediacommons_base_import_user_exists($spoke->uid);
+      $path_alias = mediacommons_base_import_find_url_alias('node/' . $spoke->nid);
 
-    /**
-     * Conditions to be meet before creating content
-     */
-    if ( $node_exist ) {
-      drush_log( t('Spoke "@title" already exist.', array('@title' => $spoke->title), 'warning' ) );
-      continue;
-    }
+      /**
+	   * Find out if node is already in the system
+	   */
+	  $node_exist = mediacommons_base_import_node_exists( $spoke->nid );
 
-    if ( !$author_uid ) {
-      drush_log( t("Can't import spoke @title author does not exist in system. Please make sure the author is created before creating content under his username", array('@title' => $spoke->title)), 'warning' );
-      continue;
-    }
-      
-    /**
-     * Prepare node
-     */
-    $node = array();
+	  /**
+	   * Find out if user is already in the system
+	   */
+	  $author_uid = mediacommons_base_import_user_exists($spoke->uid);
 
-    $node['title'] = $spoke->title;
+	  /**
+	   * Conditions to be meet before creating content
+	   */
+	  if ( $node_exist ) {
+		drush_log( t( 'Spoke "@title" already exist.', array('@title' => $spoke->title) ), 'status' );
+		continue;
+	  }
 
-    $node['ouid'] = $spoke->uid;
+	  if (!$author_uid) {
+		drush_log( t("Can't import spoke @title author does not exist in system. Please make sure the author is created before creating content under his username", array('@title' => $spoke->title) ), 'error' );
+		continue;
+	  }
 
-    $node['onid'] = $spoke->nid;
+	  /**
+	   * Prepare node
+	   */
+	  $node = array();
 
-    $node['language'] = LANGUAGE_NONE;
+	  $node['title'] = $spoke->title;
 
-    $node['date'] = date('Y-m-j H:i:s', $spoke->created);
+	  $node['ouid'] = $spoke->uid;
 
-    $node['status'] = $spoke->status;
+	  $node['onid'] = $spoke->nid;
 
-    $node['promote'] = $spoke->promote;
+	  $node['language'] = LANGUAGE_NONE;
 
-    $node['moderate'] = $spoke->moderate;
+	  $node['date'] = date('Y-m-j H:i:s', $spoke->created);
 
-    $node['sticky'] = $spoke->sticky;
-    
-    /**
-     * Attached images
-     * @var unknown_type
-     */
+	  $node['status'] = $spoke->status;
 
-    $node['field_attached_images'] = array();
-    
+	  $node['promote'] = $spoke->promote;
 
-    if ( isset( $spoke->images ) ) {
-    	
-      $images = explode(',', $spoke->images);
-    	
-      foreach ( (array) $images as $image ) {
-    	  
-    	$fid = (int) trim($image);
-    	  
-    	$attached_image = mediacommons_survey_import_d6_attached_images_by_fid( $fid );
-    	
-    	if ( $attached_image ) {
-    		
-    	  $find = str_replace("/", "\/", $image->filename);
-    	 
-    	  $pattern = "/" . $find . "/i";
+	  $node['moderate'] = $spoke->moderate;
 
-    	  preg_match($pattern, $node['field_body'], $matches);
+	  $node['sticky'] = $spoke->sticky;
 
-    	  if ( $matches ) {
+	  /**
+	   * Field body
+	   */
+	  if ( isset( $spoke->field_response_value ) ) {
+	    $node['field_body'] = $spoke->field_response_value;
+	  }
 
-    		$node['field_body'] = str_replace($matches[0], $dupal_public_file_path . '/' . basename($image->filepath), $node['field_body']);
+	  /**
+	   * References hub
+	   */
+	  if ( isset( $spoke->field_sr_reference_nid ) ) {
+	  	$node['field_part_of'] = array( $spoke->field_sr_reference_nid );
+	  }
 
-    		unset($matches);
+	  /**
+	   * Publication Status
+	   */
+	  $node['field_pubstat'] = $spoke->status;
 
-    	  } 
+	  /**
+	   * Attached images
+	   * @var unknown_type
+	   */
+	  $node['field_attached_images'] = array();
 
-    	  // $fe = str_replace("files/","", $attached_image->filepath);
+	  if ( isset( $spoke->images ) ) {
 
-    	  // $attached_image->filepath = 'files/' . urlencode($fe);
-    	  
-    	  $node['field_attached_images'][] = $attached_image;
+	  	$images = explode(',', $spoke->images);
 
-    	}
+	  	foreach ( (array) $images as $image ) {
 
-      }
+	  		$fid = (int) trim($image);
 
-    }
+	  		$attached_image = mediacommons_survey_import_d6_attached_images_by_fid( $fid );
 
-    /*
-     * Field body
-     */
-    if ( isset( $spoke->field_response_value ) ) {
+	  		if ( $attached_image ) {
 
-      $node['field_body'] = $spoke->field_response_value;
+	  			$find = str_replace("/", "\/", $image->filename);
 
-      $pattern = "/style=\"(.*)\"/i";
+	  			$pattern = "/" . $find . "/i";
 
-      preg_match($pattern, $node['field_body'], $matches);
+	  			preg_match($pattern, $node['field_body'], $matches);
 
-      if ( $matches ) {
-        
-      	$node['field_body'] = str_replace($matches[0], '', $node['field_body']);
-        
-      	unset( $matches );
-      	  
-      }
+	  			if ( $matches ) {
 
-    }
+	  				$node['field_body'] = str_replace($matches[0], $dupal_public_file_path . '/' . basename($image->filepath), $node['field_body']);
 
-    /*
-     * Publication Status
-     */
-    $node['field_pubstat'] = $spoke->status;
+	  				unset($matches);
 
-    mediacommons_base_import_create_spoke($node);
-    
-  }
+	  			}
 
-};
+	  			$node['field_attached_images'][] = $attached_image;
+
+	  		}
+
+	  	}
+
+	  }
+
+	  mediacommons_base_import_create_spoke($node);
+
+	}
+
+}

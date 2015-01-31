@@ -7,6 +7,7 @@ settings.php
 settings.json
 *.local.make
 builds
+
 *.conf
 !default.project.conf
 !default.migrations.conf
@@ -22,3 +23,9 @@ lib/scripts/*
 !lib/themes/README
 !lib/profiles/README
 !lib/scripts/README
+
+# Ignore Eclipse conf files
+.buildpath
+.settings/*
+
+*.sql

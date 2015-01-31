@@ -2,36 +2,30 @@
 
 function mediacommons_tne_import_migrate_all_contributed_pieces() {
 
-  /**
-   * Load data
-   */
   mediacommons_tne_import_migrate_contributed_pieces(
     mediacommons_tne_import_d6_contributed_pieces_list()
   );
 
 }
 
-/**
- * @TODO
- */
 function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
-  
+
   /**
    * Files folder real path
    */
-  $dupal_public_file_path = variable_get('file_public_path', conf_path() . '/files');   
-    
+  $dupal_public_file_path = variable_get('file_public_path', conf_path() . '/files');
+
   foreach ($data as $key => $spoke) {
-  	
+
     $path_alias = mediacommons_base_import_find_url_alias('node/' . $spoke->nid);
 
-    /** 
-     * Find out if node is already in the system 
+    /**
+     * Find out if node is already in the system
      */
     $node_exist = mediacommons_base_import_node_exists($spoke->nid);
 
     /**
-     * Find out if user is already in the system 
+     * Find out if user is already in the system
      */
     $author_uid = mediacommons_base_import_user_exists($spoke->uid);
 
@@ -41,7 +35,7 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
     if ($node_exist) {
       drush_print(
         t(
-          'Spoke "@title" already exist.', 
+          'Spoke "@title" already exist.',
           array('@title' => $spoke->title)
         )
       );
@@ -54,7 +48,7 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
       );
       continue;
     }
-      
+
     /**
      * Prepare node
      */
@@ -67,7 +61,7 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
     $node['onid'] = $spoke->nid;
 
     // $node['language'] = (!empty($spoke->language)) ? $spoke->language : LANGUAGE_NONE;
-    
+
     $node['language'] = LANGUAGE_NONE;
 
     $node['date'] = date('Y-m-j H:i:s', $spoke->created);
@@ -79,7 +73,7 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
     $node['moderate'] = $spoke->moderate;
 
     $node['sticky'] = $spoke->sticky;
-    
+
     /*
      * Field body
      */
@@ -92,7 +86,7 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
 
       if ($matches) {
         $node['field_body'] = str_replace($matches[0], '', $node['field_body']);
-        unset($matches);  
+        unset($matches);
       }
 
     }
@@ -105,7 +99,7 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
     /*
      * Tagline
      * @TODO: We don't have a migration path for this field. Ask Mark  about what we want to do with this
-     */    
+     */
     if (isset($spoke->field_tagline)) {
       $node['field_tagline'] = $spoke->field_tagline;
     }
@@ -115,10 +109,10 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
      */
     foreach (explode(', ', $spoke->terms) as $tid) {
       // $node['field_tags'][] = $tid;
-      $node['field_taxonomy'][] = $tid;      
-      
+      $node['field_taxonomy'][] = $tid;
+
     }
-      
+
     /** Additional authors */
     if ($spoke->additonal_authors) {
 
@@ -138,13 +132,13 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
       }
     }
 
-    /** 
+    /**
      * Representative image
      */
     if (isset($spoke->thumbnail_fid)) {
       $node['field_attached_images_ri'] = (object) array( 'fid' => $spoke->thumbnail_fid, );
     }
-      
+
     /**
      * Attached images
      * @var unknown_type
@@ -160,15 +154,15 @@ function mediacommons_tne_import_migrate_contributed_pieces($data = array()) {
       preg_match($pattern, $node['field_body'], $matches);
       if ($matches) {
         $node['field_body'] = str_replace($matches[0], $dupal_public_file_path . '/' . basename($image->filepath), $node['field_body']);
-        unset($matches);  
+        unset($matches);
       }
       if ($image->filename != '_original') {
         $image->skip = TRUE;
       }
     }
-      
+
     mediacommons_base_import_create_spoke($node);
-      
+
   }
 
 }
