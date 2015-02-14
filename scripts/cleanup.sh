@@ -29,4 +29,3 @@ mv $BUILD/install.php $BUILD/install.php.off
 
 # but no one should read it (unless super user)
 chmod 000 $BUILD/install.php.off
-

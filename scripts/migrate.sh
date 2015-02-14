@@ -89,8 +89,6 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
 
     chmod 777 $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
 
-    cp $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.old
-
     echo $DBSTRING >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
 
     chmod 755 $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php

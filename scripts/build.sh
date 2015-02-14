@@ -73,7 +73,7 @@ fi
 echo Prepare new site using $MAKE_FILE
 
 # download and prepare for the installation using make file
-drush $DEBUG make --prepare-install -y $MAKE_FILE $BUILD_DIR/$BUILD_NAME
+drush ${DEBUG} make --prepare-install -y ${MAKE_FILE} ${BUILD_DIR}/${BUILD_NAME}  --uri=${BASE_URL}
 
 [ -d $BUILD_DIR/$BUILD_NAME ] || die "Unable to install new site. Build does not exist" 
 
@@ -106,10 +106,17 @@ if [ $BUILD_BASE_NAME != $BUILD_NAME ]; then
   fi
 fi
 
+# instead of having a base them and child theme; mediaccomons theme try to do 
+# everything in just one theme, must assing this class 
+$DIR/theme_variable.sh ${BUILD_DIR}/${BUILD_NAME} ${DRUPAL_SPECIAL_BODY_CLASS}
+
 echo Build path $BUILD_DIR/$BUILD_NAME
 
 # do a quick status check
-$DIR/check_build.sh $BUILD_DIR/$BUILD_NAME $BASE_URL/
+$DIR/check_build.sh $BUILD_DIR/$BUILD_NAME $BASE_URL
+
+# share cookie
+echo "\$cookie_domain = '${COOKIE_DOMAIN}';" >> ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php
 
 if [ $MIGRATE ] ; then $DIR/migrate.sh -c $CONF_FILE $DEBUG ; fi
 

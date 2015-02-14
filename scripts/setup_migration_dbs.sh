@@ -26,13 +26,13 @@ CONF_FILE=$DIR/../migrations.conf
 
 BUILD=$1
 
-MIGRATIONG_NAME=`echo $2 | sed 's/[^a-zA-Z]//ig'`
+MIGRATIONG_NAME=`echo $2 | sed 's/[^a-zA-Z]//g'`
 
 DBSTRING="\$databases['drupal6'] = array("
 DBSTRING+="'default' => array("
 DBSTRING+="'database' => 'migration_d6_$MIGRATIONG_NAME',"
 DBSTRING+="'username' => '$DATABASES_DB_USER',"
-DBSTRING+="'password' => '$DATABASES_DB_PASS',"
+DBSTRING+="'password' => '$DRUPAL_SITE_DB_PASS',"
 DBSTRING+="'host' => 'localhost',"
 DBSTRING+="'port' => '3306',"
 DBSTRING+="'driver' => 'mysql',"
@@ -61,3 +61,9 @@ chmod 777 $BUILD/sites/default/settings.php
 cp $BUILD/sites/default/settings.php $BUILD/sites/default/settings.php.old
 
 echo $DBSTRING >> $BUILD/sites/default/settings.php
+
+chmod 755 $BUILD/sites/default/settings.php
+
+chmod 755 $BUILD/sites/default/settings.php.old
+
+exit 0

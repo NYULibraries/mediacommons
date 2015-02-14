@@ -48,7 +48,7 @@ for BUILD_NAME in `ls -1 | xargs -l readlink`
             SITE_ONLINE=`drush core-status --root=$BUILD_DIR/$BUILD_NAME --user=1`
             if [[ $SITE_ONLINE =~ "Connected" && $SITE_ONLINE =~ "Successful" ]]
               then
-                echo "[$TODAY] Successful and Connected - $BUILD_NAME "
+                echo "[$TODAY] Successful and Connected - $BUILD_NAME"
               else
                 drush status --root=$BUILD_DIR/$BUILD_NAME --user=1 | mail -s "[$TODAY] Fail - $BUILD_NAME" $EMAIL
             fi
