@@ -48,6 +48,9 @@ done
 . $CONF_FILE
 
 if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
+
+  echo $BUILD_DIR/$BUILD_BASE_NAME
+
   # check if this directory looks like Drupal 7
   MATCH=`grep -c 'DRUPAL_ROOT' $BUILD_DIR/$BUILD_BASE_NAME/index.php` 
   if [ $MATCH -gt 0 ]; then

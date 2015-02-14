@@ -32,22 +32,25 @@ cd $DIR/../
 ./scripts/prepare.sh
 
 # Build MediaCommons umbrella
-./scripts/deploy_build.sh -c mediacommons.conf mediacommons.make
+./scripts/build.sh -c configs/mediacommons.conf mediacommons.make -s
+
+# Build Field Guide
+./scripts/build.sh -c configs/fieldguide.conf mediacommons.make -s
 
 # Build The New Everyday
-./scripts/deploy_build.sh -c tne.conf mediacommons.make
+./scripts/build.sh -c configs/tne.conf mediacommons.make -s
 
 # Build Alt-Academy
-./scripts/deploy_build.sh -c alt-ac.conf mediacommons.make
+./scripts/build.sh -c configs/alt-ac.conf mediacommons.make -s
 
 # Build [in]Transition
-./scripts/deploy_build.sh -c intransition.conf mediacommons.make
+./scripts/build.sh -c configs/intransition.conf mediacommons.make -s
 
 # Build In Media Res
-./scripts/deploy_build.sh -c imr.conf mediacommons.make
+./scripts/build.sh -c configs/imr.conf mediacommons.make -s
 
 # Migrate the content of all the sites
-./scripts/migrate_d6_to_d7.sh
+# ./scripts/migrate.sh -c configs/alt-ac.conf
 
 # Run a basic test and report if error
-./scripts/report_error.sh
+# ./scripts/report_error.sh

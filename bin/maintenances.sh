@@ -73,12 +73,6 @@ CONF_FILE=$DIR/../build.conf
 
 CONF_PERM=`ls -l $CONF_FILE | awk '{print $1}'`
 
-# make this a bit more robust
-if [ "$CONF_PERM" != "-rwx------@" ]
-  then
-    echo "Please change configuration file permission to be read only by owner"
-fi
-
 . $CONF_FILE
 
 [ -d $BUILD_DIR ] || die "Build directory $BUILD_DIR does not exist"
