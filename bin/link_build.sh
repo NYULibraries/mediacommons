@@ -18,42 +18,66 @@ done
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+DEBUG=""
+
+while getopts ":c:hd" opt; do
+  case $opt in
+    c)
+      [ -f $OPTARG ] || die "Configuration file does not exist." 
+      CONF_FILE=$OPTARG
+      ;;
+    d)
+      DEBUG="-d -v"
+      ;;
+    h)
+      echo " "
+      echo " Usage: ./migrate.sh -c example.conf"
+      echo " "
+      echo " Options:"
+      echo "   -h           Show brief help"
+      echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
+      echo " "
+      exit 0
+      ;;
+  esac
+done
+
+[ $CONF_FILE ] || die "No configuration file provided."
+
+# load configuration file
+. $CONF_FILE
+
 LIBRARY="$(dirname "$DIR")"/lib
 
-. $DIR/../project.conf
+[ -d $LIBRARY ] || die "Library directory ${LIBRARY} does not exist"
 
-BUILD=$1
-
-[ -d $LIBRARY ] || die "Library directory $LIBRARY does not exist"
-
-[ ! -z  $BUILD ] || die "Please provide build derectory path"
-
-[ -d $BUILD ] || die "Build directory $BUILD does not exist"
-
-[ ! `grep -q 'DRUPAL_ROOT' $BUILD/index.php` ] || die "$BUILD does not look like a Drupal installation folder."
-
-echo Linking build $BUILD
-
-site_dirs=(modules themes)
-
-# find modules/themes and symlink them to the repo code
-for site_dir in "${site_dirs[@]}"
-  do
-    for dir in $LIBRARY/${site_dir}/*
+if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
+  # check if this directory looks like Drupal 7
+  MATCH=`grep -c 'DRUPAL_ROOT' $BUILD_DIR/$BUILD_BASE_NAME/index.php` 
+  if [ $MATCH -gt 0 ]; then
+    echo Linking build ${BUILD_DIR}/${BUILD_BASE_NAME}
+    site_dirs=(modules themes)
+    # find modules/themes and symlink them to the repo code
+    for site_dir in "${site_dirs[@]}"
       do
+        for dir in $LIBRARY/${site_dir}/*
+          do
+            base=${dir##*/}
+            if [ -d ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/all/${site_dir}/${base} ] && [ -d ${LIBRARY}/${site_dir}/${base} ]
+              then
+                rm -rf ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/all/${site_dir}/${base}
+                ln -s $LIBRARY/${site_dir}/${base} ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/all/${site_dir}/${base}
+            fi  
+      done
+    done
+    # find profiles and symlink them to the repo code
+    for dir in $LIBRARY/profiles/*
+      do 
         base=${dir##*/}
-        if [ -d $BUILD/sites/all/${site_dir}/${base} ] && [ -d $LIBRARY/${site_dir}/${base} ]
-          then
-            rm -rf $BUILD/sites/all/${site_dir}/${base}
-            ln -s $LIBRARY/${site_dir}/${base} $BUILD/sites/all/${site_dir}/${base}
-        fi  
-  done
-done
+        rm -rf ${BUILD_DIR}/${BUILD_BASE_NAME}/profiles/${base}
+        ln -s $LIBRARY/profiles/${base} ${BUILD_DIR}/${BUILD_BASE_NAME}/profiles/${base}    
+    done
+  fi
+fi
 
-# find profiles and symlink them to the repo code
-for dir in $LIBRARY/profiles/*
-  do 
-    base=${dir##*/}
-    rm -rf $BUILD/profiles/${base}
-    ln -s $LIBRARY/profiles/${base} $BUILD/profiles/${base}    
-done
+exit 0

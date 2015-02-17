@@ -1,8 +1,17 @@
 #!/bin/bash
 
 die () {
-  echo $1
-  exit 1
+  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
+  exit 1;
+}
+
+tell () { 
+  echo "file: ${0} | line: ${1} | step: ${2} | command: ${3}";
+}
+
+function is_drupal_online () {
+  SITE_ONLINE=`drush -d -v core-status --root=${BUILD_DIR}/${BUILD_NAME} --uri=${BASE_URL} --user=1`
+  if [[ $SITE_ONLINE =~ "Connected" ]] && [[ $SITE_ONLINE =~ "Successful" ]] ; then return 0 ; else return 1 ; fi
 }
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -11,16 +20,18 @@ SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do 
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve it relative to the path where
-  # the symlink file was located
+  # if $SOURCE was a relative symlink, we need to resolve it 
+  # relative to the path where the symlink file was located
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
+
+TODAY=`date +%Y%m%d`
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 DEBUG=""
 
-while getopts ":c:m:hdsi" opt; do
+while getopts ":c:m:hdsikt" opt; do
  case $opt in
   c)
    [ -f $OPTARG ] || die "Configuration file does not exist." 
@@ -36,8 +47,11 @@ while getopts ":c:m:hdsi" opt; do
   s)
     SASS=true
     ;;
-  i)
-    MIGRATE=true
+  k)
+    COOKIES=true
+    ;;
+  t)
+    SIMULATE=true
     ;;    
   h)
    echo " "
@@ -45,10 +59,11 @@ while getopts ":c:m:hdsi" opt; do
    echo " "
    echo " Options:"
    echo "   -h           Show brief help"
-   echo "   -i           Run migration script after install"
+   echo "   -k           Allow site to share cookies accross domain"   
    echo "   -s           Find SASS based themes and compile"   
    echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
    echo "   -m <file>    Specify the make file to use (e.g., -m example.make)."
+   echo "   -t           Tell all relevant actions (don't actually change the system)."
    echo " "  
    exit 0
    ;;
@@ -62,66 +77,141 @@ done
 # load configuration file
 . $CONF_FILE
 
-[ -w $BUILD_DIR ] || die "Unable to write to $BUILD_DIR directory"
+# Drupal need a valid email for user account
+DRUPAL_ACCOUNT_MAIL_VALID=$(echo ${DRUPAL_ACCOUNT_MAIL} | grep -E "^(([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))\.)*([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))@\w((-|\w)*\w)*\.(\w((-|\w)*\w)*\.)*\w{2,4}$")
 
-[ -d $BUILD_DIR ] || mkdir $BUILD_DIR
+if [ "x${DRUPAL_ACCOUNT_MAIL_VALID}" = "x" ]; then die ${LINENO} "test" "Fail: Drupal need a valid email for site account (${DRUPAL_ACCOUNT_MAIL})."; fi ;
 
-if [ -z "$DRUPAL_ACCOUNT_PASS" -a "$DRUPAL_ACCOUNT_PASS"==" " ]; then
-  DRUPAL_ACCOUNT_PASS=`drush php-eval 'print MD5(microtime());'`
-fi
+# Drupal need a valid email for site account
+DRUPAL_SITE_MAIL_VALID=$(echo ${DRUPAL_SITE_MAIL} | grep -E "^(([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))\.)*([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))@\w((-|\w)*\w)*\.(\w((-|\w)*\w)*\.)*\w{2,4}$")
 
-echo Prepare new site using $MAKE_FILE
+if [ "x${DRUPAL_SITE_MAIL_VALID}" = "x" ]; then die ${LINENO} "test" "Fail: Drupal need a valid email for site account (${DRUPAL_ACCOUNT_MAIL})."; fi ;
 
-# download and prepare for the installation using make file
-drush ${DEBUG} make --prepare-install -y ${MAKE_FILE} ${BUILD_DIR}/${BUILD_NAME}  --uri=${BASE_URL}
+[ -w $BUILD_DIR ] || die ${LINENO} "test" "Unable to write to ${BUILD_DIR} directory." ;
 
-[ -d $BUILD_DIR/$BUILD_NAME ] || die "Unable to install new site. Build does not exist" 
+STEP_1="mkdir ${BUILD_DIR}" ;
 
-# reuse code that has been linked in the lib folder
-$DIR/link_build.sh $BUILD_DIR/$BUILD_NAME
+if [ ! -d $BUILD_DIR ] ; then if [ ! $SIMULATE ] ; then eval $STEP_1 ; else tell ${LINENO} 1 "${STEP_1}" ; fi ; fi ;
 
-echo Install new site
+# read password from configuration file; if not available or empty assing $TODAY as a temporary password
+if [ -z ${DRUPAL_ACCOUNT_PASS} -a ${DRUPAL_ACCOUNT_PASS}=="" ]; then DRUPAL_ACCOUNT_PASS=${TODAY} ; fi ;
+  
+echo "Prepare new site using ${MAKE_FILE}." ;
 
-# this long string runs the site installation
-drush $DEBUG -y site-install $DRUPAL_INSTALL_PROFILE_NAME --site-name="$DRUPAL_SITE_NAME" --account-pass="$DRUPAL_ACCOUNT_PASS" --account-name=$DRUPAL_ACCOUNT_NAME --account-mail=$DRUPAL_ACCOUNT_MAIL --site-mail=$DRUPAL_SITE_MAIL --db-url=$DRUPAL_SITE_DB_TYPE://$DRUPAL_SITE_DB_USER:$DRUPAL_SITE_DB_PASS@$DRUPAL_SITE_DB_ADDRESS/$DRUPAL_DB_NAME --root=$BUILD_DIR/$BUILD_NAME
+# Step 2: Download and prepare for the installation using make file
+STEP_2="drush ${DEBUG} make --prepare-install -y ${MAKE_FILE} ${BUILD_DIR}/${BUILD_NAME} --uri=${BASE_URL}" ;
 
-chmod 777 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php
+if [ ! $SIMULATE ] ; then eval $STEP_2 ; else tell ${LINENO} 2 "${STEP_2}" ; fi ;
 
-chmod 777 $BUILD_DIR/$BUILD_NAME/sites/default
+if [ $? ] ; then echo "Successful: Downloaded and prepared for the installation using make ${MAKE_FILE} and cofiguration ${CONF_FILE}." ; else die ${LINENO} 2 "Fail: Download and prepare for the installation using make make ${MAKE_FILE} and cofiguration ${CONF_FILE}." ; fi ;
 
-# remove text files and rename install.php to install.php.off
-$DIR/cleanup.sh $BUILD_DIR/$BUILD_NAME
-
-# find SASS config.rb and compile the CSS file
-if [ $SASS ] ; then $DIR/sass.sh $BUILD_DIR/$BUILD_NAME ; fi
+if [ ! $SIMULATE ] ; then [ -d $BUILD_DIR/$BUILD_NAME ] || die ${LINENO} 2 "Unable to install new site, build ${BUILD_DIR}/${BUILD_NAME} does not exist." ; fi
 
 # link to the lastes build if BUILD_BASE_NAME it's different from BUILD_NAME
-if [ $BUILD_BASE_NAME != $BUILD_NAME ]; then
-  # build base name its a link?
-  if [[ -h $BUILD_DIR/$BUILD_BASE_NAME ]]; then
-    cd $BUILD_DIR
-    rm $BUILD_DIR/$BUILD_BASE_NAME
-    ln -s $BUILD_NAME $BUILD_BASE_NAME
-    cd -
+if [ ! $SIMULATE ] ; then 
+  if [ $BUILD_BASE_NAME != $BUILD_NAME ]; then
+    # build base name its a link?
+    if [[ -h $BUILD_DIR/$BUILD_BASE_NAME ]]; then
+      cd $BUILD_DIR
+      rm $BUILD_DIR/$BUILD_BASE_NAME
+      ln -s $BUILD_NAME $BUILD_BASE_NAME
+      cd -
+    fi
   fi
 fi
 
-# instead of having a base them and child theme; mediaccomons theme try to do 
-# everything in just one theme, must assing this class 
-$DIR/theme_variable.sh ${BUILD_DIR}/${BUILD_NAME} ${DRUPAL_SPECIAL_BODY_CLASS}
+ # Step 3: Reuse code that has been linked in the lib folder
+STEP_3="${DIR}/link_build.sh -c ${CONF_FILE}" ;
 
-echo Build path $BUILD_DIR/$BUILD_NAME
+if [ ! $SIMULATE ] ; 
+  then 
+    eval $STEP_3 ;
+    if [ $? ] ; then echo "Successful: Reuse code that has been linked in the lib folder." ; else die ${LINENO} 3 "Fail: Reuse code that has been linked in the lib folder." ; fi ; 
+  else 
+    tell ${LINENO} 3 "${STEP_3}" ;
+fi ;
 
-# do a quick status check
-$DIR/check_build.sh $BUILD_DIR/$BUILD_NAME $BASE_URL
+echo "Install new site" ;
 
-# share cookie
-echo "\$cookie_domain = '${COOKIE_DOMAIN}';" >> ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php
+# Step 4: Run the site installation
+STEP_4="drush ${DEBUG} -y site-install ${DRUPAL_INSTALL_PROFILE_NAME} --site-name='${DRUPAL_SITE_NAME}' --account-pass="${DRUPAL_ACCOUNT_PASS}" --account-name=${DRUPAL_ACCOUNT_NAME} --account-mail=${DRUPAL_ACCOUNT_MAIL} --site-mail=${DRUPAL_SITE_MAIL} --db-url=${DRUPAL_SITE_DB_TYPE}://${DRUPAL_SITE_DB_USER}:${DRUPAL_SITE_DB_PASS}@${DRUPAL_SITE_DB_ADDRESS}/${DRUPAL_DB_NAME} --root=${BUILD_DIR}/${BUILD_NAME}"
 
-if [ $MIGRATE ] ; then $DIR/migrate.sh -c $CONF_FILE $DEBUG ; fi
+if [ ! $SIMULATE ] ; 
+  then 
+    eval $STEP_4 ;
+    if [ $? ] ; then echo "Successful: Ran the site installation." ; else die ${LINENO} 4 "Fail: Run the site installation" ; fi ; 
+  else 
+    tell ${LINENO} 4 "${STEP_4}" ;
+fi ;
 
-chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php
+if [ ! $SIMULATE ] ; then if is_drupal_online ; then echo "Successful: Drupal is online" ; else die ${LINENO} "test" "Fail: Drupal is offline." ; fi ; fi; 
 
-chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default
+if [ -f $BUILD_DIR/$BUILD_NAME/sites/default/settings.php ] ; then
+  chmod 777 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php ;
+  if [ $? ] ; then echo "Successful: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; else die ${LINENO} "test" "Fail: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; fi ;    
+fi ;
+
+if [ -f $BUILD_DIR/$BUILD_NAME/sites/default ] ; then
+  chmod 777 $BUILD_DIR/$BUILD_NAME/sites/default ;
+  if [ $? ] ; then echo "Successful: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default permission to 777." ; else die ${LINENO} "test" "Fail: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default permission to 777." ; fi ;
+fi ;
+
+# Step 5: Remove text files and rename install.php to install.php.off
+STEP_5="${DIR}/cleanup.sh ${BUILD_DIR}/${BUILD_NAME}" ;
+
+if [ ! $SIMULATE ] ; 
+  then 
+    eval $STEP_5 ; 
+  if [ $? ] ; then echo "Successful: Remove text files and rename install.php to install.php.off." ; else die ${LINENO} 5 "Fail: Remove text files and rename install.php to install.php.off." ; fi ;
+  else 
+    tell ${LINENO} 5 "${STEP_5}" ; 
+fi ;
+
+# Step 6: Find SASS config.rb and compile the CSS file
+STEP_6="${DIR}/sass.sh ${BUILD_DIR}/${BUILD_NAME}" ;
+ 
+if [ ! $SIMULATE ] ; 
+  then 
+    if [ $SASS ] ;
+      then  
+        eval $STEP_6 ; 
+        if [ $? ] ; then echo "Successful: Find SASS config.rb and compile the CSS file." ; else die ${LINENO} 6 "Fail: Find SASS config.rb and compile the CSS file." ; fi ;
+      fi ;
+  else
+    tell ${LINENO} 6 "${STEP_6}" ;
+fi
+
+# Step 7: Share cookies
+STEP_7="${DIR}/cookies.sh -c ${CONF_FILE} -b ${BUILD_DIR}/${BUILD_NAME}"
+if [ ! $SIMULATE ] ; 
+  then
+    if [ $COOKIES ] ; 
+      then 
+        eval $STEP_7 ; 
+        if [ $? ] ; then echo "Successful: Share cookies." ; else die ${LINENO} 7 "Fail: Share cookies." ; fi ;
+    fi ;
+  else 
+    tell ${LINENO} 7 "${STEP_7}" ;
+fi ;
+
+# Step 8: Assing theme class
+STEP_8="${DIR}/theme_variable.sh ${BUILD_DIR}/${BUILD_NAME} ${DRUPAL_SPECIAL_BODY_CLASS}"
+
+if [ ! $SIMULATE ] ; 
+  then
+    eval $STEP_8 ; 
+    if [ $? ] ; then echo "Successful: Assing theme class." ; else die ${LINENO} 8 "Fail: Assing theme class." ; fi ;
+  else 
+    tell ${LINENO} 8 "${STEP_8}" ;
+fi ;
+
+if [ ! $SIMULATE ] ; 
+  then
+    # do a quick status check
+    $DIR/check_build.sh $BUILD_DIR/$BUILD_NAME $BASE_URL
+    chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php
+    chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default
+    chmod -R 2777 $BUILD_DIR/$BUILD_NAME/sites/default/files
+fi ;
 
 exit 0

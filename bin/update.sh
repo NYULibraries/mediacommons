@@ -19,3 +19,5 @@ MAKE_FILE=$DIR/../mediacommons.make
 rm $MAKE_FILE
 
 wget https://raw.githubusercontent.com/NYULibraries/mediacommons/master/mediacommons.make
+
+exit 0

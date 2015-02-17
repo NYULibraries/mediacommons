@@ -11,7 +11,7 @@ BUILD=$1
 
 [ -d $BUILD ] || die "Build directory $BUILD does not exist"
 
-[ ! `grep -q 'DRUPAL_ROOT' $BUILD/index.php` ] || die "$BUILD does not look like a Drupal installation folder."
+[ ! `grep -q 'DRUPAL_ROOT' $BUILD/index.php` ] || die "${BUILD} does not look like a Drupal installation folder."
 
 mv $BUILD/robots.txt $BUILD/robots.txt.bk
 
@@ -29,3 +29,5 @@ mv $BUILD/install.php $BUILD/install.php.off
 
 # but no one should read it (unless super user)
 chmod 000 $BUILD/install.php.off
+
+exit 0

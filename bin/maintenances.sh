@@ -75,7 +75,7 @@ CONF_PERM=`ls -l $CONF_FILE | awk '{print $1}'`
 
 . $CONF_FILE
 
-[ -d $BUILD_DIR ] || die "Build directory $BUILD_DIR does not exist"
+[ -d $BUILD_DIR ] || die "Build directory ${BUILD_DIR} does not exist"
 
 cd $BUILD_DIR
 
@@ -87,3 +87,6 @@ done
 
 # Find and remove 14 days old directories
 find $BUILD_DIR/* -maxdepth 0 -type d -mtime +14 -exec bash -c 'remove_if_symlink_does_not_link $0' {} \;
+
+exit 0
+
