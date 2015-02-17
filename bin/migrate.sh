@@ -87,19 +87,38 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     if [ $? -eq 0 ] ; 
       then 
         echo "Found ${BUILD_BASE_NAME}.content.sql in ${DIR}." ; 
-      else 
-        echo "Get ${BUILD_BASE_NAME}.content.sql from source" ; 
-        curl -u build:+EiBAPkL5L] $PROD_CONTENT_DB_URL > $BUILD_BASE_NAME.content.sql ;
+      else
+        echo "Unable to find ${BUILD_BASE_NAME}.content.sql in ${DIR}. Will try to get the latest one."  
+        if [[ $PROD_CONTENT_DB_URL =~ "http" ]]; 
+          then
+            # We need to curl the DB 
+            echo "Get ${BUILD_BASE_NAME}.content.sql from source" ; 
+            curl -u build:+EiBAPkL5L] $PROD_CONTENT_DB_URL > $BUILD_BASE_NAME.content.sql ;
+          else
+            # DB in disk; check if we can read 
+            [ -r $PROD_CONTENT_DB_URL ] || die ${LINENO} "test" "Unable to read to ${PROD_CONTENT_DB_URL}." ;
+            cp ${PROD_CONTENT_DB_URL} ./$BUILD_BASE_NAME.content.sql;
+        fi ;        
     fi ;
+
     
     # find if we have the file or we need to get it from source
     find ${BUILD_BASE_NAME}.share.sql -mtime -1 -print
     if [ $? -eq 0 ] ; 
       then 
         echo "Found ${BUILD_BASE_NAME}.share.sql in ${DIR}." ; 
-      else 
-        echo "Get ${BUILD_BASE_NAME}.share.sql from source" ; 
-        curl -u build:+EiBAPkL5L] $PROD_SHARED_DB_URL > $BUILD_BASE_NAME.share.sql ;
+      else
+        echo "Unable to find ${BUILD_BASE_NAME}.content.sql in ${DIR}. Will try to get the latest one."  
+        if [[ $PROD_SHARED_DB_URL =~ "http" ]]; 
+          then
+            # We need to curl the DB 
+            echo "Get ${BUILD_BASE_NAME}.share.sql from source" ; 
+            curl -u build:+EiBAPkL5L] $PROD_SHARED_DB_URL > $BUILD_BASE_NAME.content.sql ;
+          else
+            # DB in disk; check if we can read 
+            [ -r $PROD_SHARED_DB_URL ] || die ${LINENO} "test" "Unable to read to ${PROD_SHARED_DB_URL}." ;
+            cp ${PROD_SHARED_DB_URL} ./$BUILD_BASE_NAME.share.sql;
+        fi ;        
     fi ;
     
     mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS -e "DROP DATABASE IF EXISTS ${D6_DATABASE}; CREATE DATABASE ${D6_DATABASE}; DROP DATABASE IF EXISTS ${D6_SHARED}; CREATE DATABASE ${D6_SHARED};"
