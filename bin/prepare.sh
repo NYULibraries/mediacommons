@@ -1,84 +1,64 @@
 #!/bin/bash
 
+# Don't use me! ... well, do it if you know what you are doing.
+#
+# In theory I should work; but in practice I'm almost certain that I will
+# fail if you run me in a machine that does not looks like the one
+# I'm intended to run it. So, don't use me if you are not sure, I can 
+# easily get you into trouble.
+
 die () {
-  echo $1
-  exit 1
+  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
+  exit 1;
 }
-
-SOURCE="${BASH_SOURCE[0]}"
-
-# resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do 
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve it relative to the path where
-  # the symlink file was located
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 TODAY=`date +%Y-%m-%d`
 
-CONF_FILE=$DIR/../migrations.conf
+while getopts ":hsd" opt; do
+ case $opt in
+  s)
+    [ -r $OPTARG ] || die ${LINENO} "test" "Unable to read from ${OPTARG} directory." 
+    SOURCE_DIRECTORY=$OPTARG
+    ;;
+  d)
+    [ -w $OPTARG ] || die ${LINENO} "test" "Unable to read or write to Database directory ${OPTARG}." 
+    DESTINATION_DIRECTORY=$OPTARG
+    ;;
+  h)
+   echo " "
+   echo " Usage: ./prepare.sh -s /content/databases/source -d /content/databases/destination"
+   echo " "
+   echo " Options:"
+   echo "   -h                Show brief help."
+   echo "   -d <directory>    Specify the directory where script will save the databases."   
+   echo "   -s <directory>    Specify the directory where the script can find the databases."
+   echo " "  
+   exit 0
+   ;;
+  esac
+done
 
-CONF_PERM=`ls -l $CONF_FILE | awk '{print $1}'`
+[ $SOURCE_DIRECTORY ] || die ${LINENO} "test" "No source directory."
 
-. $CONF_FILE
+[ $DESTINATION_DIRECTORY ] || die ${LINENO} "test" "No destination directory."
 
-[ -d $DATABASES_DIRECTORY ] || die "Database directory ${DATABASES_DIRECTORY} does not exist"
-
-[ -d $DATABASES_PROD_DIRECTORY ] || die "Database directory ${DATABASES_PROD_DIRECTORY} does not exist"
+echo "Find and remove old databases used for sites migration from ${DESTINATION_DIRECTORY}."
 
 # remove old databases
-
-echo "Find and remove old databases used for sites migration from ${DATABASES_DIRECTORY}"
-
-find $DATABASES_DIRECTORY -type f -name "*.sql" -exec rm {} \;
-
-# Rasan's script back up database production around 4am on mounted 
-# drive: /content/prod/pa/backup/mc/mysql
+find $DESTINATION_DIRECTORY -type f -name "*.sql" -exec rm {} \;
 
 # Copy over the latest production database shared and sites databases
-
 # e.g., mysql.mc.tne_prod.2014-12-01-04-35-01.sql.bz2
-
-DATABASES=$DATABASES_PROD_DIRECTORY/mysql.mc.*.$TODAY-*-*.sql.bz2
+DATABASES=$SOURCE_DIRECTORY/mysql.mc.*.$TODAY-*-*.sql.bz2
 
 for db in $DATABASES ; do
-  # get the basename
   BASENAME=`basename $db`
   BASENAME_TRIM=${BASENAME/mysql.mc./}
   FILENAME=${BASENAME_TRIM/.$TODAY-*-*.sql.bz2/}
-  cp $db $DATABASES_DIRECTORY/$FILENAME.sql.bz2
-  chmod 775 $DATABASES_DIRECTORY/$FILENAME.sql.bz2
-  # unzip the file
-  echo "Uncompress ${DATABASES_DIRECTORY}/${FILENAME}.sql.bz2"
-  bzip2 -d $DATABASES_DIRECTORY/$FILENAME.sql.bz2
-done
-
-echo "Import DB";
-
-for database in $DATABASES_IN_PRODUCTION
-  do 
-  # SQL file to be imported
-  TEMP=$DATABASES_DIRECTORY"/"$database"_prod.sql"
-  # Database that will be updated with the SQL back-up from production
-  TEMP_MIGRATIOB_DATABASE_NAME=$DATABASES_MIGRATION_PREFIX$database
-  # check if SQL file is in the migration directory
-  if [ -f $TEMP ]
-    then
-      # Check if the database exist
-      RESULT=`mysql -u $DATABASES_DB_USER -p$DATABASES_DB_PASS -e "SHOW DATABASES" | grep -Fo $TEMP_MIGRATIOB_DATABASE_NAME`
-      if [ "$RESULT" == "$TEMP_MIGRATIOB_DATABASE_NAME" ]; then
-        # database exist; import SQL file
-        echo "Import SQL file ${TEMP} into ${TEMP_MIGRATIOB_DATABASE_NAME}."
-        mysql -u $DATABASES_DB_USER -p$DATABASES_DB_PASS $TEMP_MIGRATIOB_DATABASE_NAME < $TEMP
-      else  
-        # database does not exist
-        echo "Unable to import SQL file ${TEMP} into ${TEMP_MIGRATIOB_DATABASE_NAME}. Database does not exist.";        
-      fi
-    fi  
+  cp $db $DESTINATION_DIRECTORY/$FILENAME.sql.bz2
+  chmod 775 $DESTINATION_DIRECTORY/$FILENAME.sql.bz2
+  echo "Uncompress ${DESTINATION_DIRECTORY}/${FILENAME}.sql.bz2"
+  bzip2 -d $DESTINATION_DIRECTORY/$FILENAME.sql.bz2
 done
 
 exit 0
