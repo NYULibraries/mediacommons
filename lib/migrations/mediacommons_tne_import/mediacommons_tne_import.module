@@ -12,9 +12,9 @@ function mediacommons_tne_import_init() {
         'mediacommons_base_import_generate_terms',
         'mediacommons_base_import_generate_roles',
         'mediacommons_base_import_generate_all_users',
-        'mediacommons_tne_import_migrate_all_contributed_pieces',        
-        'mediacommons_tne_import_migrate_all_clusters',        
-        'mediacommons_tne_import_migrate_all_response',        
+        'mediacommons_tne_import_migrate_all_contributed_pieces',
+        'mediacommons_tne_import_migrate_all_clusters',
+        'mediacommons_tne_import_migrate_all_response',
       ),
     ),
     array(
@@ -46,20 +46,24 @@ function mediacommons_tne_import_init() {
       ),
     ),
     array(
-      'label' => t('Run test'),
-      'callback' => array(
-        'mediacommons_tne_import_test',
+      'label' => t('Delete Hubs, Spokes, alias, comments, file registry and users'),
+      'callback' => array (
+        'mediacommons_base_import_delete_post',
+        'mediacommons_base_import_delete_hubs',
+        'mediacommons_base_import_delete_comments',
+        'mediacommons_base_import_delete_files',
+        'mediacommons_base_import_delete_alias',
+      	'mediacommons_base_import_delete_users',
       ),
     ),
   );
-  
-  mediacommons_base_import_init(
-    array('commands' => $commands )
-  );
-  
+
+  mediacommons_base_import_init( array('commands' => $commands ) );
+
 }
 
-if (file_exists($base_file)) {
-  include_once($base_file);
-  mediacommons_tne_import_init();
-}
+if ( ! file_exists( $base_file ) ) die( 'Unable to load ' . $base_file );
+
+include_once( $base_file );
+
+mediacommons_tne_import_init();

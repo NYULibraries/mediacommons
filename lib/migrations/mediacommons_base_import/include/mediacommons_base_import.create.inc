@@ -2,33 +2,33 @@
 
 function mediacommons_base_import_generate_all_users() {
 
-  drush_print(
-    t("Importing users: This will take time, go get yourself a coffee.")
-  );
+  drush_log('Importing users. This will take time, go get yourself a coffee.', "status");
 
-  foreach (mediacommons_base_import_d6_users_list() as $user) {
-    mediacommons_base_import_generate_user($user);
+  foreach ( mediacommons_base_import_d6_users_list() as $user ) {
+  	mediacommons_base_import_generate_user ( $user ) ;
   }
+
 }
 
 function mediacommons_base_import_generate_roles() {
+
   $roles_d7 = $roles_d6_list = array();
 
   $roles_d6_list = mediacommons_base_import_d6_roles();
 
-  foreach(mediacommons_base_import_d7_roles() as $role) {
-    $roles_d7[$role->name] = $role->rid;
+  foreach ( mediacommons_base_import_d7_roles() as $role ) {
+  	$roles_d7[$role->name] = $role->rid ;
   }
 
-  foreach ($roles_d6_list as $record) {
+  foreach ( $roles_d6_list as $record ) {
 
     $rid = db_query("SELECT rid FROM {mediacommons_base_import_role_map} WHERE orid = :orid", array(':orid' => $record->rid));
 
     if (!$rid->rowCount()) {
-       drush_print_r('Role exist in Drupal 7');
+       drush_log('Role exist in Drupal 7', "error");
       /** Role exist in Drupal 7 */
       if (array_key_exists($record->name, $roles_d7)) {
-        drush_print('Role ' . $record->name . ' already exist');
+        drush_log('Role ' . $record->name . ' already exist', "error");
         db_insert('mediacommons_base_import_role_map')
           ->fields(array(
             'orid' => $record->rid,
@@ -39,22 +39,21 @@ function mediacommons_base_import_generate_roles() {
 
       /** Role does not exist in Drupal 7 */
       else {
-
-        drush_print_r('Creating role ' . $record->name);
-        $role = new stdClass();
-        $role->name = $record->name;
-        $new = user_role_save($role);
-        $r = user_role_load_by_name($role->name);
-        db_insert('mediacommons_base_import_role_map')
-          ->fields(array(
-            'orid' => $record->rid,
-            'rid' => $r->rid,
-          )
-        )->execute();
+      	if ( $record->name =! 'admin' ) {
+          drush_log('Creating role ' . $record->name, "status");
+          $role = new stdClass();
+          $role->name = $record->name;
+          $new = user_role_save($role);
+          $r = user_role_load_by_name($role->name);
+          db_insert('mediacommons_base_import_role_map')->fields(array( 'orid' => $record->rid, 'rid' => $r->rid, ) )->execute();
+        }
+        else {
+          drush_log('Skip role ' . $record->rid, "status");
+        }
       }
     }
     else {
-      drush_print('Role "' . $record->name . '" already imported');
+      drush_log('Role "' . $record->name . '" already imported', "status");
     }
   }
 }
@@ -62,21 +61,23 @@ function mediacommons_base_import_generate_roles() {
 function mediacommons_base_import_generate_vocabulary() {
 
   $d7 = mediacommons_base_import_d7_vocabulary_list();
+
   $d6 = mediacommons_base_import_d6_vocabulary_list();
+
   $d7_names = array();
 
   $query = 'SELECT vid FROM {mediacommons_base_import_vocabulary_map} WHERE vuid = :vuid';
 
-  foreach ($d7 as $record) {
+  foreach ( $d7 as $record ) {
     $d7_names[strtolower($record->name)] = $record->vid;
   }
 
-  foreach ($d6 as $record) {
+  foreach ( $d6 as $record ) {
     $vid = db_query($query, array(':vuid' => $record->vid));
-    if (!$vid->rowCount()) {
+    if ( !$vid->rowCount() ) {
       /** Vocabulary exist in Drupal 7 */
-      if (array_key_exists(strtolower($record->name), $d7_names)) {
-        drush_print('Vocabulary ' . strtolower($record->name) . ' already exist');
+      if ( array_key_exists ( strtolower( $record->name ) , $d7_names ) ) {
+        drush_log('Vocabulary ' . strtolower($record->name) . ' already exist', "status");
         db_insert('mediacommons_base_import_vocabulary_map')
           ->fields(array(
             'vuid' => $record->vid,
@@ -86,7 +87,7 @@ function mediacommons_base_import_generate_vocabulary() {
       }
       /** Vocabulary does not exist in Drupal 7 */
       else {
-        drush_print('Creating ' . $record->name);
+        drush_log('Creating ' . $record->name, "status");
         mediacommons_base_import_create_taxonomy_vocabulary($record);
       }
     }
@@ -159,25 +160,19 @@ function mediacommons_base_import_create_spoke(array $old_node) {
    */
 
   if ($node_exist) {
-    drush_print(
-      t('Spoke @title already exist.', array('@title' => $old_node->title))
-    );
+    drush_log(t('Spoke @title already exist.', array('@title' => $old_node->title) ), "status");
     return;
   }
 
   if (!$author_uid) {
-    drush_print(
-      t("Can't import spoke @title author does not exist in system. Please make sure the author is created before creating content under his username.", array('@title' => $old_node->title))
-    );
+    drush_log(t("Can't import spoke @title author does not exist in system. Please make sure the author is created before creating content under his username.", array('@title' => $old_node->title)), "status");
     return;
   }
 
   /**
    * Conditions meet node migration start
    */
-  drush_print(
-    t('Migrating "@title".', array('@title' => $old_node->title))
-  );
+  drush_log( t('Migrating "@title".', array('@title' => $old_node->title)), 'status');
 
   $path_alias = mediacommons_base_import_find_url_alias('node/' . $old_node->onid);
 
@@ -197,14 +192,8 @@ function mediacommons_base_import_create_spoke(array $old_node) {
 
   $new_node->sticky = $old_node->sticky;
 
-  if (isset($old_node->field_body)) {
-  	// $new_node->field_body[$old_node->language][0] = array( not working for TNE; there is only 5 ES nodes; what should we do?
-
-    $new_node->field_body[LANGUAGE_NONE][0] = array(
-      'value' => $old_node->field_body,
-      'format' => 'full_html', // should this be filtered_html?
-      // 'format' => 'filtered_html',
-    );
+  if ( isset( $old_node->field_body ) ) {
+    $new_node->field_body[LANGUAGE_NONE][0] = array( 'value' => $old_node->field_body, 'format' => 'limited_html' );
   }
 
   /**
@@ -222,7 +211,7 @@ function mediacommons_base_import_create_spoke(array $old_node) {
     $put_success = file_put_contents($source_image_path, mediacommons_base_import_get_content($url_image_path));
 
     if ($put_success) {
-      $info = image_get_info($source_image_path);
+      $info = image_get_info( $source_image_path );
       if (is_array($info)) {
         $file = (object) array(
           'uid' => (int)$new_node->uid, // change this to this user ID?
@@ -373,9 +362,7 @@ function mediacommons_base_import_create_spoke(array $old_node) {
       )
     )->execute();
 
-    drush_print(
-      t('Spoke saved.')
-    );
+    drush_log( 'Spoke saved', 'status');
 
   }
 
@@ -424,9 +411,7 @@ function mediacommons_base_import_create_hub(array $old_node) {
    * If hub exist, exit
    */
   if ($node_exist) {
-    drush_print(
-      t('Hub @title already exist.', array('@title' => $old_node->title))
-    );
+  	drush_log( t('Hub @title already exist.', array('@title' => $old_node->title)), 'status');
     return;
   }
 
@@ -436,21 +421,14 @@ function mediacommons_base_import_create_hub(array $old_node) {
    * other reason, you can assume something is wrong with the script or the datasource.
    */
   if (!$author_uid) {
-    drush_print(
-      t(
-        'Can\'t import spoke "@title" (nid: @nid, uid: @uid) author does not exist in system.',
-        array('@title' => $old_node->title, '@nid' => $old_node->onid, '@uid' => $old_node->ouid)
-      )
-    );
+    drush_log( t('Can\'t import spoke "@title" (nid: @nid, uid: @uid) author does not exist in system.', array('@title' => $old_node->title, '@nid' => $old_node->onid, '@uid' => $old_node->ouid) ), 'status');
     return;
   }
 
   /**
    * Conditions meet node migration start
    */
-  drush_print(
-    t('Migrating "@title".', array('@title' => $old_node->title))
-  );
+  drush_log(t('Migrating "@title".', array('@title' => $old_node->title)));
 
   $path_alias = mediacommons_base_import_find_url_alias('node/' . $old_node->onid);
 
@@ -477,7 +455,7 @@ function mediacommons_base_import_create_hub(array $old_node) {
    */
   $new_node->field_body[$new_node->language][0] = array(
     'value' => $old_node->field_body,
-    'format' => 'full_html',
+    'format' => 'limited_html',
   );
 
   /**
@@ -619,9 +597,7 @@ function mediacommons_base_import_create_hub(array $old_node) {
       )
     )->execute();
 
-    drush_print(
-      t('Spoke saved.')
-    );
+    drush_log( 'Hub saved', 'status');
 
   }
 
@@ -703,7 +679,7 @@ function mediacommons_base_import_generate_hubs() {
         /** Add description */
         $node->field_description[$node->language][0] = array(
           'value' => $value->body,
-          'format' => 'full_html',
+          'format' => 'limited_html',
         );
 
         /** Media type */
@@ -846,7 +822,7 @@ function mediacommons_base_import_comment($nid, $oldNid) {
         LANGUAGE_NONE => array(
           0 => array (
             'value' => $comment->comment,
-            'format' => 'filtered_html',
+            'format' => 'limited_html',
           ),
         ),
       ),
@@ -899,7 +875,6 @@ function mediacommons_base_import_create_taxonomy_term($term) {
  * Create a taxonomy vocabulary.
  */
 function mediacommons_base_import_create_taxonomy_vocabulary($vocabulary) {
-
   $new = new stdClass();
   $machine_name = strtolower(preg_replace('/\s+/', '', $vocabulary->name));
   $new->name = $vocabulary->name;
@@ -921,7 +896,7 @@ function mediacommons_base_import_create_taxonomy_vocabulary($vocabulary) {
         'vid' => $m->vid,
       )
      )->execute();
-     drush_print('Vocabulary saved. ' . $vocabulary->name . "\n");
+     drush_log('Vocabulary saved. ' . $vocabulary->name, "status");
      return $v;
   }
 }
@@ -929,19 +904,29 @@ function mediacommons_base_import_create_taxonomy_vocabulary($vocabulary) {
 /**
  * Create user.
  */
-function mediacommons_base_import_generate_user($user) {
+function mediacommons_base_import_generate_user ( $user ) {
 
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+  drush_bootstrap( DRUSH_BOOTSTRAP_DRUPAL_FULL );
+
+  /**
+   * URL to be used as the production URL; we need to hard-code this
+   */
+  $production_url = 'http://mediacommons.futureofthebook.org/';
+
+  /**
+   * Files folder real path
+   */
+  $dupal_file_path = drupal_realpath('public://');
 
   $query = 'SELECT * FROM {mediacommons_base_import_user_map} WHERE ouid = :ouid';
 
-  $result = db_query($query, array(':ouid' => $user->uid));
+  $result = db_query( $query, array(':ouid' => $user->uid) );
 
   $exclude_by_username = db_query("SELECT * FROM {users} WHERE name = :name", array(':name' => $user->name));
 
-  if ($result->rowCount() == 0 && $exclude_by_username->rowCount() == 0) {
+  if ( $result->rowCount() == 0 && $exclude_by_username->rowCount() == 0 ) {
 
-    drush_print('Importing user: ' . $user->name);
+    drush_log('Importing user: ' . $user->name, "status");
 
     $new_user = array(
       'name' => $user->name,
@@ -956,13 +941,11 @@ function mediacommons_base_import_generate_user($user) {
       'created' => $user->created,
       'login' => $user->login,
       'language' => $user->language,
-      'picture' => $user->picture,
-      'init' => $user->init,
       'timezone_name' => $user->timezone_name,
     );
 
-    if (isset($user->roles)) {
-      foreach(explode(',', $user->roles) as $value) {
+    if ( isset( $user->roles ) ) {
+      foreach ( explode(',', $user->roles ) as $value ) {
         $new_user['roles'][$value] = TRUE;
       }
     }
@@ -981,19 +964,60 @@ function mediacommons_base_import_generate_user($user) {
         ->condition('mail', $user->mail, '=')
         ->execute();
       $account->ouid = $user->uid;
+
     }
-    return $account;
   }
+
   else {
-    if ($exclude_by_username->rowCount()) {
-      drush_print('User "'. $user->name .'" already exist in database');
+    if ( $exclude_by_username->rowCount() ) {
+      drush_log('User "'. $user->name .'" already exist in database', "status");
       $m = $exclude_by_username->fetchObject();
       $account = user_load($m->uid);
       $account->ouid = $user->uid;
-      return $account;
     }
     else {
       return FALSE;
     }
   }
+
+  if ( $user->picture ) {
+
+  	$url_image_path = url( $production_url . $user->picture, array( 'absolute' => TRUE ) );
+
+  	$basename = basename ( $url_image_path ) ;
+
+  	$picture_directory =  file_default_scheme() . '://' . variable_get('user_picture_path', 'pictures');
+
+  	$source_image_path = $dupal_file_path . '/' . $basename;
+
+  	if ( file_prepare_directory ( $picture_directory, FILE_CREATE_DIRECTORY ) ) {
+
+  	  $image = file_put_contents ( $source_image_path, file_get_contents( $url_image_path ) );
+
+      $picture_path = file_stream_wrapper_uri_normalize( $picture_directory . '/picture-' . $account->uid . '-' . REQUEST_TIME . '.jpg');
+
+      $picture_file = file_save_data ( $image, $picture_path, FILE_EXISTS_REPLACE);
+
+      file_unmanaged_move ($source_image_path, $picture_path, FILE_EXISTS_REPLACE );
+
+      $max_dimensions = variable_get('user_picture_dimensions', '85x85');
+
+      file_validate_image_resolution( $picture_file, $max_dimensions );
+
+      $picture_file->uid = $account->uid;
+
+      $picture_file = file_save ( $picture_file );
+
+      file_usage_add ( $picture_file, 'user', 'user', $account->uid );
+
+      db_update('users')->fields( array( 'picture' => $picture_file->fid, ) )->condition('uid', $account->uid)->execute();
+
+  	  $account->picture = $picture_file->fid;
+
+  	}
+
+  }
+
+  return $account;
+
 }

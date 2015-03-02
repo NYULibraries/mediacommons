@@ -9,11 +9,11 @@ function mediacommons_imr_import_init() {
       'label' => t('Import IMR D6 Content'),
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
-        'mediacommons_base_import_generate_terms',   
-        'mediacommons_base_import_generate_roles',             
+        'mediacommons_base_import_generate_terms',
+        'mediacommons_base_import_generate_roles',
         'mediacommons_base_import_generate_all_users',
         'mediacommons_imr_import_migrate_posts',
-        'mediacommons_imr_import_migrate_theme_weeks',        
+        'mediacommons_imr_import_migrate_theme_weeks',
       ),
     ),
     array(
@@ -28,12 +28,20 @@ function mediacommons_imr_import_init() {
         'mediacommons_imr_import_migrate_theme_weeks',
       ),
     ),
+  	array(
+  	  'label' => t('Delete Theme Weeks, Posts'),
+  	    'callback' => array(
+  		  'mediacommons_base_import_delete_post',
+  		  'mediacommons_base_import_delete_hubs',
+          'mediacommons_base_import_delete_comments',
+      ),
+    ),
     array(
       'label' => t('Delete Theme Weeks, Posts, comments and file registry'),
       'callback' => array(
         'mediacommons_base_import_delete_post',
         'mediacommons_base_import_delete_hubs',
-        'mediacommons_base_import_delete_comments',        
+        'mediacommons_base_import_delete_comments',
         'mediacommons_base_import_delete_files',
         'mediacommons_base_import_delete_alias'
       ),
@@ -43,14 +51,14 @@ function mediacommons_imr_import_init() {
       'callback' => array(
         'mediacommons_imr_import_test_content',
       ),
-    ),    
+    ),
     array(
       'label' => t('Run test'),
       'callback' => array(
         'mediacommons_base_import_delete_hubs',
       ),
-    ),    
-    
+    ),
+
   );
 
   mediacommons_base_import_init(

@@ -13,22 +13,22 @@ function mediacommons_imr_import_test() {
 function mediacommons_imr_import_test_content() {
 
   global $settings;
-  
+
   $environment_url = $settings['settings'][$settings['environment']]['url'];
   $production_url = $settings['settings']['production']['url'];
-  
-  $query = "SELECT 
+
+  $query = "SELECT
     m.*
     FROM {mediacommons_base_import_node_map} m
     LEFT JOIN node n
       ON n.nid = m.nid
-    WHERE 
-      type = 'hub' 
-    ORDER BY RAND() 
+    WHERE
+      type = 'hub'
+    ORDER BY RAND()
     LIMIT 5";
-    
+
   $result = db_query($query, array(), array());
-    
+
   foreach ($result as $record) {
     drush_print(
       url($environment_url . 'node/' . $record->nid, array('absolute' => TRUE))
@@ -44,19 +44,19 @@ function mediacommons_imr_import_test_content() {
  * Migrate Theme Weeks.
  */
 function mediacommons_imr_import_migrate_theme_weeks() {
-  
+
   /**
-   * Load data, this will take time; go get yourself a coffee 
+   * Load data, this will take time; go get yourself a coffee
    */
   $data = mediacommons_imr_import_d6_theme_week_list();
 
   /**
-   * If we have $data proceed 
+   * If we have $data proceed
    */
   if (isset($data)) {
 
     foreach ($data as $key => $hub) {
-        
+
       /**
        * Prepare node
        */
@@ -69,7 +69,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
       $node['onid'] = $hub->nid;
 
       $node['language'] = (!empty($hub->language)) ? $hub->language : LANGUAGE_NONE;
- 
+
       $node['date'] = date('Y-m-j H:i:s', $hub->created);
 
       $node['status'] = $hub->status;
@@ -79,40 +79,40 @@ function mediacommons_imr_import_migrate_theme_weeks() {
       $node['moderate'] = $hub->moderate;
 
       $node['sticky'] = $hub->sticky;
-      
+
       if (isset($hub->body)) {
         $node['field_body'] = $hub->body;
-      }      
+      }
 
       $node['field_type'] = 1;
-      
-      /** 
+
+      /**
        * Representative image
        */
       if (isset($hub->field_theme_week_image_fid)) {
         $node['field_representative_image'] = (object) array( 'fid' => $hub->field_theme_week_image_fid, );
       }
-      
+
       $node['field_pubstat'] = $hub->status;
-      
+
       $node['field_tags'] = array();
-      
+
       if (isset($hub->terms)) {
         foreach (explode(', ', $hub->terms) as $tid) {
           $node['field_tags'][] = $tid;
         }
       }
-      
+
       /*
        * Post in Theme Weeks are a set of fields, we assume n match week day
        * D7 will use index as week date
        */
       $node['field_spokes'] = array();
-      
+
       if (!empty($hub->field_featured_post_1_nid)) {
         $node['field_spokes'][] = $hub->field_featured_post_1_nid;
       }
-        
+
       if (!empty($hub->field_featured_post_2_nid)) {
         $node['field_spokes'][] = $hub->field_featured_post_2_nid;
       }
@@ -132,32 +132,32 @@ function mediacommons_imr_import_migrate_theme_weeks() {
       if (!empty($hub->field_featured_page_or_feed_nid)) {
         $node['field_spokes'][] = $hub->field_featured_page_or_feed_nid;
       }
-      
+
       /**
        * Get the D6 uid from the all the Post that belong to this Theme Week
        * and add it to the D7 contributors field
-       */      
-      
+       */
+
       $node['field_contributors'] = array();
-             
+
       foreach ($node['field_spokes'] as $onid) {
         $node['field_contributors'][] = mediacommons_imr_import_d6_uid_by_node($onid);
       }
-      
+
       /**
        * Subtract the dates from the title of the Theme Week
        */
       $dates = mediacommons_imr_import_find_hub_dates($hub->title);
 
-      /** 
+      /**
        * Dates
        * If $dates is set proceed, no good comes from setting dates with wrong values
        */
        if (
-         isset($dates['start']) && 
+         isset($dates['start']) &&
          isset($dates['end'])
        ) {
-       
+
         // Y-m-d H:i:s
         // $node['field_period_1'] = date('Y-m-d', strtotime($dates['start']));
         // $node['field_period_2'] = date('Y-m-d', strtotime($dates['end']));
@@ -167,7 +167,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
       mediacommons_base_import_create_hub($node);
     }
   }
-  
+
   drush_print(
     t('Done')
   );
@@ -179,12 +179,12 @@ function mediacommons_imr_import_migrate_theme_weeks() {
 function mediacommons_imr_import_migrate_posts() {
 
   /**
-   * Load data, this will take time; go get yourself a coffee 
+   * Load data, this will take time; go get yourself a coffee
    */
   $data = mediacommons_imr_import_d6_post_list();
 
-  /** 
-   * If we have $data proceed 
+  /**
+   * If we have $data proceed
    */
   if (isset($data)) {
 
@@ -192,13 +192,13 @@ function mediacommons_imr_import_migrate_posts() {
 
       $path_alias = mediacommons_base_import_find_url_alias('node/' . $spoke->nid);
 
-      /** 
-       * Find out if node is already in the system 
+      /**
+       * Find out if node is already in the system
        */
       $node_exist = mediacommons_base_import_node_exists($spoke->nid);
 
       /**
-       * Find out if user is already in the system 
+       * Find out if user is already in the system
        */
       $author_uid = mediacommons_base_import_user_exists($spoke->uid);
 
@@ -208,7 +208,7 @@ function mediacommons_imr_import_migrate_posts() {
       if ($node_exist) {
         drush_print(
           t(
-            'Spoke "@title" already exist.', 
+            'Spoke "@title" already exist.',
             array('@title' => $spoke->title)
           )
         );
@@ -221,7 +221,7 @@ function mediacommons_imr_import_migrate_posts() {
         );
         continue;
       }
-      
+
       /**
        * Prepare node
        */
@@ -250,32 +250,32 @@ function mediacommons_imr_import_migrate_posts() {
       }
 
       $node['field_pubstat'] = $spoke->status;
-      
+
       foreach (explode(', ', $spoke->terms) as $tid) {
         $node['field_tags'][] = $tid;
       }
-      
-      /** 
+
+      /**
        * Representative image
        */
       if (isset($spoke->field_tease_image_fid)) {
         $node['field_attached_images_ri'] = (object) array( 'fid' => $spoke->field_tease_image_fid, );
-      }      
-      
-      /** 
+      }
+
+      /**
        * Add embed content
        * Extend field must be explicitly added to mediacommons_imr_import_extend_fields()
        */
-      if (isset($spoke->field_video_embed_link_value)) { 
+      if (isset($spoke->field_video_embed_link_value)) {
         $node['field_embed'] = array(
           $node['language'] => array(
             array(
               'value' => $spoke->field_video_embed_link_value,
-              'format' => 'full_html',  // make this be filtered_html?
+              'format' => 'limited_html',
             ),
           ),
         );
-      }      
+      }
       mediacommons_base_import_create_spoke($node);
     }
   }
@@ -302,7 +302,7 @@ function mediacommons_imr_import_theme_weeks_title($title_source) {
 
   $title_source = trim($title_source);
 
-  preg_match('/\[(.*)\]/', $title_source, $match); 
+  preg_match('/\[(.*)\]/', $title_source, $match);
 
   if (isset($match[0])) {
     return str_replace($match[0], '', $title_source);
@@ -313,21 +313,21 @@ function mediacommons_imr_import_theme_weeks_title($title_source) {
 }
 
 /**
- * Crazy but the only realible source of dates is the title 
+ * Crazy but the only realible source of dates is the title
  * of the Theme Week
  */
 function mediacommons_imr_import_find_hub_dates($date_source) {
 
   $start_month = $end_month = $start_day = $end_day = NULL;
-  
-  $date_source = trim($date_source);  
+
+  $date_source = trim($date_source);
   $p = '/\[(.*)\]/';
   $year_pattern = '/[0-9]{4}$/';
   $months_pattern = '/[a-zA-Z]+/';
   $days_pattern = '/[0-9]{1,2}/';
 
   preg_match($p, $date_source, $match);
-  
+
   if (isset($match[1])) {
     preg_match($year_pattern, $match[1], $years);
     preg_match_all($months_pattern, $match[1], $months);
@@ -335,7 +335,7 @@ function mediacommons_imr_import_find_hub_dates($date_source) {
     if (isset($months[0])) {
       if (isset($months[0][0])) {
         $start_month = $months[0][0];
-      }	
+      }
       if (isset($months[0][1])) {
         $end_month = $months[0][1];
       }
@@ -343,7 +343,7 @@ function mediacommons_imr_import_find_hub_dates($date_source) {
         $end_month = $start_month;
       }
     }
-    preg_match_all($days_pattern, str_replace($years, ' ', $match[1]), $days); 
+    preg_match_all($days_pattern, str_replace($years, ' ', $match[1]), $days);
 
     if (isset($days[0])) {
       if (isset($days[0][0])) {

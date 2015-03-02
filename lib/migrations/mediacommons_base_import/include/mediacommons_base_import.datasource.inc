@@ -280,6 +280,51 @@ function mediacommons_base_import_d6_node_comments_list() {
   return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments}', array(), array());
 }
 
+function mediacommons_base_import_d6_user_one() {
+
+	$users = array();
+
+	/** Create a database connection to the source (d6) database */
+	$query = Database::getConnection('default', 'drupal6')
+
+	->select('users', 'u')
+
+	->fields('u', array(
+			'uid',
+			'name',
+			'pass',
+			'mail',
+			'theme',
+			'signature',
+			'signature_format',
+			'created',
+			'access',
+			'login',
+			'status',
+			'language',
+			'picture',
+			'init',
+			'timezone_name'
+	)
+	)
+	->condition('u.uid', 1);
+
+	$query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
+
+	$query->groupBy('uid');
+
+	$query->addExpression("GROUP_CONCAT(DISTINCT ur.rid SEPARATOR ',')", 'roles');
+
+	$results = $query->execute();
+
+	foreach ($results as $result) {
+		$users[$result->uid] = $result;
+	}
+
+	return $users;
+
+}
+
 function mediacommons_base_import_d6_users_list() {
 
   $users = array();
@@ -307,7 +352,6 @@ function mediacommons_base_import_d6_users_list() {
       'timezone_name'
     )
   )
-
   ->condition('u.uid', 1, '>');
 
   $query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
@@ -427,3 +471,74 @@ function mediacommons_base_import_d7_hubs_list() {
   /** return nids */
   return $query->fetchAll();
 }
+
+/** Drupal 6 Realname */
+
+function mediacommons_base_import_d6_users_realname_list() {
+
+  $users = array();
+
+  /** Create a database connection to the source (d6) database */
+  $query = Database::getConnection('default', 'drupal6')->select('realname', 'r')->fields('r', array( 'uid', 'realname' ) )->condition('r.uid', 1, '>');
+
+  $results = $query->execute();
+
+  foreach ( $results as $result ) $users[$result->uid] = $result;
+
+  return $users;
+
+}
+
+/** Drupal 6 profile fields value by Drupal 6 user id */
+
+function mediacommons_base_import_d6_profile_fields_values_list( $oid ) {
+
+  $users = array();
+
+  /** Create a database connection to the source (d6) database */
+  $query = Database::getConnection('default', 'drupal6')->select('profile_values', 'v')->fields('v', array( 'fid', 'uid', 'value' ) )->groupBy('v.uid')->condition('v.uid', $oid );
+
+  $results = $query->execute();
+
+  foreach ( $results as $result ) $users[$result->uid] = $result;
+
+  return $users;
+
+}
+
+function mediacommons_base_import_d6_profile_field_value( $ofid, $ouid ) {
+
+  $value = FALSE ;
+
+  /** Create a database connection to the source (d6) database */
+  $query = Database::getConnection('default', 'drupal6')->select('profile_values', 'v')->fields('v', array( 'value' ) )->condition('v.fid', $ofid )->condition('v.uid', $ouid );
+
+  $results = $query->execute() ;
+
+  $field = $results->fetchObject() ;
+
+  if ( isset( $field->value ) && ! empty ( $field->value ) ) $value = $field->value ;
+
+  return $value;
+
+}
+
+/** Drupal 6 profile fields */
+
+function mediacommons_base_import_d6_profile_fields_list() {
+
+	$fields = array();
+
+	/** Create a database connection to the source (d6) database */
+	$query = Database::getConnection('default', 'drupal6')->select('profile_fields', 'v')->fields('v', array( 'fid', 'name' ) );
+
+	$results = $query->execute();
+
+	foreach ( $results as $result ) {
+	  $fields[$result->name] = $result->fid;
+	}
+
+	return $fields;
+
+}
+

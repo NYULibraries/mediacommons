@@ -9,30 +9,35 @@ function mediacommons_mc_import_init() {
       'label' => t('Migrate MediaCommons Umbrella content'),
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
-        'mediacommons_base_import_generate_terms',   
-        'mediacommons_base_import_generate_roles',             
+        'mediacommons_base_import_generate_terms',
+        'mediacommons_base_import_generate_roles',
         'mediacommons_base_import_generate_all_users',
         'mediacommons_mc_import_test',
       ),
     ),
-
     array(
       'label' => t('Delete all front page nodes and files'),
       'callback' => array(
         'mediacommons_mc_import_delete_content',
         'mediacommons_base_import_delete_files',
       ),
-    ),    
-    
+    ),
+    array(
+      'label' => t('Delete all front page nodes and files and users'),
+      'callback' => array(
+        'mediacommons_mc_import_delete_content',
+        'mediacommons_base_import_delete_files',
+        'mediacommons_base_import_delete_users',
+      ),
+    ),
   );
-  
-  mediacommons_base_import_init(
-    array('commands' => $commands )
-  );
-  
+
+  mediacommons_base_import_init( array('commands' => $commands ) );
+
 }
 
-if (file_exists($base_file)) {
-  include_once($base_file);
-  mediacommons_mc_import_init();
-}
+if ( ! file_exists( $base_file ) ) die( 'Unable to load ' . $base_file );
+
+include_once( $base_file );
+
+mediacommons_mc_import_init();
