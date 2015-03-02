@@ -30,8 +30,8 @@ while getopts ":hsd" opt; do
    echo " "
    echo " Options:"
    echo "   -h                Show brief help."
-   echo "   -d <directory>    Specify the directory where script will save the databases."   
-   echo "   -s <directory>    Specify the directory where the script can find the databases."
+   echo "   -d <directory>    Specify path to directory where the script will save the databases."   
+   echo "   -s <directory>    Specify path to directory where the script can find the databases."
    echo " "  
    exit 0
    ;;
