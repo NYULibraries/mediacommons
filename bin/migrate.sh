@@ -108,12 +108,12 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
       then 
         echo "Found ${BUILD_BASE_NAME}.share.sql in ${DIR}." ; 
       else
-        echo "Unable to find ${BUILD_BASE_NAME}.content.sql in ${DIR}. Will try to get the latest one."  
+        echo "Unable to find ${BUILD_BASE_NAME}.cshare.sql in ${DIR}. Will try to get the latest one."  
         if [[ $PROD_SHARED_DB_URL =~ "http" ]]; 
           then
             # We need to curl the DB 
             echo "Get ${BUILD_BASE_NAME}.share.sql from source" ; 
-            curl -u build:+EiBAPkL5L] $PROD_SHARED_DB_URL > $BUILD_BASE_NAME.content.sql ;
+            curl -u build:+EiBAPkL5L] $PROD_SHARED_DB_URL > $BUILD_BASE_NAME.share.sql ;
           else
             # DB in disk; check if we can read 
             [ -r $PROD_SHARED_DB_URL ] || die ${LINENO} "test" "Unable to read to ${PROD_SHARED_DB_URL}." ;
@@ -129,7 +129,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     cp $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.${BUILD_DATE}.off
     
     # owner or sudo can read
-    chmo 700 $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.${BUILD_DATE}.off
+    chmod 700 $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.${BUILD_DATE}.off
 
     # Append database set-up to settings.php file
     echo $DBSTRING >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
