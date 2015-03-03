@@ -87,24 +87,21 @@ function mediacommons_base_import_default_commands() {
       'callback' => array(
         'mediacommons_base_import_generate_all_users',
       	'mediacommons_base_import_migrate_user_realname',
-      	'_mediacommons_base_import_prepare_taxonomy_fields',
+      	'mediacommons_base_import_prepare_taxonomy_fields',
       	'mediacommons_base_import_migrate_profile_fields',
       ),
     ),
-
-  	array( 'label' => t('Test'), 'callback' => array( 'mediacommons_base_import_generate_all_users', ), ),
-
   );
 }
 
 function mediacommons_base_import_prepare($caller) {
 
-  include_once('include/mediacommons_base_import.install');
-  include_once "include/mediacommons_base_import.datasource.inc";
-  include_once "include/mediacommons_base_import.create.inc";
-  include_once "include/mediacommons_base_import.delete.inc";
-  include_once "include/mediacommons_base_import.profile.inc";
-  include_once "include/mediacommons_base_import.random.inc";
+  include_once 'include/mediacommons_base_import.install';
+  include_once 'include/mediacommons_base_import.datasource.inc';
+  include_once 'include/mediacommons_base_import.create.inc';
+  include_once 'include/mediacommons_base_import.delete.inc';
+  include_once 'include/mediacommons_base_import.profile.inc';
+  include_once 'include/mediacommons_base_import.random.inc';
 
   global $settigs; // while I find them all
   global $settings;
@@ -127,7 +124,7 @@ function mediacommons_base_import_prepare($caller) {
   $includes = file_scan_directory($settigs['script_path']['dirname'], '/.*\.inc$/');
 
   foreach ($includes as $include) {
-    include_once($include->uri);
+    include_once ( $include->uri );
   }
 
   if (file_exists($install_file)) {
@@ -169,13 +166,9 @@ function _mediacommons_base_import_setup_node($type) {
 }
 
 function mediacommons_base_migrate_truncate($string, $limit, $pad = '...') {
-
   if (strlen($string) <= $limit) return $string;
-
   return trim(substr($string, 0, $limit)) .  $pad;
-
 }
-
 
 function mediacommons_base_import_initialize_schema($module, &$schema) {
   // Set the name and module key for all tables.
@@ -198,9 +191,7 @@ function mediacommons_base_import_run($task, array $commands = array()) {
     }
   }
   else {
-    drush_print('');
-    drush_print(t('ERROR: Unable to perform task'));
-    drush_print('');
+    drush_log('Unable to perform task', 'error');
     mediacommons_base_import_show_options($commands);
   }
 }
@@ -281,8 +272,4 @@ $caller = (isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__);
 /**
  * This script is meant to be "extended", not to be used by itself.
  */
-if (preg_match('/core.drush.inc/', $caller)) {
-
-  drush_print(t('Mama\' told me never talk to strangers!'));
-
-}
+if ( preg_match('/core.drush.inc/', $caller) ) drush_log( "Mama told me never talk to strangers!", 'error' );

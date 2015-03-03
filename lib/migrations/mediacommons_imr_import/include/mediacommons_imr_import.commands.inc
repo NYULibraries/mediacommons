@@ -1,42 +1,79 @@
 <?php
 
-/**
- * Test callback
- */
-function mediacommons_imr_import_test() {
-  drush_print('Running test command at ' . date('Y-m-j H:i:s', time()));
+function mediacommons_imr_import_add_allowed_iframe_sources () {
+
+  $d6_domains = mediacommons_imr_import_find_iframe_sources () ;
+
+  $result = db_query("SELECT * FROM {mediacommons_filter}");
+
+  $domains = array();
+
+  $cache = array();
+
+  foreach ( $result as $record ) {
+  	$domains[$record->did] = $record->domain;
+  }
+
+  foreach ( $d6_domains as $d6_domain ) {
+  	if ( ! in_array( $d6_domain, $domains ) ) {
+  	  drush_log ( 'Adding ' . $d6_domain . ' to allowed iframe source list' , 'status' );
+      db_insert('mediacommons_filter')->fields( array('domain' => $d6_domain, ) )->execute();
+    }
+  }
+
 }
 
-/**
- * Echo 5 random Hubs and generate the link for prodcution site and dev
- */
-function mediacommons_imr_import_test_content() {
+function mediacommons_imr_import_find_iframe_sources () {
 
-  global $settings;
+  include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
 
-  $environment_url = $settings['settings'][$settings['environment']]['url'];
-  $production_url = $settings['settings']['production']['url'];
+  $type = 'post';
 
-  $query = "SELECT
-    m.*
-    FROM {mediacommons_base_import_node_map} m
-    LEFT JOIN node n
-      ON n.nid = m.nid
-    WHERE
-      type = 'hub'
-    ORDER BY RAND()
-    LIMIT 5";
+  $query = "
+    SELECT
+      n.nid,
+      MAX(n.vid) AS vid,
+  	  nr.body,
+      ct.*
+    FROM {node} n
+    LEFT JOIN {node_revisions} nr ON n.vid = nr.vid
+    LEFT JOIN {content_type_post} ct ON n.vid = ct.vid
+    WHERE n.type = :type
+    AND n.status > 0
+    GROUP BY n.nid
+    ORDER BY n.nid";
 
-  $result = db_query($query, array(), array());
+  /** Create and return a database connection to the source (d6) database */
+  $nodes = Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
 
-  foreach ($result as $record) {
-    drush_print(
-      url($environment_url . 'node/' . $record->nid, array('absolute' => TRUE))
-    );
-    drush_print(
-      url($production_url . 'node/' . $record->onid, array('absolute' => TRUE))
-    );
+  $hosts = array ( 'iframe' => array ( ) , 'embed' => array ( ) , 'img' =>  array ( ) , 'sources' ) ;
+
+  foreach ( $nodes as $node ) {
+
+  	$html = str_get_html( $node->field_video_embed_link_value . ' ' . $node->body ) ;
+  	// Find all iframe
+  	foreach ( $html->find('iframe') as $element) {
+  	  $parse_url = parse_url( $element->src ) ;
+  	  if ( ! in_array( $parse_url['host'], $hosts['iframe'], true ) ) {
+  	  	$hosts['iframe'][] = $parse_url['host'];
+  	  }
+  	}
+  	// Find all embed
+  	foreach ( $html->find('embed') as $element ) {
+      $parse_url = parse_url( $element->src ) ;
+  	  if ( ! in_array( $parse_url['host'], $hosts['embed'], true ) ) {
+  	  	$hosts['embed'][] = $parse_url['host'];
+  	  }
+    }
+    // Find all img
+    foreach ( $html->find('img') as $element ) {
+  	  $hosts['img'][] = $element->src ;
+    }
   }
+
+  $hosts['sources'] = array_merge( $hosts['iframe'] , $hosts['embed'] ) ;
+
+  return $hosts['sources'] ;
 
 }
 

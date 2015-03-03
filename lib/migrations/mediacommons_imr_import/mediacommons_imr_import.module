@@ -1,6 +1,6 @@
 <?php
 
-$base_file = __DIR__ . '/../mediacommons_base_import/' . 'mediacommons_base_import.module';
+$base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';
 
 function mediacommons_imr_import_init() {
 
@@ -11,7 +11,11 @@ function mediacommons_imr_import_init() {
         'mediacommons_base_import_generate_vocabulary',
         'mediacommons_base_import_generate_terms',
         'mediacommons_base_import_generate_roles',
+      	'mediacommons_base_import_prepare_taxonomy_fields',
         'mediacommons_base_import_generate_all_users',
+      	'mediacommons_base_import_migrate_user_realname',
+      	'mediacommons_base_import_migrate_profile_fields',
+        'mediacommons_imr_import_add_allowed_iframe_sources',
         'mediacommons_imr_import_migrate_posts',
         'mediacommons_imr_import_migrate_theme_weeks',
       ),
@@ -46,28 +50,14 @@ function mediacommons_imr_import_init() {
         'mediacommons_base_import_delete_alias'
       ),
     ),
-    array(
-      'label' => t('Echo 5 random Hubs URL'),
-      'callback' => array(
-        'mediacommons_imr_import_test_content',
-      ),
-    ),
-    array(
-      'label' => t('Run test'),
-      'callback' => array(
-        'mediacommons_base_import_delete_hubs',
-      ),
-    ),
 
   );
 
-  mediacommons_base_import_init(
-    array('commands' => $commands)
-  );
+  mediacommons_base_import_init( array ( 'commands' => $commands ) );
 
 }
 
-if (file_exists($base_file)) {
-  include_once($base_file);
+if ( file_exists ( $base_file ) ) {
+  include_once ( $base_file );
   mediacommons_imr_import_init();
 }
