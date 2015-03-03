@@ -64,3 +64,8 @@ libraries[flexslider][download][type] = "git"
 libraries[flexslider][download][url] = "https://github.com/woothemes/FlexSlider.git"
 libraries[flexslider][directory_name] = "flexslider"
 libraries[flexslider][type] = "library"
+
+libraries[flexslider][download][type] = "get"
+libraries[flexslider][download][url] = "http://downloads.sourceforge.net/project/simplehtmldom/simplehtmldom/1.5/simplehtmldom_1_5.zip"
+libraries[flexslider][directory_name] = "simplehtmldom"
+libraries[flexslider][type] = "library"
