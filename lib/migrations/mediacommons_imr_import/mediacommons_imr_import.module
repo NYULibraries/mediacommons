@@ -50,6 +50,11 @@ function mediacommons_imr_import_init() {
         'mediacommons_base_import_delete_alias'
       ),
     ),
+    array( 'label' => t('Embed field'),
+      'callback' => array(
+        'mediacommons_imr_import_embed_field',
+      ),
+    ),
 
   );
 

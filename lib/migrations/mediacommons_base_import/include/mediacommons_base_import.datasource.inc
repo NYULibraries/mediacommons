@@ -472,6 +472,15 @@ function mediacommons_base_import_d7_hubs_list() {
   return $query->fetchAll();
 }
 
+function mediacommons_base_import_d7_spoke_list() {
+	/** find all */
+	$query = db_query("SELECT nid, vid, title FROM {node} WHERE type = :type AND status = :status", array(':status' => 1, ':type' => 'spoke'));
+
+	/** return nids */
+	return $query->fetchAll();
+}
+
+
 /** Drupal 6 Realname */
 
 function mediacommons_base_import_d6_users_realname_list() {

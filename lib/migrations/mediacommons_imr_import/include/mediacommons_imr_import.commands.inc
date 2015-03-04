@@ -1,5 +1,65 @@
 <?php
 
+function mediacommons_imr_import_embed_field () {
+
+  include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
+
+  $source = array ( ) ;
+
+  $divs = array ( ) ;
+
+  $nodes = mediacommons_base_import_d7_spoke_list () ;
+
+  foreach ( $nodes as $node ) {
+
+  	$elemets = array ( 'nid' => $node->nid , 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
+
+  	/** load node */
+  	$entity = node_load ( $node->nid ) ;
+
+    /** Wrap it with Entity API */
+    $ewrapper = entity_metadata_wrapper('node', $entity);
+
+    $embed = $ewrapper->field_embed->value();
+
+    $html = str_get_html( $embed['value'] ) ;
+
+    // Find all object
+    foreach ( $html->find('object') as $element) {
+      foreach ( $html->find('embed') as $sub_element ) {
+      	if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
+      	  $elemets['object'][] = $sub_element->src;
+      	}
+      }
+    }
+
+    // Find all embed
+    foreach ( $html->find('embed') as $element) {
+      if ( ! in_array ( $element->src, $elemets['object'] ) ) {
+        $elemets['embed'][] = $element->src;
+      }
+    }
+
+    // Find all div
+
+    if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
+      foreach ( $html->find('div') as $element ) {
+      	foreach ( $element->find('param[name=movie]') as $sub_element ) {
+      	  $elemets['div'][] = $sub_element->value ;
+      	}
+      }
+    }
+
+    $elemets['source'] = $embed['value'];
+
+    $source[] = $elemets ;
+
+  }
+
+  drush_print_r ( $source ) ;
+
+}
+
 function mediacommons_imr_import_add_allowed_iframe_sources () {
 
   $d6_domains = mediacommons_imr_import_find_iframe_sources () ;
