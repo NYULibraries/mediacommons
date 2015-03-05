@@ -460,8 +460,8 @@ function mediacommons_base_import_d6_spoke_list() {
 
 }
 
-function mediacommons_base_import_get_role_by_name($name) {
-  return array_search($name, user_roles());
+function mediacommons_base_import_get_role_by_name ($name) {
+  return array_search( $name, user_roles() );
 }
 
 function mediacommons_base_import_d7_hubs_list() {
@@ -551,3 +551,37 @@ function mediacommons_base_import_d6_profile_fields_list() {
 
 }
 
+function mediacommons_base_import_get_role_rid_by_orid ( $orid ) {
+
+  /** Create a database connection to the source (d6) database */
+  $result = db_query("SELECT rid FROM {mediacommons_base_import_role_map} WHERE orid = :orid", array(':orid' => $orid ) );
+
+  $rid = $result->fetchObject() ;
+
+  if ( $rid ) return $rid->rid ;
+
+  else return FALSE ;
+
+}
+
+function mediacommons_base_import_d6_list_files (  ) {
+
+	/** Create a database connection to the source (d6) database */
+    $query = Database::getConnection('default', 'drupal6')->select('files', 'f')->fields('f', array( 'fid', 'filename', 'filepath' ) );
+
+	return $query->execute();
+
+}
+
+function mediacommons_base_import_get_file_fid_by_ofid ( $ofid ) {
+
+	/** Create a database connection to the source (d6) database */
+	$result = db_query("SELECT fid FROM {mediacommons_base_import_files_map} WHERE ofid = :ofid", array(':ofid' => $ofid ) );
+
+	$fid = $result->fetchObject() ;
+
+	if ( $fid ) return $fid->fid ;
+
+	else return FALSE ;
+
+}

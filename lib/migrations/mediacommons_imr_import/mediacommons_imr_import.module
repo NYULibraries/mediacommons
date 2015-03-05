@@ -10,14 +10,16 @@ function mediacommons_imr_import_init() {
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
         'mediacommons_base_import_generate_terms',
-        'mediacommons_base_import_generate_roles',
+        'mediacommons_base_import_map_roles',
       	'mediacommons_base_import_prepare_taxonomy_fields',
         'mediacommons_base_import_generate_all_users',
       	'mediacommons_base_import_migrate_user_realname',
       	'mediacommons_base_import_migrate_profile_fields',
-        'mediacommons_imr_import_add_allowed_iframe_sources',
+      	'mediacommons_base_import_download_files', // download files that are managed by Drupal
+        'mediacommons_imr_import_add_allowed_iframe_sources', // mediacommons_filter filter <iframe> by source and only allow the ones listed in the allowed iframes list.
         'mediacommons_imr_import_migrate_posts',
         'mediacommons_imr_import_migrate_theme_weeks',
+      	'mediacommons_imr_import_embed_field', // find <embed> and <object> and convert them into <iframe>
       ),
     ),
     array(
@@ -50,11 +52,15 @@ function mediacommons_imr_import_init() {
         'mediacommons_base_import_delete_alias'
       ),
     ),
-    array( 'label' => t('Embed field'),
+
+    array( 'label' => t('Delete all users'),
       'callback' => array(
-        'mediacommons_imr_import_embed_field',
+        'mediacommons_base_import_delete_users',
       ),
     ),
+
+    array( 'label' => t('Download files managed by Drupal'), 'callback' => array( 'mediacommons_base_import_download_files' ) ),
+
 
   );
 
@@ -62,7 +68,8 @@ function mediacommons_imr_import_init() {
 
 }
 
-if ( file_exists ( $base_file ) ) {
-  include_once ( $base_file );
-  mediacommons_imr_import_init();
-}
+if ( ! file_exists ( $base_file ) ) die() ;
+
+include_once ( $base_file );
+
+mediacommons_imr_import_init();

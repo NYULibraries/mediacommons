@@ -6,16 +6,16 @@ function mediacommons_imr_import_embed_field () {
 
   $source = array ( ) ;
 
-  $divs = array ( ) ;
-
   $nodes = mediacommons_base_import_d7_spoke_list () ;
 
   foreach ( $nodes as $node ) {
 
-  	$elemets = array ( 'nid' => $node->nid , 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
+  	$alter = FALSE;
 
   	/** load node */
   	$entity = node_load ( $node->nid ) ;
+
+  	$elemets = array ( 'nid' => $node->nid , 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
 
     /** Wrap it with Entity API */
     $ewrapper = entity_metadata_wrapper('node', $entity);
@@ -28,6 +28,7 @@ function mediacommons_imr_import_embed_field () {
     foreach ( $html->find('object') as $element) {
       foreach ( $html->find('embed') as $sub_element ) {
       	if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
+      	  $alter = TRUE;
       	  $elemets['object'][] = $sub_element->src;
       	}
       }
@@ -36,27 +37,56 @@ function mediacommons_imr_import_embed_field () {
     // Find all embed
     foreach ( $html->find('embed') as $element) {
       if ( ! in_array ( $element->src, $elemets['object'] ) ) {
-        $elemets['embed'][] = $element->src;
+      	$alter = TRUE;
+      	$elemets['embed'][] = $element->src;
       }
     }
 
     // Find all div
-
     if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
       foreach ( $html->find('div') as $element ) {
       	foreach ( $element->find('param[name=movie]') as $sub_element ) {
+      	  $alter = TRUE;
       	  $elemets['div'][] = $sub_element->value ;
       	}
       }
     }
 
-    $elemets['source'] = $embed['value'];
+    if ( $alter ) {
 
-    $source[] = $elemets ;
+      $elemets['source'] = $embed['value'];
+
+      $source[] = $elemets ;
+
+    }
 
   }
 
-  drush_print_r ( $source ) ;
+  foreach ( $source as $node_data ) {
+
+  	$html = '';
+
+  	$srcs = array_unique ( array_merge( $node_data['object'], $node_data['embed'], $node_data['div'] ) );
+
+  	foreach ( $srcs as $src ) {
+      if ( $src ) {
+  	    $html .= theme('html_tag', array( 'element' => array( '#tag' => 'iframe', '#attributes' => array( 'class' => array( 'altered' ), 'src' => $src, 'data-onid' => $node_data['nid'], 'data-onid' => $node_data['nid'] ) ) ) ) ;
+      }
+  	}
+
+  	/** load node */
+  	$entity = node_load ( $node_data['nid'] ) ;
+
+  	/** Wrap it with Entity API */
+  	$ewrapper = entity_metadata_wrapper('node', $entity);
+
+  	$ewrapper->field_embed->set( array ( 'value' => $html ) );
+
+  	drush_log ( url('node/' . $entity->nid , array( 'absolute'=> TRUE ) ) , 'status' ) ;
+
+  	$ewrapper->save();
+
+  }
 
 }
 
@@ -183,10 +213,8 @@ function mediacommons_imr_import_migrate_theme_weeks() {
 
       $node['field_type'] = 1;
 
-      /**
-       * Representative image
-       */
-      if (isset($hub->field_theme_week_image_fid)) {
+      /** representative image */
+      if ( isset( $hub->field_theme_week_image_fid ) ) {
         $node['field_representative_image'] = (object) array( 'fid' => $hub->field_theme_week_image_fid, );
       }
 
@@ -194,11 +222,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
 
       $node['field_tags'] = array();
 
-      if (isset($hub->terms)) {
-        foreach (explode(', ', $hub->terms) as $tid) {
-          $node['field_tags'][] = $tid;
-        }
-      }
+      if ( isset ( $hub->terms ) ) foreach ( explode(', ', $hub->terms ) as $tid ) $node['field_tags'][] = $tid;
 
       /*
        * Post in Theme Weeks are a set of fields, we assume n match week day
@@ -237,7 +261,7 @@ function mediacommons_imr_import_migrate_theme_weeks() {
 
       $node['field_contributors'] = array();
 
-      foreach ($node['field_spokes'] as $onid) {
+      foreach ( $node['field_spokes'] as $onid ) {
         $node['field_contributors'][] = mediacommons_imr_import_d6_uid_by_node($onid);
       }
 
@@ -254,10 +278,6 @@ function mediacommons_imr_import_migrate_theme_weeks() {
          isset($dates['start']) &&
          isset($dates['end'])
        ) {
-
-        // Y-m-d H:i:s
-        // $node['field_period_1'] = date('Y-m-d', strtotime($dates['start']));
-        // $node['field_period_2'] = date('Y-m-d', strtotime($dates['end']));
         $node['field_period_1'] = strtotime($dates['start']);
         $node['field_period_2'] = strtotime($dates['end']);
       }
@@ -265,9 +285,6 @@ function mediacommons_imr_import_migrate_theme_weeks() {
     }
   }
 
-  drush_print(
-    t('Done')
-  );
 }
 
 /**
@@ -280,48 +297,31 @@ function mediacommons_imr_import_migrate_posts() {
    */
   $data = mediacommons_imr_import_d6_post_list();
 
-  /**
-   * If we have $data proceed
-   */
-  if (isset($data)) {
+  /** If we have $data proceed */
+  if ( isset( $data ) ) {
 
-    foreach ($data as $key => $spoke) {
+    foreach ( $data as $key => $spoke ) {
 
       $path_alias = mediacommons_base_import_find_url_alias('node/' . $spoke->nid);
 
-      /**
-       * Find out if node is already in the system
-       */
+      /** find out if node is already in the system */
       $node_exist = mediacommons_base_import_node_exists($spoke->nid);
 
-      /**
-       * Find out if user is already in the system
-       */
+      /** find out if user is already in the system */
       $author_uid = mediacommons_base_import_user_exists($spoke->uid);
 
-      /**
-       * Conditions to be meet before creating content
-       */
-      if ($node_exist) {
-        drush_print(
-          t(
-            'Spoke "@title" already exist.',
-            array('@title' => $spoke->title)
-          )
-        );
+      /** conditions to be meet before creating content */
+      if ( $node_exist ) {
+        drush_log ( t( 'Spoke "@title" exist.', array('@title' => $spoke->title ) ) , 'warning' );
         continue;
       }
 
-      if (!$author_uid) {
-        drush_print(
-          t("Can't import spoke @title author does not exist in system. Please make sure the author is created before creating content under his username", array('@title' => $spoke->title))
-        );
+      if ( !$author_uid ) {
+        drush_log ( t("Can't import spoke @title author does not exist in system. Please make sure the author is created before creating content under his username", array('@title' => $spoke->title ) ) , 'warning');
         continue;
       }
 
-      /**
-       * Prepare node
-       */
+      /** prepare node */
       $node = array();
 
       $node['title'] = $spoke->title;
@@ -342,22 +342,14 @@ function mediacommons_imr_import_migrate_posts() {
 
       $node['sticky'] = $spoke->sticky;
 
-      if (isset($spoke->body)) {
-        $node['field_body'] = $spoke->body;
-      }
+      if ( isset ( $spoke->body ) ) $node['field_body'] = $spoke->body ;
 
       $node['field_pubstat'] = $spoke->status;
 
-      foreach (explode(', ', $spoke->terms) as $tid) {
-        $node['field_tags'][] = $tid;
-      }
+      foreach ( explode(', ', $spoke->terms ) as $tid )  $node['field_tags'][] = $tid;
 
-      /**
-       * Representative image
-       */
-      if (isset($spoke->field_tease_image_fid)) {
-        $node['field_attached_images_ri'] = (object) array( 'fid' => $spoke->field_tease_image_fid, );
-      }
+      /** representative image */
+      if ( isset ( $spoke->field_tease_image_fid ) ) $node['field_attached_images_ri'] = (object) array( 'fid' => $spoke->field_tease_image_fid ) ;
 
       /**
        * Add embed content
@@ -376,10 +368,6 @@ function mediacommons_imr_import_migrate_posts() {
       mediacommons_base_import_create_spoke($node);
     }
   }
-
-  drush_print(
-    t('Done.')
-  );
 
 }
 

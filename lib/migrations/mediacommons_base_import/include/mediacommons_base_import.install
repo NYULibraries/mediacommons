@@ -27,7 +27,7 @@ function mediacommons_base_import_schema() {
       ),
       'primary key' => array('ouid'),
   );
-  
+
   $schema['mediacommons_base_import_comments_map'] = array(
       'description' => 'Stores a record of imported comments.',
       'fields' => array(
@@ -50,7 +50,7 @@ function mediacommons_base_import_schema() {
       ),
       'primary key' => array('ocid'),
   );
-  
+
   $schema['mediacommons_base_import_role_map'] = array(
       'description' => 'Stores a record of role imports.',
       'fields' => array(
@@ -73,7 +73,7 @@ function mediacommons_base_import_schema() {
       ),
       'primary key' => array('orid'),
   );
-  
+
   $schema['mediacommons_base_import_vocabulary_map'] = array(
       'description' => 'Stores a record of imported vocabularies.',
       'fields' => array(
@@ -95,7 +95,7 @@ function mediacommons_base_import_schema() {
           'uid' => array('vid'),
       ),
       'primary key' => array('vuid'),
-  );  
+  );
 
   $schema['mediacommons_base_import_term_map'] = array(
       'description' => 'Stores a record of imported vocabularies.',
@@ -141,6 +141,27 @@ function mediacommons_base_import_schema() {
           'nid' => array('nid'),
       ),
       'primary key' => array('onid'),
+  );
+
+  $schema['mediacommons_base_import_files_map'] = array(
+    'description' => 'Stores a record of files imports.',
+  	'fields' => array(
+  	  'ofid' => array(
+  	    'description' => 'The primary identifier for the Drupal 6 file',
+        'type' => 'serial',
+  		'unsigned' => TRUE,
+  		'not null' => TRUE,
+  	  ),
+      'fid' => array(
+        'description' => 'The primary identifier for the node.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+  	'indexes' => array( 'fid' => array('fid') ),
+  	'primary key' => array('ofid'),
   );
 
   return $schema;
