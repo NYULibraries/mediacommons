@@ -4,7 +4,7 @@ function mediacommons_base_import_download_files ( ) {
 
   global $settings;
 
-  $production_base_url = $settings['settings']['production']['url'] ;
+  $production_base_url = $settings['mediacommons']['environments']['production'][ $settings['mediacommons']['umbrella'] ] ;
 
   $files = array ( ) ;
 
@@ -14,15 +14,32 @@ function mediacommons_base_import_download_files ( ) {
 
   foreach ( mediacommons_base_import_d6_list_files ( ) as $file ) {
 
-    $url_image_path = $production_base_url . ( dirname ( $file->filepath ) . '/' . rawurlencode ( $file->filename ) ) ;
+    $pathinfo = pathinfo ( $file->filename ) ;
 
-    $destination_file = $destination_dir . '/' . $file->filename ;
+    $filepath = pathinfo ( $file->filepath ) ;
+
+    if ( $pathinfo['extension'] ) $filename = $file->filename ;
+
+    /** because of some idiot */
+    else $filename = basename ( $file->filepath ) ;
+
+    $url_image_path = $production_base_url . ( dirname ( $file->filepath ) . '/' . rawurlencode ( $filename ) ) ;
+
+    $destination_file = $destination_dir . '/' . $filename ;
+
+    if ( $filepath['basename'] !== $filename ) {
+
+      $file_data = drupal_http_request ( $production_base_url . ( dirname ( $file->filepath ) . '/' . rawurlencode ( $filepath['basename'] ) )  ) ;
+
+      file_save_data ( $file_data->data, 'public://' . $filepath['basename'] ) ;
+
+    }
 
     if ( ! file_exists ( $destination_file ) ) {
 
       $file_data = drupal_http_request ( $url_image_path ) ;
 
-      $saved_file = file_save_data ( $file_data->data, 'public://' . $file->filename );
+      $saved_file = file_save_data ( $file_data->data, 'public://' . $filename );
 
       if ( $saved_file ) {
         drush_log ( $destination_file . ' saved', 'status' ) ;
@@ -37,11 +54,11 @@ function mediacommons_base_import_download_files ( ) {
     /** file exist in destination folder; save us a request */
     else {
 
+      drush_log ( dt('"@filename" exist.' , array ('@filename' => $filename ) ), 'status' ) ;
+
       $saved_file = (object) array( 'uid' => 1, 'uri' => $destination_file, 'filemime' => file_get_mimetype ( $destination_file ), 'status' => 1 ) ;
 
       $saved_file = file_copy ( $saved_file, 'public://') ;
-
-      drush_log ( $destination_file . ' saved', 'status' ) ;
 
       /** map relationship */
       $record = array( 'ofid' => $file->fid, 'fid' => $saved_file->fid ) ;
@@ -49,7 +66,6 @@ function mediacommons_base_import_download_files ( ) {
       db_insert('mediacommons_base_import_files_map')->fields( $record )->execute() ;
 
     }
-
   }
 }
 
@@ -159,40 +175,25 @@ function mediacommons_base_import_generate_roles() {
   }
 }
 
-function mediacommons_base_import_generate_vocabulary() {
-
-  $d7 = mediacommons_base_import_d7_vocabulary_list();
-
-  $d6 = mediacommons_base_import_d6_vocabulary_list();
-
-  $d7_names = array();
-
-  $query = 'SELECT vid FROM {mediacommons_base_import_vocabulary_map} WHERE vuid = :vuid';
-
-  foreach ( $d7 as $record ) {
-    $d7_names[strtolower($record->name)] = $record->vid;
-  }
-
-  foreach ( $d6 as $record ) {
-    $vid = db_query($query, array(':vuid' => $record->vid));
-    if ( !$vid->rowCount() ) {
-      /** Vocabulary exist in Drupal 7 */
-      if ( array_key_exists ( strtolower( $record->name ) , $d7_names ) ) {
-        drush_log('Vocabulary ' . strtolower($record->name) . ' already exist', "status");
-        db_insert('mediacommons_base_import_vocabulary_map')
-          ->fields(array(
-            'vuid' => $record->vid,
-            'vid' => $d7_names[strtolower($record->name)],
-          )
-        )->execute();
-      }
-      /** Vocabulary does not exist in Drupal 7 */
-      else {
-        drush_log('Creating ' . $record->name, "status");
-        mediacommons_base_import_create_taxonomy_vocabulary($record);
-      }
+function mediacommons_base_import_generate_vocabulary () {
+  foreach ( mediacommons_base_import_d6_vocabulary_list () as $record ) {
+  	$vid = mediacommons_base_import_d7_vid_by_d6_vid ( $record->vid ) ;
+  	/** vocabulary has mapping ? */
+  	if ( ! $vid ) {
+  	  /** vocabulary does not have mapping; check if exist in Drupal 7 */
+  	  $vid = mediacommons_base_import_d7_vid_by_d6_name ( $record->name ) ;
+  	  if ( $vid ) {
+    	/** vocabulary exist in Drupal 7; but does not have mapping */
+  	  	$vocabulary = taxonomy_vocabulary_load ( $vid ) ;
+  	  	/** map vocabulary */
+  		if ( $vocabulary ) {
+  		  drush_log ( '"' . $vocabulary->name . '" mapped', 'status' ) ;
+  		  db_insert('mediacommons_base_import_vocabulary_map')->fields( array( 'vuid' => $record->vid, 'vid' => $vid ) )->execute() ;
+  	    }
+  	  }
     }
   }
+
 }
 
 function mediacommons_base_import_generate_terms() {
@@ -201,6 +202,7 @@ function mediacommons_base_import_generate_terms() {
   mediacommons_base_import_generate_vocabulary();
 
   $vocabulary_map = db_query("SELECT * FROM {mediacommons_base_import_vocabulary_map}");
+
   $terms_d6 = mediacommons_base_import_d6_term_list();
 
   $vocabularies = array();
@@ -212,9 +214,7 @@ function mediacommons_base_import_generate_terms() {
   foreach ($terms_d6 as $term) {
     if (isset($vocabularies[$term->vid])) {
       $tid = db_query("SELECT tid FROM {mediacommons_base_import_term_map} WHERE toid = :toid", array('toid' => $term->tid));
-      if (!$tid->rowCount()) {
-        mediacommons_base_import_create_taxonomy_term($term);
-      }
+      if ( ! $tid->rowCount()) mediacommons_base_import_create_taxonomy_term( $term ) ;
     }
   }
 }
@@ -293,9 +293,7 @@ function mediacommons_base_import_create_spoke( array $old_node ) {
 
   $new_node->sticky = $old_node->sticky;
 
-  if ( isset( $old_node->field_body ) ) {
-    $new_node->field_body[LANGUAGE_NONE][0] = array( 'value' => $old_node->field_body, 'format' => 'limited_html' );
-  }
+  if ( isset( $old_node->field_body ) ) $new_node->field_body[LANGUAGE_NONE][0] = array( 'value' => $old_node->field_body, 'format' => 'limited_html' ) ;
 
   /** attached representative image */
   if ( isset ( $old_node->field_attached_images_ri ) ) {
@@ -309,7 +307,8 @@ function mediacommons_base_import_create_spoke( array $old_node ) {
   /** attached all other images */
   if ( isset ( $old_node->field_attached_images ) ) {
     foreach ( $old_node->field_attached_images as $image ) {
-      drush_print_r ( $image ) ;
+      $fid = mediacommons_base_import_get_file_fid_by_ofid ( $image->fid ) ;
+      if ( $fid ) $new_node->field_attached_images[$old_node->language][] = (array) file_load ( $fid ) ;
     }
   }
 

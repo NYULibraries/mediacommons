@@ -1,7 +1,7 @@
 <?php
 
 function _mediacommons_base_import_prepare_taxonomy_fields () {
-  mediacommons_base_import_prepare_taxonomy_fields();
+  mediacommons_base_import_prepare_taxonomy_fields() ;
 }
 
 function mediacommons_base_import_prepare_taxonomy_fields () {

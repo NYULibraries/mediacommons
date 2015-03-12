@@ -37,19 +37,17 @@
  *  ),
  * );
  */
-function mediacommons_base_import_d6_configured() {
+function mediacommons_base_import_d6_configured () {
 
   global $databases;
 
   if ( isset ( $databases['drupal6'] ) ) return TRUE ;
 
-  drush_log( 'Unable to find Drupal 6 database.' , 'error' );
-
-  die ();
+  die ( drush_set_error ( dt ( 'Unable to find Drupal 6 database.' ) ) ) ;
 
 }
 
- function mediacommons_base_import_get_content($URL) {
+function mediacommons_base_import_get_content($URL) {
    $ch = curl_init();
    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
    curl_setopt($ch, CURLOPT_URL, $URL);
@@ -59,7 +57,7 @@ function mediacommons_base_import_d6_configured() {
 }
 
 function mediacommons_base_import_curl($URL) {
-	return mediacommons_base_import_get_content($URL);
+  return mediacommons_base_import_get_content($URL);
 }
 
 function mediacommons_base_import_default_commands() {
@@ -94,63 +92,54 @@ function mediacommons_base_import_default_commands() {
   );
 }
 
-function mediacommons_base_import_prepare($caller) {
+function mediacommons_base_import_prepare ($caller) {
 
-  include_once 'include/mediacommons_base_import.install';
-  include_once 'include/mediacommons_base_import.datasource.inc';
-  include_once 'include/mediacommons_base_import.create.inc';
-  include_once 'include/mediacommons_base_import.delete.inc';
-  include_once 'include/mediacommons_base_import.profile.inc';
-  include_once 'include/mediacommons_base_import.random.inc';
-
-  global $settigs; // while I find them all
   global $settings;
 
-  $settings = $settigs = mediacommons_base_import_settings($caller);
+  include_once __DIR__ . '/mediacommons_base_import.install';
 
-  foreach ($settings['dependencies'] as $dependency) {
-    if(!module_exists($dependency)) {
-      drush_set_error(
-        t('About to die like a coward. Dependency @dependency not met.', array('@dependency' => $dependency))
-      );
-      die();
+  foreach ( file_scan_directory ( __DIR__ . '/include/', '/.*\.inc$/' ) as $include ) include_once ( $include->uri ) ;
+
+  $schemas = mediacommons_base_import_schema () ;
+
+  $settings = mediacommons_base_import_settings ( $caller );
+
+  if ( isset ( $settings['dependencies']) ) {
+    foreach ( $settings['dependencies'] as $dependency ) {
+      if ( ! module_exists ( $dependency ) ) die ( drush_set_error ( t('About to die like a coward. Dependency @dependency not met.', array( '@dependency' => $dependency) ) ) );
     }
   }
 
-  $schemas = mediacommons_base_import_schema();
+  $install_file = $settings['script_path']['dirname'] . '/' . $settings['script_path']['filename'] . '.install';
 
-  $install_file = $settigs['script_path']['dirname'] . '/include/' . $settigs['script_path']['filename'] . '.install';
+  $info_file = $settings['script_path']['dirname'] . '/' . $settings['script_path']['filename'] . '.info';
 
-  $includes = file_scan_directory($settigs['script_path']['dirname'], '/.*\.inc$/');
+  $includes = file_scan_directory( $settings['script_path']['dirname'], '/.*\.inc$/' );
 
-  foreach ($includes as $include) {
-    include_once ( $include->uri );
-  }
+  foreach ( $includes as $include ) include_once ( $include->uri );
 
-  if (file_exists($install_file)) {
+  if ( file_exists ( $install_file ) ) {
     include_once($install_file);
-    $call = $settigs['script_path']['filename'] . '_schema';
-    if (function_exists($call)) {
-      $schemas += $call();
-    }
+    $call = $settings['script_path']['filename'] . '_schema';
+    if ( function_exists( $call ) ) $schemas += $call() ;
   }
 
-  mediacommons_base_import_initialize_schema($settigs['script_path']['filename'], $schemas);
+  mediacommons_base_import_initialize_schema ( $settigs['script_path']['filename'], $schemas ) ;
 
-  foreach ($schemas as $name => $schema) {
-    if (!db_table_exists($name)) {
-      db_create_table($name, $schema);
-    }
-  }
+  foreach ( $schemas as $name => $schema ) if ( ! db_table_exists ( $name ) ) db_create_table( $name, $schema ) ;
 
 }
 
-function mediacommons_base_import_settings($caller) {
-  $script = pathinfo($caller);
-  $settigs = array();
-  $settigs = json_decode(utf8_encode(file_get_contents($script['dirname'] . '/settings.json')), true);
-  $settigs['script_path'] = $script;
-  return $settigs;
+function mediacommons_base_import_settings ( $caller ) {
+
+  $script = pathinfo ( $caller ) ;
+
+  $settigs = drupal_parse_info_file ( $script['dirname'] . '/' . $script['filename'] . '.info' )  ;
+
+  $settigs['script_path'] = $script ;
+
+  return $settigs ;
+
 }
 
 /** Return a plain node template */
@@ -230,39 +219,20 @@ function mediacommons_base_import_init(array $options = array()) {
   $commands = array_merge($default_commands, $options['commands']);
 
   // Add exit command to end of the commands options
-  $commands[] = array(
-    'label' => t('Exit'),
-    'callback' => array(
-      'drush_exit',
-    ),
-  );
+  $commands[] = array( 'label' => t('Exit'), 'callback' => array( 'drush_exit' ) ) ;
 
-  mediacommons_base_import_prepare($caller);
+  mediacommons_base_import_prepare ( $caller ) ;
 
   if ( $task ) {
 
-    $action = FALSE;
+    foreach ( $commands as $key => $command ) if ( $commands[$key]['label'] == $task ) $action = $key ;
 
-    foreach ($commands as $key => $command) {
+    if ( $action ) mediacommons_base_import_run ($action, $commands ) ;
 
-      if ($commands[$key]['label'] == $task) {
-        $action = $key;
-      }
-
-    }
-
-    if ($action) {
-      mediacommons_base_import_run($action, $commands);
-    }
-
-    else {
-      drush_log('Unable to load task', 'error');
-    }
+    else drush_log('Unable to load task', 'error') ;
 
   }
-  else {
-    mediacommons_base_import_show_options($commands);
-  }
+  else mediacommons_base_import_show_options( $commands ) ;
 }
 
 $trace = debug_backtrace();

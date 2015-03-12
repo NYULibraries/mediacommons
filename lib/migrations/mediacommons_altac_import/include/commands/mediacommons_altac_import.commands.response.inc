@@ -1,18 +1,14 @@
 <?php
 
 function mediacommons_altac_import_migrate_all_response() {
-  /**
-   * Load all clusters
-   */
-  mediacommons_altac_import_migrate_response(
-    mediacommons_altac_import_d6_response_list()
-  );
+  /** Load all clusters */
+  mediacommons_altac_import_migrate_response ( mediacommons_altac_import_d6_response_list () ) ;
 }
 
 function mediacommons_altac_import_migrate_response($data = array()) {
 
-  foreach ($data as $response) {
-  	
+  foreach ( $data as $response ) {
+
     $d7Nid = mediacommons_base_import_node_nid($response->nid);
 
     $d7Uid = mediacommons_base_import_user_exists($response->uid);
@@ -22,7 +18,7 @@ function mediacommons_altac_import_migrate_response($data = array()) {
     if (!$d7Nid || !$d7Uid) { continue; }
 
     if (!$d7Pid) { $d7Pid = 0; }
-    
+
     $subject = mediacommons_base_migrate_truncate($response->title, 60);
 
     $new_comment = (object) array(
@@ -48,10 +44,11 @@ function mediacommons_altac_import_migrate_response($data = array()) {
         ),
       ),
     );
-    
+
     comment_submit($new_comment);
+
     comment_save($new_comment);
-      
+
     db_insert('mediacommons_base_import_comments_map')
       ->fields(array(
         'ocid' => (int)$response->cid,

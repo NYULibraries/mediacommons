@@ -1,6 +1,3 @@
 <?php
 
-/*
- * Main
- * Usually empty. Add any site specific routine here
- */
+/** Usually empty. Add any site specific routine here */

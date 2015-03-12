@@ -1,0 +1,17 @@
+name = IMR Migration
+description = Migration script for MediaCommons IMR
+core = 7.x
+version = 7.x-1.0
+
+mediacommons[project] = imr
+mediacommons[umbrella] = mediacommons
+mediacommons[environment] = development
+
+mediacommons[environments][local][imr] = http://localhost:8000/imr/
+mediacommons[environments][local][mediacommons] = http://localhost:8000/mediacommons/
+
+mediacommons[environments][development][imr] = http://devmc.dlib.nyu.edu/redesign/imr/
+mediacommons[environments][development][mediacommons] = http://devmc.dlib.nyu.edu/redesign/mediacommons/
+
+mediacommons[environments][production][imr] = http://mediacommons.futureofthebook.org/imr/
+mediacommons[environments][production][mediacommons] = http://mediacommons.futureofthebook.org/

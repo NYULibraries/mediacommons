@@ -19,7 +19,7 @@ function mediacommons_imr_import_init() {
         'mediacommons_imr_import_add_allowed_iframe_sources', // mediacommons_filter filter <iframe> by source and only allow the ones listed in the allowed iframes list.
         'mediacommons_imr_import_migrate_posts',
         'mediacommons_imr_import_migrate_theme_weeks',
-      	'mediacommons_imr_import_embed_field', // find <embed> and <object> and convert them into <iframe>
+      	'mediacommons_base_import_embed_field', // find <embed> and <object> and convert them into <iframe>
       ),
     ),
     array(
@@ -53,23 +53,18 @@ function mediacommons_imr_import_init() {
       ),
     ),
 
-    array( 'label' => t('Delete all users'),
-      'callback' => array(
-        'mediacommons_base_import_delete_users',
-      ),
-    ),
+    array( 'label' => t('Download files managed by Drupal 6'), 'callback' => array( 'mediacommons_base_import_download_files' ) ),
 
-    array( 'label' => t('Download files managed by Drupal'), 'callback' => array( 'mediacommons_base_import_download_files' ) ),
-
+    array( 'label' => t('Run test'), 'callback' => array( 'mediacommons_base_import_run_test' ) ),
 
   );
 
-  mediacommons_base_import_init( array ( 'commands' => $commands ) );
+  mediacommons_base_import_init ( array ( 'commands' => $commands ) );
 
 }
 
-if ( ! file_exists ( $base_file ) ) die() ;
+if ( ! file_exists ( $base_file ) ) exit( drush_set_error ( dt ('Unable to find "@file".', array('@file' => $base_file ) ) ) ) ;
 
-include_once ( $base_file );
+include_once ( $base_file ) ;
 
-mediacommons_imr_import_init();
+mediacommons_imr_import_init() ;

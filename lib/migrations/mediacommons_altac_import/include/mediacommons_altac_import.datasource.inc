@@ -1,7 +1,7 @@
 <?php
 
 function mediacommons_altac_import_d6_response_list() {
-	
+
   $query = "
     SELECT
       c.cid,
@@ -25,9 +25,9 @@ function mediacommons_altac_import_d6_response_list() {
         ON n.nid = c.cid
     WHERE n.status = 1
   ";
-  
+
   $results = Database::getConnection('default', 'drupal6')->query($query, array(), array());
-  
+
   /** Create and return a database connection to the source (d6) database */
   return Database::getConnection('default', 'drupal6')->query($query, array(':onid' => $onid), array());
 }
@@ -35,11 +35,11 @@ function mediacommons_altac_import_d6_response_list() {
 function mediacommons_altac_import_d6_cluster_list() {
 
   $type = 'cluster';
-  
+
   $query = "
-    SELECT 
+    SELECT
       n.nid,
-      MAX(n.vid) AS vid, 
+      MAX(n.vid) AS vid,
       n.type,
       n.language,
       n.uid,
@@ -55,16 +55,16 @@ function mediacommons_altac_import_d6_cluster_list() {
       f.filename AS filename,
       GROUP_CONCAT(DISTINCT cfc.field_contributors_uid ORDER by cfc.delta SEPARATOR ', ') AS contributors,
       GROUP_CONCAT(DISTINCT cfp.field_contributed_piece_nid ORDER by cfp.delta SEPARATOR ', ') AS pieces,
-      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms      
+      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
     FROM {node} n
       LEFT JOIN {node_revisions} nr
-        ON n.vid = nr.vid    
+        ON n.vid = nr.vid
       LEFT JOIN {content_type_cluster} ct
         ON n.vid = ct.vid
     LEFT JOIN {content_field_contributors} cfc
       ON n.vid = cfc.vid
     LEFT JOIN {content_field_contributed_piece} cfp
-      ON n.vid = cfp.vid      
+      ON n.vid = cfp.vid
     LEFT JOIN {files} f
       ON ct.field_image_fid = f.fid
     LEFT JOIN {term_node} t
@@ -72,17 +72,17 @@ function mediacommons_altac_import_d6_cluster_list() {
     WHERE n.type = :type
     AND n.status > 0
     GROUP BY n.nid
-    ORDER BY n.nid";  
+    ORDER BY n.nid";
 
   /** Create and return a database connection to the source (d6) database */
   return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
-  	
+
 }
 
 function mediacommons_altac_import_d6_contributed_pieces_list() {
-  	
-  $type = 'contributed_pieces'; 
-    
+
+  $type = 'contributed_pieces';
+
   $query = "
     SELECT
       n.nid,
@@ -122,17 +122,17 @@ function mediacommons_altac_import_d6_contributed_pieces_list() {
         ON n.vid = t.vid
     WHERE n.type = :type
     GROUP BY n.nid
-    ORDER BY n.nid";  
-    
+    ORDER BY n.nid";
+
   /** Create and return a database connection to the source (d6) database */
   return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
 
 }
 
-function mediacommons_altac_import_d6_contributed_pieces($nid = NULL) {
-  
+function mediacommons_altac_import_d6_contributed_pieces ( $nid = NULL ) {
+
   if (!$nid) { return FALSE; }
-  
+
   $query = "
     SELECT
       n.nid,
@@ -173,16 +173,15 @@ function mediacommons_altac_import_d6_contributed_pieces($nid = NULL) {
     WHERE n.type = 'contributed_pieces'
     AND n.nid = :nid
     GROUP BY n.nid
-    ORDER BY n.nid";  
-    
-  //AND n.status > 0
-  
+    ORDER BY n.nid";
+
   /** Create and return a database connection to the source (d6) database */
   return Database::getConnection('default', 'drupal6')->query($query, array(':nid' => $nid), array());
 
 }
 
 function mediacommons_altac_import_d6_attached_images($nid) {
+
   $query = Database::getConnection('default', 'drupal6')
     ->select('image_attach', 'ia')
     ->fields('f',
@@ -195,6 +194,7 @@ function mediacommons_altac_import_d6_attached_images($nid) {
     ->condition('ia.nid', $nid, '=');
 
   $query->leftJoin('image', 'i', 'ia.iid = i.nid');
+
   $query->leftJoin('files', 'f', 'f.fid = i.fid');
 
   return $query->execute();

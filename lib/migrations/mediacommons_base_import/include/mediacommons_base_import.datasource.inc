@@ -1,6 +1,6 @@
 <?php
 
-mediacommons_base_import_d6_configured();
+mediacommons_base_import_d6_configured () ;
 
 /**
  *  Return configured production URL
@@ -45,45 +45,7 @@ function mediacommons_base_import_node_nid($onid) {
 }
 
 
-/**
- *  Find out if user is already in the system by its Drupal 6 user id
- */
-function mediacommons_base_import_user_exists($ouid) {
-
-  $ouid = (int)$ouid;
-
-  if ($ouid == 1) {
-    return 1;
-  }
-
-  $author_exist = db_query('SELECT uid FROM mediacommons_base_import_user_map u WHERE ouid = :ouid', array(':ouid' => $ouid));
-
-  $count = $author_exist->rowCount();
-
-  if ( $count > 0) {
-    $author = $author_exist->fetchObject();
-    return $author->uid;
-  }
-
-  return FALSE;
-
-}
-
-
-function mediacommons_base_import_d6_roles() {
-  return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {role}', array(), array());
-}
-
-function mediacommons_base_import_d7_roles() {
-  /** find all */
-  $query = db_query("SELECT * FROM {role}");
-
-  /** return nids */
-  return $query->fetchAll();
-
-}
-
-function mediacommons_base_import_d6_find_node_image_attach($nid) {
+function mediacommons_base_import_d6_find_node_image_attach( $nid ) {
 
   $query = Database::getConnection('default', 'drupal6')
     ->select('image_attach', 'ia')
@@ -103,7 +65,7 @@ function mediacommons_base_import_d6_find_node_image_attach($nid) {
 
 }
 
-function mediacommons_base_import_d6_find_node_representative_image($nid) {
+function mediacommons_base_import_d6_find_node_representative_image ( $nid ) {
   $query = Database::getConnection('default', 'drupal6')
     ->select('image_attach', 'ia')
     ->fields('f',
@@ -120,24 +82,7 @@ function mediacommons_base_import_d6_find_node_representative_image($nid) {
 
 }
 
-function mediacommons_base_import_find_d6_user_roles($uid) {
-
-  $query = Database::getConnection('default', 'drupal6')
-    ->select('users', 'u')->fields('u',
-      array(
-        'uid',
-        'name',
-      )
-    )
-    ->condition('u.uid', $uid, '=');
-
-  $query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
-  $query->groupBy('uid');
-  $query->addExpression("GROUP_CONCAT(DISTINCT ur.rid SEPARATOR ',')", 'roles');
-  return $query->execute();
-}
-
-function mediacommons_base_import_find_nodes($type) {
+function mediacommons_base_import_find_nodes ( $type ) {
 
   /** find all */
   $query = db_query("SELECT DISTINCT nid FROM {node} WHERE type = :type", array('type' => $type));
@@ -210,13 +155,14 @@ function mediacommons_base_import_find_term($tid) {
 
 }
 
-function mediacommons_base_import_find_vocabulary($vid) {
+
+function mediacommons_base_import_find_vocabulary( $vid ) {
 
   $vocabulary = array();
 
   $vocabulary_d7_vid = db_query("SELECT vid FROM mediacommons_base_import_vocabulary_map WHERE vuid = :vuid", array(':vuid' => $vid));
 
-  if (!$vocabulary_d7_vid->rowCount()) {
+  if ( ! $vocabulary_d7_vid->rowCount() ) {
     $query = '
         SELECT
           vocabulary.vid,
@@ -239,6 +185,7 @@ function mediacommons_base_import_find_vocabulary($vid) {
     if ($result->rowCount()) {
       $vocabulary = mediacommons_base_import_create_taxonomy_vocabulary($result->fetchObject());
     }
+
   }
   else {
     $v = $vocabulary_d7_vid->fetchObject();
@@ -259,16 +206,10 @@ function mediacommons_base_import_d7_term_list() {
 
 function mediacommons_base_import_d6_term_list() {
 
-  $query = '
-      SELECT term.tid, term.vid, term.name, term.description, term.weight, hierarchy.parent
-      FROM {term_data} term
-      LEFT JOIN {term_hierarchy} hierarchy
-        ON term.tid = hierarchy.tid';
+  $query = 'SELECT term.tid, term.vid, term.name, term.description, term.weight FROM {term_data} term ';
 
   /** Create a database connection to the source (d6) database */
-  $result = Database::getConnection('default', 'drupal6')->query($query, array(), array());
-
-  return $result;
+  return Database::getConnection('default', 'drupal6')->query($query, array(), array()) ;
 
 }
 
@@ -280,95 +221,7 @@ function mediacommons_base_import_d6_node_comments_list() {
   return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {comments}', array(), array());
 }
 
-function mediacommons_base_import_d6_user_one() {
 
-	$users = array();
-
-	/** Create a database connection to the source (d6) database */
-	$query = Database::getConnection('default', 'drupal6')
-
-	->select('users', 'u')
-
-	->fields('u', array(
-			'uid',
-			'name',
-			'pass',
-			'mail',
-			'theme',
-			'signature',
-			'signature_format',
-			'created',
-			'access',
-			'login',
-			'status',
-			'language',
-			'picture',
-			'init',
-			'timezone_name'
-	)
-	)
-	->condition('u.uid', 1);
-
-	$query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
-
-	$query->groupBy('uid');
-
-	$query->addExpression("GROUP_CONCAT(DISTINCT ur.rid SEPARATOR ',')", 'roles');
-
-	$results = $query->execute();
-
-	foreach ($results as $result) {
-		$users[$result->uid] = $result;
-	}
-
-	return $users;
-
-}
-
-function mediacommons_base_import_d6_users_list() {
-
-  $users = array();
-
-  /** Create a database connection to the source (d6) database */
-  $query = Database::getConnection('default', 'drupal6')
-
-  ->select('users', 'u')
-
-  ->fields('u', array(
-      'uid',
-      'name',
-      'pass',
-      'mail',
-      'theme',
-      'signature',
-      'signature_format',
-      'created',
-      'access',
-      'login',
-      'status',
-      'language',
-      'picture',
-      'init',
-      'timezone_name'
-    )
-  )
-  ->condition('u.uid', 1, '>');
-
-  $query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
-
-  $query->groupBy('uid');
-
-  $query->addExpression("GROUP_CONCAT(DISTINCT ur.rid SEPARATOR ',')", 'roles');
-
-  $results = $query->execute();
-
-  foreach ($results as $result) {
-    $users[$result->uid] = $result;
-  }
-
-  return $users;
-
-}
 
 function mediacommons_base_import_d6_hub_list() {
 
@@ -460,9 +313,6 @@ function mediacommons_base_import_d6_spoke_list() {
 
 }
 
-function mediacommons_base_import_get_role_by_name ($name) {
-  return array_search( $name, user_roles() );
-}
 
 function mediacommons_base_import_d7_hubs_list() {
   /** find all */
@@ -478,24 +328,6 @@ function mediacommons_base_import_d7_spoke_list() {
 
 	/** return nids */
 	return $query->fetchAll();
-}
-
-
-/** Drupal 6 Realname */
-
-function mediacommons_base_import_d6_users_realname_list() {
-
-  $users = array();
-
-  /** Create a database connection to the source (d6) database */
-  $query = Database::getConnection('default', 'drupal6')->select('realname', 'r')->fields('r', array( 'uid', 'realname' ) )->condition('r.uid', 1, '>');
-
-  $results = $query->execute();
-
-  foreach ( $results as $result ) $users[$result->uid] = $result;
-
-  return $users;
-
 }
 
 /** Drupal 6 profile fields value by Drupal 6 user id */
@@ -551,25 +383,16 @@ function mediacommons_base_import_d6_profile_fields_list() {
 
 }
 
-function mediacommons_base_import_get_role_rid_by_orid ( $orid ) {
 
-  /** Create a database connection to the source (d6) database */
-  $result = db_query("SELECT rid FROM {mediacommons_base_import_role_map} WHERE orid = :orid", array(':orid' => $orid ) );
-
-  $rid = $result->fetchObject() ;
-
-  if ( $rid ) return $rid->rid ;
-
-  else return FALSE ;
-
-}
 
 function mediacommons_base_import_d6_list_files (  ) {
 
 	/** Create a database connection to the source (d6) database */
-    $query = Database::getConnection('default', 'drupal6')->select('files', 'f')->fields('f', array( 'fid', 'filename', 'filepath' ) );
+    //$query = Database::getConnection('default', 'drupal6')->select('files', 'f')->fields('f', array( 'fid', 'filename', 'filepath' ) );
 
-	return $query->execute();
+    $query = 'SELECT fid, filename, filepath FROM {files} ORDER BY fid ASC' ;
+
+	return Database::getConnection('default', 'drupal6')->query($query, array(), array());
 
 }
 
@@ -583,5 +406,107 @@ function mediacommons_base_import_get_file_fid_by_ofid ( $ofid ) {
 	if ( $fid ) return $fid->fid ;
 
 	else return FALSE ;
+
+}
+
+function mediacommons_base_import_find_iframe_sources () {
+
+	include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
+
+	$type = 'post';
+
+	$query = "
+    SELECT
+      n.nid,
+      MAX(n.vid) AS vid,
+  	  nr.body,
+      ct.*
+    FROM {node} n
+    LEFT JOIN {node_revisions} nr ON n.vid = nr.vid
+    LEFT JOIN {content_type_post} ct ON n.vid = ct.vid
+    WHERE n.type = :type
+    AND n.status > 0
+    GROUP BY n.nid
+    ORDER BY n.nid";
+
+	/** Create and return a database connection to the source (d6) database */
+	$nodes = Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
+
+	$hosts = array ( 'iframe' => array ( ) , 'embed' => array ( ) , 'img' =>  array ( ) , 'sources' ) ;
+
+	foreach ( $nodes as $node ) {
+
+		$html = str_get_html( $node->field_video_embed_link_value . ' ' . $node->body ) ;
+		// Find all iframe
+		foreach ( $html->find('iframe') as $element) {
+			$parse_url = parse_url( $element->src ) ;
+			if ( ! in_array( $parse_url['host'], $hosts['iframe'], true ) ) {
+				$hosts['iframe'][] = $parse_url['host'];
+			}
+		}
+		// Find all embed
+		foreach ( $html->find('embed') as $element ) {
+			$parse_url = parse_url( $element->src ) ;
+			if ( ! in_array( $parse_url['host'], $hosts['embed'], true ) ) {
+				$hosts['embed'][] = $parse_url['host'];
+			}
+		}
+		// Find all img
+		foreach ( $html->find('img') as $element ) $hosts['img'][] = $element->src ;
+	}
+
+	$hosts['sources'] = array_merge( $hosts['iframe'] , $hosts['embed'] ) ;
+
+	return $hosts['sources'] ;
+
+}
+
+function mediacommons_base_import_contributed_pieces_find_iframe_sources ( ) {
+
+  include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
+
+  $query = "
+    SELECT
+      n.nid,
+      MAX(n.vid) AS vid,
+  	  nr.body,
+      ct.*
+    FROM {node} n
+    LEFT JOIN {node_revisions} nr ON n.vid = nr.vid
+    LEFT JOIN {content_type_contributed_pieces} ct ON n.vid = ct.vid
+    WHERE n.type = 'contributed_pieces'
+    AND n.status
+    GROUP BY n.nid
+    ORDER BY n.nid";
+
+  /** Create and return a database connection to the source (d6) database */
+  $nodes = Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
+
+  $hosts = array ( 'iframe' => array ( ) , 'embed' => array ( ) , 'img' =>  array ( ) , 'sources' ) ;
+
+  foreach ( $nodes as $node ) {
+
+    $html = str_get_html( $node->field_document_textarea_body_value . ' ' . $node->body ) ;
+    // Find all iframe
+    foreach ( $html->find('iframe') as $element) {
+      $parse_url = parse_url( $element->src ) ;
+      if ( ! in_array( $parse_url['host'], $hosts['iframe'], true ) ) {
+        $hosts['iframe'][] = $parse_url['host'];
+      }
+    }
+    // Find all embed
+    foreach ( $html->find('embed') as $element ) {
+      $parse_url = parse_url( $element->src ) ;
+      if ( ! in_array( $parse_url['host'], $hosts['embed'], true ) ) $hosts['embed'][] = $parse_url['host'] ;
+    }
+    // Find all img
+    foreach ( $html->find('img') as $element ) {
+      $hosts['img'][] = $element->src ;
+    }
+  }
+
+  $hosts['sources'] = array_merge( $hosts['iframe'] , $hosts['embed'] ) ;
+
+  return $hosts['sources'] ;
 
 }
