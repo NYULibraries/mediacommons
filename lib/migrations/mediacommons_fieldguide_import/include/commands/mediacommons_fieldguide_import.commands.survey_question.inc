@@ -1,10 +1,8 @@
 <?php
 
-function mediacommons_survey_import_migrate_all_survey_question() {
+function mediacommons_fieldguide_import_migrate_all_survey_question() {
 
-  mediacommons_survey_import_migrate_survey_question(
-    mediacommons_survey_import_d6_survey_question_list()
-  );
+  mediacommons_survey_import_migrate_survey_question( mediacommons_survey_import_d6_survey_question_list() ) ;
 
 }
 
@@ -22,7 +20,7 @@ function mediacommons_survey_import_migrate_survey_question ( $data = array() ) 
 
     $node['onid'] = $hub->nid;
 
-    $node['language'] = ( !empty( $hub->language ) ) ? $hub->language : LANGUAGE_NONE;
+    $node['language'] = LANGUAGE_NONE;
 
     $node['date'] = date('Y-m-j H:i:s', $hub->created);
 
@@ -41,4 +39,5 @@ function mediacommons_survey_import_migrate_survey_question ( $data = array() ) 
     mediacommons_base_import_create_hub( $node );
 
   }
+
 }

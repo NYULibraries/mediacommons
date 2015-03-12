@@ -1,6 +1,6 @@
 <?php
 
-function mediacommons_survey_import_d6_survey_response_list() {
+function mediacommons_fieldguide_import_d6_survey_response_list() {
 
   $type = 'survey_response';
 
@@ -38,18 +38,18 @@ function mediacommons_survey_import_d6_survey_response_list() {
 
 }
 
-function mediacommons_survey_import_d6_attached_images_by_fid( $fid ) {
+function mediacommons_fieldguide_import_d6_attached_images_by_fid ( $fid ) {
 
   $query = "SELECT fid, filepath, filename FROM {files} WHERE fid = :fid";
-	
+
   /** Create and return a database connection to the source (d6) database */
   $file = Database::getConnection('default', 'drupal6')->query($query, array(':fid' => $fid), array())->fetchObject();
-	
+
   return $file;
-	
+
 }
 
-function mediacommons_survey_import_d6_survey_question_list() {
+function mediacommons_fieldguide_import_d6_survey_question_list () {
 
   $type = 'survey_question';
 

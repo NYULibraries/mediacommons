@@ -1,0 +1,45 @@
+<?php
+
+$base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';
+
+function mediacommons_fieldguide_import_init () {
+
+  $commands = array(
+
+    array(
+      'label' => t('Migrate MediaCommons Survey content'),
+      'callback' => array(
+        'mediacommons_base_import_generate_vocabulary',
+        'mediacommons_base_import_generate_terms',
+        'mediacommons_base_import_map_roles',
+      	'mediacommons_base_import_prepare_taxonomy_fields',
+        'mediacommons_base_import_generate_all_users',
+      	'mediacommons_base_import_migrate_user_realname',
+      	'mediacommons_base_import_migrate_profile_fields',
+      	'mediacommons_base_import_download_files',
+        'mediacommons_fieldguide_import_migrate_all_survey_question',
+        'mediacommons_fieldguide_import_migrate_all_survey_response',
+      ),
+    ),
+
+    array(
+  	  'label' => t('Migrate MediaCommons Survey Questions'),
+  	  'callback' => array( 'mediacommons_fieldguide_import_migrate_all_survey_question' )
+    ),
+
+  	array(
+  	  'label' => t('Migrate MediaCommons Survey Response'),
+  	  'callback' => array( 'mediacommons_fieldguide_import_migrate_all_survey_response' )
+    ),
+
+  );
+
+  mediacommons_base_import_init( array('commands' => $commands ) );
+
+}
+
+if ( ! file_exists ( $base_file ) ) exit( drush_set_error ( dt ('Unable to find "@file".', array('@file' => $base_file ) ) ) ) ;
+
+include_once ( $base_file ) ;
+
+mediacommons_fieldguide_import_init () ;

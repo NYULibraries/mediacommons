@@ -1,0 +1,17 @@
+name = MediaCommons Survey Question
+description = Migration script for MediaCommons Survey Question
+core = 7.x
+version = 7.x-1.0
+
+mediacommons[project] = fieldguide
+mediacommons[umbrella] = mediacommons
+mediacommons[environment] = development
+
+mediacommons[environments][local][fieldguide] = http://localhost:8000/fieldguide/
+mediacommons[environments][local][mediacommons] = http://localhost:8000/mediacommons/
+
+mediacommons[environments][development][fieldguide] = http://devmc.dlib.nyu.edu/redesign/fieldguide/
+mediacommons[environments][development][mediacommons] = http://devmc.dlib.nyu.edu/redesign/mediacommons/
+
+mediacommons[environments][production][fieldguide] = http://mediacommons.futureofthebook.org/
+mediacommons[environments][production][mediacommons] = http://mediacommons.futureofthebook.org/

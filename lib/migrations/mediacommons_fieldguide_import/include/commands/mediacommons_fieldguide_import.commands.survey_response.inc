@@ -1,20 +1,10 @@
 <?php
 
-function mediacommons_survey_import_migrate_all_survey_response() {
-
-  /**
-   * Load data
-   */
-  $nodes = mediacommons_survey_import_d6_survey_response_list();
-
-  /**
-   * Migrate data
-   */
-  mediacommons_survey_import_migrate_survey_response( $nodes );
-
+function mediacommons_fieldguide_import_migrate_all_survey_response() {
+  mediacommons_fieldguide_import_migrate_survey_response( mediacommons_fieldguide_import_d6_survey_response_list() ) ;
 }
 
-function mediacommons_survey_import_migrate_survey_response( $data = array() ) {
+function mediacommons_fieldguide_import_migrate_survey_response( $data = array() ) {
 
   /**
    * Files folder real path
@@ -71,28 +61,17 @@ function mediacommons_survey_import_migrate_survey_response( $data = array() ) {
 
 	  $node['sticky'] = $spoke->sticky;
 
-	  /**
-	   * Field body
-	   */
-	  if ( isset( $spoke->field_response_value ) ) {
-	    $node['field_body'] = $spoke->field_response_value;
-	  }
+	  /** field body */
+	  if ( isset( $spoke->field_response_value ) ) $node['field_body'] = $spoke->field_response_value ;
 
-	  /**
-	   * References hub
-	   */
-	  if ( isset( $spoke->field_sr_reference_nid ) ) {
-	  	$node['field_part_of'] = array( $spoke->field_sr_reference_nid );
-	  }
+	  /** references hub */
+	  if ( isset( $spoke->field_sr_reference_nid ) ) $node['field_part_of'] = array( $spoke->field_sr_reference_nid ) ;
 
-	  /**
-	   * Publication Status
-	   */
+	  /** publication Status */
 	  $node['field_pubstat'] = $spoke->status;
 
 	  /**
 	   * Attached images
-	   * @var unknown_type
 	   */
 	  $node['field_attached_images'] = array();
 
@@ -130,7 +109,7 @@ function mediacommons_survey_import_migrate_survey_response( $data = array() ) {
 
 	  }
 
-	  mediacommons_base_import_create_spoke($node);
+	  mediacommons_base_import_create_spoke( $node );
 
 	}
 
