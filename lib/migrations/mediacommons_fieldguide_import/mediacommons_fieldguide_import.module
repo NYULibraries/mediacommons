@@ -19,6 +19,8 @@ function mediacommons_fieldguide_import_init () {
       	'mediacommons_base_import_download_files',
         'mediacommons_fieldguide_import_migrate_all_survey_question',
         'mediacommons_fieldguide_import_migrate_all_survey_response',
+      	'mediacommons_fieldguide_import_body_field', // find <embed> and <object> and convert them into <iframe>
+
       ),
     ),
 

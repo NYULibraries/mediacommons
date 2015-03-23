@@ -2,11 +2,11 @@
 
 function mediacommons_fieldguide_import_migrate_all_survey_question() {
 
-  mediacommons_survey_import_migrate_survey_question( mediacommons_survey_import_d6_survey_question_list() ) ;
+  mediacommons_fieldguide_import_migrate_survey_question( mediacommons_fieldguide_import_d6_survey_question_list() ) ;
 
 }
 
-function mediacommons_survey_import_migrate_survey_question ( $data = array() ) {
+function mediacommons_fieldguide_import_migrate_survey_question ( $data = array() ) {
 
   foreach ( $data as $key => $hub ) {
 

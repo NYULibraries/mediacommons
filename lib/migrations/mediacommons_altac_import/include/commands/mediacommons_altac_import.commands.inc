@@ -1,3 +1,5 @@
 <?php
 
-/** Usually empty. Add any site specific routine here */
+function mediacommons_fieldguide_import_body_field ( ) {
+
+}
