@@ -20,11 +20,16 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 DEBUG=""
 
+ENVIRONMENT="local"
+
 while getopts ":c:hdb" opt; do
   case $opt in
     c)
       [ -f $OPTARG ] || die "Configuration file does not exist." 
       CONF_FILE=$OPTARG
+      ;;
+    e)
+      ENVIRONMENT=$OPTARG
       ;;
     d)
       DEBUG="-d -v"
@@ -143,7 +148,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     if [[ $SITE_ONLINE =~ "Connected" ]] && [[ $SITE_ONLINE =~ "Successful" ]] ; 
       then
         echo $MIGRATION_TASK
-        drush $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --task="${MIGRATION_TASK}"
+      drush $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --environment=${ENVIRONMENT} --strict=0 --task="${MIGRATION_TASK}"
       else
         die ${LINENO} "test" "Unable to connect to Drupal. URI: ${BASE_URL} ROOT: ${BUILD_DIR}/${BUILD_BASE_NAME}"  
     fi
