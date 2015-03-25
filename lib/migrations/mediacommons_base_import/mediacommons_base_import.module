@@ -136,6 +136,10 @@ function mediacommons_base_import_settings ( $caller ) {
 
   $settigs = drupal_parse_info_file ( $script['dirname'] . '/' . $script['filename'] . '.info' )  ;
 
+  if ( $environment = drush_get_option('environment') ) {
+    if ( isset ( $settigs['mediacommons']['environments'][$environment] ) ) $settigs['mediacommons']['environment'] = $environment ;
+  }
+
   $settigs['script_path'] = $script ;
 
   return $settigs ;

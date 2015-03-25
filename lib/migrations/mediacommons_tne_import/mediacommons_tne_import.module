@@ -10,11 +10,19 @@ function mediacommons_tne_import_init() {
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
         'mediacommons_base_import_generate_terms',
-        'mediacommons_base_import_generate_roles',
+        'mediacommons_base_import_map_roles',  
+      	'mediacommons_base_import_prepare_taxonomy_fields',              
         'mediacommons_base_import_generate_all_users',
+        'mediacommons_base_import_migrate_user_realname',
+      	'mediacommons_base_import_migrate_profile_fields',
+      	'mediacommons_base_import_download_files', // download files that are managed by Drupal
+        'mediacommons_tne_import_add_hub_allowed_iframe_sources', // mediacommons_filter filter <iframe> by source and only allow the ones listed in the allowed iframes list.      	
+        'mediacommons_tne_import_add_contributed_pieces_allowed_iframe_sources', // mediacommons_filter filter <iframe> by source and only allow the ones listed in the allowed iframes list.      	        
         'mediacommons_tne_import_migrate_all_contributed_pieces',
         'mediacommons_tne_import_migrate_all_clusters',
         'mediacommons_tne_import_migrate_all_response',
+        // 'mediacommons_base_import_body_field', // find <embed> and <object> and convert them into <iframe>
+        // 'mediacommons_base_import_embed_field', // find <embed> and <object> and convert them into <iframe>
       ),
     ),
     array(

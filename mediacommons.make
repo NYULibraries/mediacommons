@@ -2,18 +2,18 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.34"
+projects[drupal][version] = "7.35"
 
 ; Modules
 
-projects[ctools][version] = "1.6"
+projects[ctools][version] = "1.7"
 projects[cnr][version] = "4.22"
 projects[date][version] = "2.8"
 projects[diff][version] = "3.2"
 projects[ds][version] = "2.7"
 projects[entity][version] = "1.6"
 projects[features_extra][version] = "1.0-beta1"
-projects[features][version] = "2.3"
+projects[features][version] = "2.4"
 projects[flexslider][version] = "2.0-alpha3"
 projects[imagefield_crop][version] = "1.1"
 projects[jquery_update][version] = "2.5"
@@ -65,7 +65,7 @@ libraries[flexslider][download][url] = "https://github.com/woothemes/FlexSlider.
 libraries[flexslider][directory_name] = "flexslider"
 libraries[flexslider][type] = "library"
 
-libraries[flexslider][download][type] = "get"
-libraries[flexslider][download][url] = "http://downloads.sourceforge.net/project/simplehtmldom/simplehtmldom/1.5/simplehtmldom_1_5.zip"
-libraries[flexslider][directory_name] = "simplehtmldom"
-libraries[flexslider][type] = "library"
+libraries[simplehtmldom][download][type] = "get"
+libraries[simplehtmldom][download][url] = "http://downloads.sourceforge.net/project/simplehtmldom/simplehtmldom/1.5/simplehtmldom_1_5.zip"
+libraries[simplehtmldom][directory_name] = "simplehtmldom"
+libraries[simplehtmldom][type] = "library"

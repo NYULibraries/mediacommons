@@ -1,5 +1,24 @@
 <?php
 
+function mediacommons_tne_import_add_hub_allowed_iframe_sources () {
+
+	$d6_domains = mediacommons_tne_import_hub_iframe_sources () ;
+
+	$result = db_query("SELECT * FROM {mediacommons_filter}");
+
+	$domains = array();
+
+	foreach ( $result as $record ) $domains[$record->did] = $record->domain ;
+
+	foreach ( $d6_domains as $d6_domain ) {
+		if ( ! in_array( $d6_domain, $domains ) ) {
+			drush_log ( 'Adding ' . $d6_domain . ' to allowed iframe source list' , 'status' );
+			db_insert('mediacommons_filter')->fields( array('domain' => $d6_domain, ) )->execute();
+		}
+	}
+
+}
+
 function mediacommons_tne_import_migrate_all_clusters() {
   /**
    * Load all clusters
