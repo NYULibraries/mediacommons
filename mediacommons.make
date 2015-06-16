@@ -2,7 +2,7 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.35"
+projects[drupal][version] = "7.37"
 
 ; Modules
 
@@ -10,10 +10,10 @@ projects[ctools][version] = "1.7"
 projects[cnr][version] = "4.22"
 projects[date][version] = "2.8"
 projects[diff][version] = "3.2"
-projects[ds][version] = "2.7"
+projects[ds][version] = "2.10"
 projects[entity][version] = "1.6"
 projects[features_extra][version] = "1.0-beta1"
-projects[features][version] = "2.4"
+projects[features][version] = "2.5"
 projects[flexslider][version] = "2.0-alpha3"
 projects[imagefield_crop][version] = "1.1"
 projects[jquery_update][version] = "2.5"
@@ -21,12 +21,12 @@ projects[libraries][version] = "2.2"
 projects[link][version] = "1.3"
 projects[menu_token][version] = "1.0-beta5"
 projects[references][version] = "2.1"
-projects[nodequeue][version] = "2.0-beta1"
+projects[nodequeue][version] = "2.0"
 projects[pathauto][version] = "1.2"
 projects[realname][version] = "1.2"
 projects[strongarm][version] = "2.0"
 projects[token][version] = "1.6"
-projects[views][version] = "3.10"
+projects[views][version] = "3.11"
 projects[admin_menu][version] = "3.0-rc5"
 projects[devel][version] = "1.5"
 projects[field_group][version] = "1.4"
