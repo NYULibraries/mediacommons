@@ -2,7 +2,7 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.37"
+projects[drupal][version] = "7.38"
 
 ; Modules
 
@@ -16,7 +16,7 @@ projects[features_extra][version] = "1.0-beta1"
 projects[features][version] = "2.5"
 projects[flexslider][version] = "2.0-alpha3"
 projects[imagefield_crop][version] = "1.1"
-projects[jquery_update][version] = "2.5"
+projects[jquery_update][version] = "2.6"
 projects[libraries][version] = "2.2"
 projects[link][version] = "1.3"
 projects[menu_token][version] = "1.0-beta5"
