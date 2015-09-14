@@ -2,19 +2,19 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.38"
+projects[drupal][version] = "7.39"
 
 ; Modules
 
-projects[ctools][version] = "1.7"
+projects[ctools][version] = "1.9"
 projects[cnr][version] = "4.22"
-projects[date][version] = "2.8"
+projects[date][version] = "2.9"
 projects[diff][version] = "3.2"
 projects[ds][version] = "2.11"
 projects[entity][version] = "1.6"
-projects[features_extra][version] = "1.0-beta1"
+projects[features_extra][version] = "1.0"
 projects[features][version] = "2.6"
-projects[flexslider][version] = "2.0-alpha3"
+projects[flexslider][version] = "2.0-rc1"
 projects[imagefield_crop][version] = "1.1"
 projects[jquery_update][version] = "2.6"
 projects[libraries][version] = "2.2"
