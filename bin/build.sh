@@ -33,7 +33,7 @@ DEBUG=""
 
 ENVIRONMENT="local"
 
-while getopts ":c:m:hdsikt" opt; do
+while getopts ":e:c:m:hdsikt" opt; do
  case $opt in
   c)
    [ -f $OPTARG ] || die "Configuration file does not exist." 
@@ -141,6 +141,8 @@ echo "Install new site" ;
 
 # Step 4: Run the site installation
 STEP_4="drush ${DEBUG} -y site-install ${DRUPAL_INSTALL_PROFILE_NAME} --site-name='${DRUPAL_SITE_NAME}' --account-pass="${DRUPAL_ACCOUNT_PASS}" --account-name=${DRUPAL_ACCOUNT_NAME} --account-mail=${DRUPAL_ACCOUNT_MAIL} --site-mail=${DRUPAL_SITE_MAIL} --db-url=${DRUPAL_SITE_DB_TYPE}://${DRUPAL_SITE_DB_USER}:${DRUPAL_SITE_DB_PASS}@${DRUPAL_SITE_DB_ADDRESS}/${DRUPAL_DB_NAME} --root=${BUILD_DIR}/${BUILD_NAME} --environment=${ENVIRONMENT} --strict=0"
+
+echo $STEP_4 ;
 
 if [ ! $SIMULATE ] ; 
   then 

@@ -1,70 +1,30 @@
 <?php
 
-$base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';
-
-function mediacommons_imr_import_init() {
-
-  $commands = array(
-    array(
-      'label' => t('Import IMR D6 Content'),
-      'callback' => array(
-        'mediacommons_base_import_generate_vocabulary',
-        'mediacommons_base_import_generate_terms',
-        'mediacommons_base_import_map_roles',
+function init ( ) {
+  $commands = array (
+    array (
+      'label' => t('Migrate site'),
+      'callback' => array (
+      	'mediacommons_base_import_generate_vocabulary',
+      	'mediacommons_base_import_generate_terms',
+      	'mediacommons_base_import_map_roles',
       	'mediacommons_base_import_prepare_taxonomy_fields',
-        'mediacommons_base_import_generate_all_users',
-      	'mediacommons_base_import_migrate_user_realname',
-      	'mediacommons_base_import_migrate_profile_fields',
       	'mediacommons_base_import_download_files', // download files that are managed by Drupal
-        'mediacommons_imr_import_add_allowed_iframe_sources', // mediacommons_filter filter <iframe> by source and only allow the ones listed in the allowed iframes list.
-        'mediacommons_imr_import_migrate_posts',
-        'mediacommons_imr_import_migrate_theme_weeks',
-      	'mediacommons_base_import_embed_field', // find <embed> and <object> and convert them into <iframe>
+      	'mediacommons_base_import_generate_all_users',
+      	'migrate_posts',
+      	'migrate_theme_weeks',
       ),
     ),
-    array(
-      'label' => t('Migrate posts'),
-      'callback' => array(
-        'mediacommons_imr_import_migrate_posts',
-      ),
-    ),
-    array(
-      'label' => t('Migrate Theme Weeks'),
-      'callback' => array(
-        'mediacommons_imr_import_migrate_theme_weeks',
-      ),
-    ),
-  	array(
-  	  'label' => t('Delete Theme Weeks, Posts'),
-  	    'callback' => array(
-  		  'mediacommons_base_import_delete_post',
-  		  'mediacommons_base_import_delete_hubs',
-          'mediacommons_base_import_delete_comments',
-      ),
-    ),
-    array(
-      'label' => t('Delete Theme Weeks, Posts, comments and file registry'),
-      'callback' => array(
-        'mediacommons_base_import_delete_post',
-        'mediacommons_base_import_delete_hubs',
-        'mediacommons_base_import_delete_comments',
-        'mediacommons_base_import_delete_files',
-        'mediacommons_base_import_delete_alias'
-      ),
-    ),
-
-    array( 'label' => t('Download files managed by Drupal 6'), 'callback' => array( 'mediacommons_base_import_download_files' ) ),
-
-    array( 'label' => t('Run test'), 'callback' => array( 'mediacommons_base_import_run_test' ) ),
-
-  );
+  ) ;
 
   mediacommons_base_import_init ( array ( 'commands' => $commands ) );
 
 }
 
-if ( ! file_exists ( $base_file ) ) exit( drush_set_error ( dt ('Unable to find "@file".', array('@file' => $base_file ) ) ) ) ;
+$base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';
+
+if ( ! file_exists ( $base_file ) ) exit ( drush_set_error ( dt ('Unable to find "@file".', array ( '@file' => $base_file ) ) ) ) ;
 
 include_once ( $base_file ) ;
 
-mediacommons_imr_import_init() ;
+init() ;

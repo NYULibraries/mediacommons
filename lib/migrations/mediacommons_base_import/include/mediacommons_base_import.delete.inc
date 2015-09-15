@@ -1,15 +1,14 @@
 <?php
 
 /** Yar, maties, to-day we sail with Virgilio" */
-function mediacommons_base_import_delete_alias() {
+function mediacommons_base_import_delete_alias ( ) {
   db_delete('url_alias')
     ->condition('pid', 'kill em all', '<>')
     ->execute();
 }
 
 /** I'm going Megaupload on you */
-function mediacommons_base_import_delete_files() {
-
+function mediacommons_base_import_delete_files () {
   db_delete('file_managed')
     ->condition('uri', 'kill em all', '<>')
     ->execute();
@@ -18,69 +17,48 @@ function mediacommons_base_import_delete_files() {
     ->condition('fid', 'kill em all', '<>')
     ->execute();
 
+    db_delete('mediacommons_base_import_files_map')
+    ->condition('fid', 0, '=')
+    ->execute();
+
 }
 
 /** Peer wha'? Shut up! No one cares */
-function mediacommons_base_import_delete_comments() {
+function mediacommons_base_import_delete_comments ( ) {
 
-  db_delete('mediacommons_base_import_comments_map')
-    ->condition('cid', 'kill em all', '<>')
-    ->execute();
+  db_delete('mediacommons_base_import_comments_map')->condition('cid', 'kill em all', '<>')->execute();
 
-  db_delete('comment')
-    ->condition('cid', 'kill em all', '<>')
-    ->execute();
+  db_delete('comment')->condition('cid', 'kill em all', '<>')->execute();
 
-  db_delete('node_comment_statistics')
-    ->condition('cid', 'kill em all', '<>')
-    ->execute();
+  db_delete('node_comment_statistics')->condition('cid', 'kill em all', '<>')->execute();
 
-  db_delete('field_revision_comment_body')
-    ->condition('entity_id', 'kill em all', '<>')
-    ->execute();
+  db_delete('field_revision_comment_body')->condition('entity_id', 'kill em all', '<>')->execute();
 
-  db_delete('field_data_comment_body')
-    ->condition('entity_id', 'kill em all', '<>')
-    ->execute();
+  db_delete('field_data_comment_body')->condition('entity_id', 'kill em all', '<>')->execute();
 
-  db_update('node')
-    ->fields(array(
-      'comment' => 0,
-    )
-  )
-  ->condition('title', 'kill em all', '<>')
-  ->execute();
+  db_update('node')->fields( array( 'comment' => 0 ) )->condition('title', 'kill em all', '<>')->execute();
 
-  db_update('node_revision')
-    ->fields(array(
-      'comment' => 0,
-    )
-  )
-  ->condition('title', 'kill em all', '<>')
-  ->execute();
+  db_update('node_revision')->fields(array( 'comment' => 0 ) )->condition('title', 'kill em all', '<>')->execute() ;
+
+  mediacommons_base_import_delete_files () ;
 
 }
 
 /** We don't need no education */
-function mediacommons_base_import_delete_users($roles = array()) {
-
+function mediacommons_base_import_delete_users ( $roles = array() ) {
   /** find users */
   $query = db_query("SELECT DISTINCT uid FROM {users} WHERE uid <> 0 AND uid <> 1", array());
-
   /** fetch users */
-  $users = $query->fetchAll();
-
-  foreach ($users as $user) {
+  foreach ( $query->fetchAll() as $user) {
     user_delete($user->uid);
     $num_deleted = db_delete('mediacommons_base_import_user_map')
     ->condition('uid', $user->uid)
     ->execute();
   }
-
 }
 
 /** I just want to poke your left eye */
-function mediacommons_base_import_delete_post() {
+function mediacommons_base_import_delete_post ( ) {
   foreach (mediacommons_base_import_find_nodes('spoke') as $node) {
     node_delete($node->nid);
     db_delete('mediacommons_base_import_node_map')
@@ -90,7 +68,7 @@ function mediacommons_base_import_delete_post() {
 }
 
 /** I really don't have a title for this one, want to pitch in? */
-function mediacommons_base_import_delete_hubs() {
+function mediacommons_base_import_delete_hubs ( ) {
   foreach (mediacommons_base_import_find_nodes('hub') as $node) {
     node_delete($node->nid);
     db_delete('mediacommons_base_import_node_map')
@@ -100,7 +78,7 @@ function mediacommons_base_import_delete_hubs() {
 }
 
 /** Kill 'em all */
-function mediacommons_base_import_delete_content($ype = 'all') {
+function mediacommons_base_import_delete_content ($ype = 'all') {
 
   $nodes = array();
 

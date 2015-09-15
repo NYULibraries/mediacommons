@@ -1,241 +1,368 @@
 <?php
 
-function mediacommons_base_import_add_contributed_pieces_allowed_iframe_sources () {
+function clean_images_paths ( $text ) {
+  include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
+  $html = str_get_html ( $text ) ;
+  // Find all img
+  foreach ( $html->find('img') as $element ) {
+    $parse_url = parse_url ( $element->src ) ;
+    $match = preg_match ( '/mediacommons.futureofthebook.org/i' , $parse_url['host'] ) ;
 
-	$d6_domains = mediacommons_base_import_contributed_pieces_find_iframe_sources () ;
+    if ( isset ( $parse_url['host'] ) && ! $match ) { } // nothing to do
 
-	$result = db_query("SELECT * FROM {mediacommons_filter}");
+    else if ( isset ( $parse_url['host'] ) && $match ) { } // nothing to do
 
-	$domains = array();
+    else {
+      $first_character = mb_substr ( $element->src , 0 , 1 , 'utf-8' ) ;
+      if ( $first_character == '/' ) {
+        $production_url = mediacommons_base_import_get_production_url ( ) . ltrim ( $element->src, '/' ) ;
+        $environment_url = environment_url () ;
+        $filepath = pathinfo ( $production_url ) ;
+        if ( ! $image_by_filename = find_image_by_filename ( $filepath['basename'] ) ) {
+          mediacommons_base_import_download_file ( $production_url ) ;
+          if ( $wrapper = file_stream_wrapper_get_instance_by_uri('public://' . $filepath['basename'] ) ) {
+            // the file directory returns "http://default/" change it for the site URL
+            if ( $url = str_replace ( 'http://default/' , $environment_url ,  $wrapper->getExternalUrl() ) ) {
+              $element->src = $url ;
+            }
+          }
+        }
+        else {
+          if ( $wrapper = file_stream_wrapper_get_instance_by_uri('public://' . $filepath['basename'] ) ) {
+            // the file directory returns "http://default/" change it for the site URL
+            if ( $url = str_replace ( 'http://default/' , $environment_url ,  $wrapper->getExternalUrl() ) ) {
+              $element->src = $url ;
+            }
+          }
+        }
+      }
+    }
+  }
+  return (string) $html ;
+}
 
-	foreach ( $result as $record ) $domains[$record->did] = $record->domain ;
+function clean_embed_field_input ( $text ) {
 
-	foreach ( $d6_domains as $d6_domain ) {
-		if ( ! in_array( $d6_domain, $domains ) ) {
-			drush_log ( 'Adding ' . $d6_domain . ' to allowed iframe source list' , 'status' );
-			db_insert('mediacommons_filter')->fields( array('domain' => $d6_domain, ) )->execute();
-		}
-	}
+  include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
+
+  $source = array ( ) ;
+
+  $elemets = array ( 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
+
+  $html = str_get_html ( $text ) ;
+
+  // Find all object
+  foreach ( $html->find('object') as $element) {
+    foreach ( $html->find('embed') as $sub_element ) {
+      if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
+        $alter = TRUE;
+        $elemets['object'][] = $sub_element->src;
+      }
+    }
+  }
+
+  // Find all embed
+  foreach ( $html->find('embed') as $element ) {
+    if ( ! in_array ( $element->src, $elemets['object'] ) ) {
+      $alter = TRUE;
+      $elemets['embed'][] = $element->src;
+    }
+  }
+
+  // Find all div
+  if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
+    foreach ( $html->find('div') as $element ) {
+      foreach ( $element->find('param[name=movie]') as $sub_element ) {
+        $alter = TRUE;
+        $elemets['div'][] = $sub_element->value ;
+      }
+    }
+  }
+
+  if ( $alter ) {
+
+    $elemets['source'] = $embed['value'];
+
+    $source[] = $elemets ;
+
+  }
+
+  $plain_html = '';
+
+  foreach ( $source as $node_data ) {
+
+    $srcs = array_unique ( array_merge( $node_data['object'], $node_data['embed'], $node_data['div'] ) );
+
+    foreach ( $srcs as $src ) if ( ! empty ( $src ) ) {
+
+    	allowed_iframe_sources ( $src ) ;
+
+    	$plain_html .= theme ( 'html_tag', array( 'element' => array( '#tag' => 'iframe', '#attributes' => array( 'class' => array( 'altered' ), 'src' => $src ) ) ) ) ;
+
+    }
+
+  }
+
+  return $plain_html ;
 
 }
 
-function mediacommons_base_import_add_allowed_iframe_sources () {
+function allowed_iframe_sources ( $url ) {
 
-  $d6_domains = mediacommons_base_import_find_iframe_sources () ;
+  $allowed_domains = array ( ) ;
 
-  $result = db_query("SELECT * FROM {mediacommons_filter}");
+  foreach ( db_query("SELECT * FROM {mediacommons_filter}") as $record ) $allowed_domains[] = $record->domain ;
 
-  $cache = $domains = array();
+  $parse_url = parse_url ( $url ) ;
 
-  foreach ( $result as $record ) $domains[$record->did] = $record->domain ;
+  if ( ! in_array ( $parse_url['host'], $allowed_domains, true ) ) {
 
-  foreach ( $d6_domains as $d6_domain ) {
-    if ( ! in_array( $d6_domain, $domains ) ) {
-      drush_log ( 'Adding ' . $d6_domain . ' to allowed iframe source list' , 'status' );
-      db_insert('mediacommons_filter')->fields( array('domain' => $d6_domain, ) )->execute();
-    }
+  	drush_log ( dt('Adding @domain to allowed iframe source list', array ( '@domain' => $parse_url['host'] ) ) , 'ok' ) ;
+
+    db_insert('mediacommons_filter')->fields( array('domain' => $parse_url['host'] ) )->execute() ;
+
+    drupal_flush_all_caches ( ) ;
+
+    $cache = cache_get('domains', 'cache_mediacommons_filter') ;
+
+    cache_clear_all ( $cache->cid, 'cache_mediacommons_filter' ) ;
+
   }
 
 }
 
-function mediacommons_base_import_spoke_add_allowed_iframe_sources () {
+function extract_iframe_sources ( $text ) {
 
-  $d6_domains = mediacommons_base_import_contributed_pieces_find_iframe_sources () ;
+	include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' ) ;
 
-  $result = db_query("SELECT * FROM {mediacommons_filter}");
+  if ( empty ( $text ) ) return  ;
 
-  $cache = $domains = array();
+  $elemets = array ( 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'iframe' =>  array ( ), 'source' =>  '' ) ;
 
-  foreach ( $result as $record ) $domains[$record->did] = $record->domain ;
+  $html = str_get_html ( $text ) ;
 
-  foreach ( $d6_domains as $d6_domain ) {
-    if ( ! in_array( $d6_domain, $domains ) ) {
-      drush_log ( 'Adding ' . $d6_domain . ' to allowed iframe source list' , 'status' );
-      db_insert('mediacommons_filter')->fields( array('domain' => $d6_domain, ) )->execute();
+  try {
+
+    foreach ( $html->find('iframe') as $element) {
+      if ( ! in_array ( $element->src, $elemets['iframe'] ) ) {
+        $elemets['iframe'][] = $element->src;
+      }
     }
+
+    // Find all object
+    foreach ( $html->find('object') as $element) {
+      foreach ( $html->find('embed') as $sub_element ) {
+        if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
+          $elemets['object'][] = $sub_element->src;
+        }
+      }
+    }
+
+    // Find all embed
+    foreach ( $html->find('embed') as $element ) {
+      if ( ! in_array ( $element->src, $elemets['object'] ) ) {
+        $elemets['embed'][] = $element->src;
+      }
+    }
+
+    // Find all div
+    if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
+      foreach ( $html->find('div') as $element ) {
+        foreach ( $element->find('param[name=movie]') as $sub_element ) {
+          $elemets['div'][] = $sub_element->value ;
+        }
+      }
+    }
+
+    foreach ( $elemets as $elemet ) foreach ( (array) $elemet as $source ) if ( ! empty ( $source ) ) allowed_iframe_sources ( $source ) ;
+
+  }
+
+  catch ( Exception $e ) {
+    drush_log ( dt ( 'Caught exception: @error' , array ( '@error' =>  $e->getMessage() ) ) , 'error') ;
   }
 
 }
 
-function mediacommons_base_import_embed_field () {
 
-	include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
+function mediacommons_base_import_embed_field ( $new_node ) {
 
-	$source = array ( ) ;
+  include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
 
-	$nodes = mediacommons_base_import_d7_spoke_list () ;
+  $source = array ( ) ;
 
-	foreach ( $nodes as $node ) {
+  $nodes = spokes () ;
 
-		$alter = FALSE;
+  foreach ( $nodes as $node ) {
 
-		/** load node */
-		$entity = node_load ( $node->nid ) ;
+    $alter = FALSE;
 
-		$elemets = array ( 'nid' => $node->nid , 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
+    /** load node */
+    $entity = node_load ( $node->nid ) ;
 
-		/** Wrap it with Entity API */
-		$ewrapper = entity_metadata_wrapper('node', $entity);
+    $elemets = array ( 'nid' => $node->nid , 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
 
-		$embed = $ewrapper->field_embed->value();
+    /** Wrap it with Entity API */
+    $ewrapper = entity_metadata_wrapper('node', $entity);
 
-		$html = str_get_html( $embed['value'] ) ;
+    $embed = $ewrapper->field_embed->value();
 
-		// Find all object
-		foreach ( $html->find('object') as $element) {
-			foreach ( $html->find('embed') as $sub_element ) {
-				if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
-					$alter = TRUE;
-					$elemets['object'][] = $sub_element->src;
-				}
-			}
-		}
+    $html = str_get_html( $embed['value'] ) ;
 
-		// Find all embed
-		foreach ( $html->find('embed') as $element ) {
-			if ( ! in_array ( $element->src, $elemets['object'] ) ) {
-				$alter = TRUE;
-				$elemets['embed'][] = $element->src;
-			}
-		}
+    // Find all object
+    foreach ( $html->find('object') as $element) {
+      foreach ( $html->find('embed') as $sub_element ) {
+        if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
+          $alter = TRUE;
+          $elemets['object'][] = $sub_element->src;
+        }
+      }
+    }
 
-		// Find all div
-		if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
-			foreach ( $html->find('div') as $element ) {
-				foreach ( $element->find('param[name=movie]') as $sub_element ) {
-					$alter = TRUE;
-					$elemets['div'][] = $sub_element->value ;
-				}
-			}
-		}
+    // Find all embed
+    foreach ( $html->find('embed') as $element ) {
+      if ( ! in_array ( $element->src, $elemets['object'] ) ) {
+        $alter = TRUE;
+        $elemets['embed'][] = $element->src;
+      }
+    }
 
-		if ( $alter ) {
+    // Find all div
+    if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
+      foreach ( $html->find('div') as $element ) {
+        foreach ( $element->find('param[name=movie]') as $sub_element ) {
+          $alter = TRUE;
+          $elemets['div'][] = $sub_element->value ;
+        }
+      }
+    }
 
-			$elemets['source'] = $embed['value'];
+    if ( $alter ) {
 
-			$source[] = $elemets ;
+      $elemets['source'] = $embed['value'];
 
-		}
+      $source[] = $elemets ;
 
-	}
+    }
 
-	foreach ( $source as $node_data ) {
+  }
 
-		$html = '';
+  foreach ( $source as $node_data ) {
 
-		$srcs = array_unique ( array_merge( $node_data['object'], $node_data['embed'], $node_data['div'] ) );
+    $html = '';
 
-		foreach ( $srcs as $src ) {
-			if ( $src ) {
-				$html .= theme('html_tag', array( 'element' => array( '#tag' => 'iframe', '#attributes' => array( 'class' => array( 'altered' ), 'src' => $src, 'data-onid' => $node_data['nid'], 'data-onid' => $node_data['nid'] ) ) ) ) ;
-			}
-		}
+    $srcs = array_unique ( array_merge( $node_data['object'], $node_data['embed'], $node_data['div'] ) );
 
-		/** load node */
-		$entity = node_load ( $node_data['nid'] ) ;
+    foreach ( $srcs as $src ) {
+      if ( $src ) {
+        $html .= theme('html_tag', array( 'element' => array( '#tag' => 'iframe', '#attributes' => array( 'class' => array( 'altered' ), 'src' => $src, 'data-onid' => $node_data['nid'], 'data-onid' => $node_data['nid'] ) ) ) ) ;
+      }
+    }
 
-		/** Wrap it with Entity API */
-		$ewrapper = entity_metadata_wrapper('node', $entity);
+    /** load node */
+    $entity = node_load ( $node_data['nid'] ) ;
 
-		$ewrapper->field_embed->set( array ( 'value' => $html ) );
+    /** Wrap it with Entity API */
+    $ewrapper = entity_metadata_wrapper('node', $entity);
 
-		drush_log ( url('node/' . $entity->nid , array( 'absolute'=> TRUE ) ) , 'status' ) ;
+    $ewrapper->field_embed->set( array ( 'value' => $html ) );
 
-		$ewrapper->save();
+    drush_log ( url('node/' . $entity->nid , array( 'absolute'=> TRUE ) ) , 'status' ) ;
 
-	}
+    $ewrapper->save();
+
+  }
 
 }
 
 function mediacommons_base_import_body_field () {
 
-	include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
+  include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
 
-	$source = array ( ) ;
+  $source = array ( ) ;
 
-	$nodes = mediacommons_base_import_d7_spoke_list () ;
+  $nodes = mediacommons_base_import_d7_spoke_list () ;
 
-	foreach ( $nodes as $node ) {
+  foreach ( $nodes as $node ) {
 
-		$alter = FALSE;
+    $alter = FALSE;
 
-		/** load node */
-		$entity = node_load ( $node->nid ) ;
+    /** load node */
+    $entity = node_load ( $node->nid ) ;
 
-		$elemets = array ( 'nid' => $node->nid , 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
+    $elemets = array ( 'nid' => $node->nid , 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
 
-		/** Wrap it with Entity API */
-		$ewrapper = entity_metadata_wrapper('node', $entity);
+    /** Wrap it with Entity API */
+    $ewrapper = entity_metadata_wrapper('node', $entity);
 
-		$embed = $ewrapper->field_body->value();
+    $embed = $ewrapper->field_body->value();
 
+    continue ;
 
-		continue ;
+    $html = str_get_html( $embed['value'] ) ;
 
-		$html = str_get_html( $embed['value'] ) ;
+    // Find all object
+    foreach ( $html->find('object') as $element) {
+      foreach ( $html->find('embed') as $sub_element ) {
+        if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
+          $alter = TRUE;
+          $elemets['object'][] = $sub_element->src;
+        }
+      }
+    }
 
-		// Find all object
-		foreach ( $html->find('object') as $element) {
-			foreach ( $html->find('embed') as $sub_element ) {
-				if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
-					$alter = TRUE;
-					$elemets['object'][] = $sub_element->src;
-				}
-			}
-		}
+    // Find all embed
+    foreach ( $html->find('embed') as $element ) {
+      if ( ! in_array ( $element->src, $elemets['object'] ) ) {
+        $alter = TRUE;
+        $elemets['embed'][] = $element->src;
+      }
+    }
 
-		// Find all embed
-		foreach ( $html->find('embed') as $element ) {
-			if ( ! in_array ( $element->src, $elemets['object'] ) ) {
-				$alter = TRUE;
-				$elemets['embed'][] = $element->src;
-			}
-		}
+    // Find all div
+    if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
+      foreach ( $html->find('div') as $element ) {
+        foreach ( $element->find('param[name=movie]') as $sub_element ) {
+          $alter = TRUE;
+          $elemets['div'][] = $sub_element->value ;
+        }
+      }
+    }
 
-		// Find all div
-		if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
-			foreach ( $html->find('div') as $element ) {
-				foreach ( $element->find('param[name=movie]') as $sub_element ) {
-					$alter = TRUE;
-					$elemets['div'][] = $sub_element->value ;
-				}
-			}
-		}
+    if ( $alter ) {
 
-		if ( $alter ) {
+      $elemets['source'] = $embed['value'];
 
-			$elemets['source'] = $embed['value'];
+      $source[] = $elemets ;
 
-			$source[] = $elemets ;
+    }
 
-		}
+  }
 
-	}
+  foreach ( $source as $node_data ) {
 
-	foreach ( $source as $node_data ) {
+    $html = '';
 
-		$html = '';
+    $srcs = array_unique ( array_merge( $node_data['object'], $node_data['embed'], $node_data['div'] ) );
 
-		$srcs = array_unique ( array_merge( $node_data['object'], $node_data['embed'], $node_data['div'] ) );
+    foreach ( $srcs as $src ) {
+      if ( $src ) {
+        $html .= theme('html_tag', array( 'element' => array( '#tag' => 'iframe', '#attributes' => array( 'class' => array( 'altered' ), 'src' => $src, 'data-onid' => $node_data['nid'], 'data-onid' => $node_data['nid'] ) ) ) ) ;
+      }
+    }
 
-		foreach ( $srcs as $src ) {
-			if ( $src ) {
-				$html .= theme('html_tag', array( 'element' => array( '#tag' => 'iframe', '#attributes' => array( 'class' => array( 'altered' ), 'src' => $src, 'data-onid' => $node_data['nid'], 'data-onid' => $node_data['nid'] ) ) ) ) ;
-			}
-		}
+    /** load node */
+    $entity = node_load ( $node_data['nid'] ) ;
 
-		/** load node */
-		$entity = node_load ( $node_data['nid'] ) ;
+    /** Wrap it with Entity API */
+    $ewrapper = entity_metadata_wrapper('node', $entity);
 
-		/** Wrap it with Entity API */
-		$ewrapper = entity_metadata_wrapper('node', $entity);
+    $ewrapper->field_body->set( array ( 'value' => $html ) );
 
-		$ewrapper->field_body->set( array ( 'value' => $html ) );
+    drush_log ( url('node/' . $entity->nid , array( 'absolute'=> TRUE ) ) , 'status' ) ;
 
-		drush_log ( url('node/' . $entity->nid , array( 'absolute'=> TRUE ) ) , 'status' ) ;
+    $ewrapper->save();
 
-		$ewrapper->save();
-
-	}
+  }
 
 }

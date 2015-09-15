@@ -10,8 +10,8 @@ mediacommons[environment] = development
 mediacommons[environments][local][imr] = http://localhost:8000/intransition/
 mediacommons[environments][local][mediacommons] = http://localhost:8000/mediacommons/
 
-mediacommons[environments][development][imr] = http://devmc.dlib.nyu.edu/redesign/intransition/
-mediacommons[environments][development][mediacommons] = http://devmc.dlib.nyu.edu/redesign/mediacommons/
+mediacommons[environments][development][imr] = http://devmc.dlib.nyu.edu/intransition/
+mediacommons[environments][development][mediacommons] = http://devmc.dlib.nyu.edu/mediacommons/
 
 mediacommons[environments][production][imr] = http://mediacommons.futureofthebook.org/intransition/
 mediacommons[environments][production][mediacommons] = http://mediacommons.futureofthebook.org/

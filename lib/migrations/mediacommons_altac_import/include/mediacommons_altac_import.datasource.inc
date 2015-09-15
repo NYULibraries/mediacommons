@@ -1,6 +1,6 @@
 <?php
 
-function mediacommons_altac_import_d6_response_list() {
+function response () {
 
   $query = "
     SELECT
@@ -32,10 +32,7 @@ function mediacommons_altac_import_d6_response_list() {
   return Database::getConnection('default', 'drupal6')->query($query, array(':onid' => $onid), array());
 }
 
-function mediacommons_altac_import_d6_cluster_list() {
-
-  $type = 'cluster';
-
+function clusters () {
   $query = "
     SELECT
       n.nid,
@@ -70,18 +67,17 @@ function mediacommons_altac_import_d6_cluster_list() {
     LEFT JOIN {term_node} t
       ON n.vid = t.vid
     WHERE n.type = :type
-    AND n.status > 0
     GROUP BY n.nid
     ORDER BY n.nid";
 
   /** Create and return a database connection to the source (d6) database */
-  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
+  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => 'cluster'), array()) ;
 
 }
 
-function mediacommons_altac_import_d6_contributed_pieces_list() {
+function contributed_pieces ( $nid = NULL ) {
 
-  $type = 'contributed_pieces';
+	$options = array () ;
 
   $query = "
     SELECT
@@ -120,83 +116,47 @@ function mediacommons_altac_import_d6_contributed_pieces_list() {
         ON n.vid = cfcl.vid
       LEFT JOIN {term_node} t
         ON n.vid = t.vid
-    WHERE n.type = :type
-    GROUP BY n.nid
-    ORDER BY n.nid";
+    WHERE n.type = :type" ;
+
+  if ( $nid ) {
+    $query .= " AND n.nid = :nid" ;
+  	$options[':nid'] = $nid ;
+  }
+
+  $query .= " GROUP BY n.nid ORDER BY n.nid" ;
+
+  $options[':type'] = 'contributed_pieces' ;
 
   /** Create and return a database connection to the source (d6) database */
-  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
+  return Database::getConnection('default', 'drupal6')->query(  $query, $options, array() ) ;
 
 }
 
-function mediacommons_altac_import_d6_contributed_pieces ( $nid = NULL ) {
+function find_iframe_sources ( $body ) {
 
-  if (!$nid) { return FALSE; }
+	include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
 
-  $query = "
-    SELECT
-      n.nid,
-      MAX(n.vid) AS vid,
-      n.type,
-      n.language,
-      nr.title,
-      nr.teaser,
-      nr.format,
-      n.uid,
-      n.status,
-      n.created,
-      n.changed,
-      n.comment,
-      n.promote,
-      n.moderate,
-      n.sticky,
-      ct.field_document_textarea_body_value,
-      ct.field_tagline_value,
-      ct.field_pubstat_value,
-      GROUP_CONCAT(DISTINCT ct.field_thumbnail_fid SEPARATOR ', ') AS thumbnail_fid,
-      GROUP_CONCAT(DISTINCT cfaa.field_additional_authors_uid) AS additonal_authors,
-      GROUP_CONCAT(DISTINCT cfaa.delta) AS additonal_authors_delta,
-      GROUP_CONCAT(DISTINCT cfcl.field_cluster_nid) AS cluster_nid,
-      GROUP_CONCAT(DISTINCT cfcl.delta) AS cluster_delta,
-      GROUP_CONCAT(DISTINCT t.tid SEPARATOR ', ') AS terms
-    FROM {node} n
-      LEFT JOIN {node_revisions} nr
-        ON n.vid = nr.vid
-      LEFT JOIN {content_type_contributed_pieces} ct
-        ON n.vid = ct.vid
-      LEFT JOIN {content_field_additional_authors} cfaa
-        ON n.vid = cfaa.vid
-      LEFT JOIN {content_field_cluster} cfcl
-        ON n.vid = cfcl.vid
-      LEFT JOIN {term_node} t
-        ON n.vid = t.vid
-    WHERE n.type = 'contributed_pieces'
-    AND n.nid = :nid
-    GROUP BY n.nid
-    ORDER BY n.nid";
+	$hosts = array ( 'iframe' => array ( ) , 'embed' => array ( ) , 'img' =>  array ( ) , 'sources' ) ;
 
-  /** Create and return a database connection to the source (d6) database */
-  return Database::getConnection('default', 'drupal6')->query($query, array(':nid' => $nid), array());
+  $html = str_get_html( $body ) ;
 
-}
+	// Find all iframe
+	foreach ( $html->find('iframe') as $element) {
+	  $parse_url = parse_url( $element->src ) ;
+		if ( ! in_array( $parse_url['host'], $hosts['iframe'], true ) ) {
+		  $hosts['iframe'][] = $parse_url['host'];
+	  }
+	}
 
-function mediacommons_altac_import_d6_attached_images($nid) {
+	// Find all embed
+	foreach ( $html->find('embed') as $element ) {
+		$parse_url = parse_url( $element->src ) ;
+		if ( ! in_array( $parse_url['host'], $hosts['embed'], true ) ) {
+			$hosts['embed'][] = $parse_url['host'];
+		}
+	}
 
-  $query = Database::getConnection('default', 'drupal6')
-    ->select('image_attach', 'ia')
-    ->fields('f',
-      array(
-        'fid',
-        'filepath',
-        'filename',
-      )
-    )
-    ->condition('ia.nid', $nid, '=');
-
-  $query->leftJoin('image', 'i', 'ia.iid = i.nid');
-
-  $query->leftJoin('files', 'f', 'f.fid = i.fid');
-
-  return $query->execute();
+	// Find all img
+	foreach ( $html->find('img') as $element ) $hosts['img'][] = $element->src ;
 
 }

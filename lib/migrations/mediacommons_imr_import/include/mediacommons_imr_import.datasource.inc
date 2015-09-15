@@ -1,9 +1,7 @@
 <?php
 
-function mediacommons_imr_import_d6_load_post( int $onid) {
-  
-  $type = 'post';
-  
+function d6_post( $onid ) {
+
   $query = "
     SELECT
       n.nid,
@@ -41,13 +39,11 @@ function mediacommons_imr_import_d6_load_post( int $onid) {
   
   
   /** Create and return a database connection to the source (d6) database */
-  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type, ':onid' => $onid), array());
+  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => 'post', ':onid' => $onid), array());
 
 }
 
-function mediacommons_imr_import_d6_post_list() {
-  
-  $type = 'post';
+function posts() {
   
   $query = "
     SELECT
@@ -85,13 +81,11 @@ function mediacommons_imr_import_d6_post_list() {
   
   
   /** Create and return a database connection to the source (d6) database */
-  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
+  return Database::getConnection('default', 'drupal6')->query ( $query, array(':type' => 'post'), array() ) ;
 
 }
 
-function mediacommons_imr_import_d6_theme_week_list() {
-  
-  $type = 'theme_week_page';
+function theme_weeks () {
   
   $query = "
     SELECT
@@ -128,22 +122,11 @@ function mediacommons_imr_import_d6_theme_week_list() {
     ORDER BY n.nid";
   
   /** Create and return a database connection to the source (d6) database */
-  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
+  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => 'theme_week_page'), array());
 
 }
 
-function mediacommons_imr_import_d6_uid_by_node($onid) {
-
-  $query = "SELECT uid FROM {node} WHERE nid = :onid";
-
-  /** Create and return a database connection to the source (d6) database */
-  $user = Database::getConnection('default', 'drupal6')->query($query, array(':onid' => $onid), array())->fetchObject();
-  
-  return $user->uid;
-
-}
-
-function mediacommons_imr_import_d6_theme_week_load($onid) {
+function d6_theme_week ( $onid ) {
   
   $query = "
     SELECT

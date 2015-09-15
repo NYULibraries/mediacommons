@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# no longer in use ... don not use me!!!!!!
+
+
 # Don't use me! ... well, do it if you know what you are doing.
 #
 # In theory I should work; but in practice I'm almost certain that I will
@@ -14,15 +17,11 @@ die () {
 
 TODAY=`date +%Y-%m-%d`
 
-while getopts ":hsd" opt; do
+while getopts ":s:h" opt; do
  case $opt in
   s)
     [ -r $OPTARG ] || die ${LINENO} "test" "Unable to read from ${OPTARG} directory." 
     SOURCE_DIRECTORY=$OPTARG
-    ;;
-  d)
-    [ -w $OPTARG ] || die ${LINENO} "test" "Unable to read or write to Database directory ${OPTARG}." 
-    DESTINATION_DIRECTORY=$OPTARG
     ;;
   h)
    echo " "
@@ -38,9 +37,7 @@ while getopts ":hsd" opt; do
   esac
 done
 
-[ $SOURCE_DIRECTORY ] || die ${LINENO} "test" "No source directory."
-
-[ $DESTINATION_DIRECTORY ] || die ${LINENO} "test" "No destination directory."
+[ $SOURCE_DIRECTORY ] || die ${LINENO} "error" "No source directory."
 
 echo "Find and remove old databases used for sites migration from ${DESTINATION_DIRECTORY}."
 

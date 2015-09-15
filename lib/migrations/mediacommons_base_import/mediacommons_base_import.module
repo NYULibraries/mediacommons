@@ -38,16 +38,12 @@
  * );
  */
 function mediacommons_base_import_d6_configured () {
-
   global $databases;
-
   if ( isset ( $databases['drupal6'] ) ) return TRUE ;
-
   die ( drush_set_error ( dt ( 'Unable to find Drupal 6 database.' ) ) ) ;
-
 }
 
-function mediacommons_base_import_get_content($URL) {
+function mediacommons_base_import_get_content ( $URL ) {
    $ch = curl_init();
    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
    curl_setopt($ch, CURLOPT_URL, $URL);
@@ -56,43 +52,31 @@ function mediacommons_base_import_get_content($URL) {
    return $data;
 }
 
-function mediacommons_base_import_curl($URL) {
-  return mediacommons_base_import_get_content($URL);
+function mediacommons_base_import_curl ( $URL ) {
+  return mediacommons_base_import_get_content ( $URL ) ;
 }
 
-function mediacommons_base_import_default_commands() {
-  return array(
-    array(
-      'label' => t('Import vocabulary'),
+function mediacommons_base_import_default_commands ( ) {
+  return array (
+    array (
+      'label' => t('Import vocabulary and terms'),
       'callback' => array(
         'mediacommons_base_import_generate_vocabulary',
+      	'mediacommons_base_import_generate_terms',
+      	'mediacommons_base_import_prepare_taxonomy_fields'
       ),
     ),
-    array(
-      'label' => t('Import terms'),
-      'callback' => array(
-        'mediacommons_base_import_generate_terms',
-      ),
-    ),
-    array(
-      'label' => t('Import roles'),
-      'callback' => array(
-        'mediacommons_base_import_generate_roles',
-      ),
-    ),
-    array(
-      'label' => t('Import users'),
-      'callback' => array(
-        'mediacommons_base_import_generate_all_users',
-      	'mediacommons_base_import_migrate_user_realname',
-      	'mediacommons_base_import_prepare_taxonomy_fields',
-      	'mediacommons_base_import_migrate_profile_fields',
+    array (
+      'label' => t('Import roles and users'),
+      'callback' => array (
+        'mediacommons_base_import_map_roles',
+      	'mediacommons_base_import_generate_all_users',
       ),
     ),
   );
 }
 
-function mediacommons_base_import_prepare ($caller) {
+function mediacommons_base_import_prepare ( $caller ) {
 
   global $settings;
 
@@ -147,7 +131,7 @@ function mediacommons_base_import_settings ( $caller ) {
 }
 
 /** Return a plain node template */
-function _mediacommons_base_import_setup_node($type) {
+function _mediacommons_base_import_setup_node ( $type ) {
   $node = new StdClass();
   $node->type = $type;
   $node->language = LANGUAGE_NONE;
@@ -163,7 +147,7 @@ function mediacommons_base_migrate_truncate($string, $limit, $pad = '...') {
   return trim(substr($string, 0, $limit)) .  $pad;
 }
 
-function mediacommons_base_import_initialize_schema($module, &$schema) {
+function mediacommons_base_import_initialize_schema ( $module, &$schema ) {
   // Set the name and module key for all tables.
   foreach ($schema as $name => $table) {
     if (empty($table['module'])) {
@@ -175,11 +159,11 @@ function mediacommons_base_import_initialize_schema($module, &$schema) {
   }
 }
 
-function mediacommons_base_import_run($task, array $commands = array()) {
+function mediacommons_base_import_run ( $task, array $commands = array() ) {
   if (isset($commands[$task]) && isset($commands[$task]['callback'])) {
     foreach ($commands[$task]['callback'] as $callback) {
-      if (function_exists($callback)) {
-        $callback();
+      if ( function_exists ( $callback ) ) {
+        $callback() ;
       }
     }
   }
@@ -189,15 +173,19 @@ function mediacommons_base_import_run($task, array $commands = array()) {
   }
 }
 
-function mediacommons_base_import_show_help(array $commands = array()) {
-  drush_print('');
-  foreach ($commands as $key => $option) {
-    drush_print('[' . $key . '] ' . $option['label']);
+function mediacommons_base_import_show_help ( array $commands = array() ) {
+
+	drush_print('') ;
+
+  foreach ( $commands as $key => $option ) {
+    drush_print( '[' . $key . '] ' . $option['label'] ) ;
   }
-  drush_print('');
+
+  drush_print('') ;
+
 }
 
-function mediacommons_base_import_show_options(array $commands = array()) {
+function mediacommons_base_import_show_options ( array $commands = array() ) {
   drush_print(t('Please type one of the following options to continue:'));
   mediacommons_base_import_show_help($commands);
   $handle = fopen ("php://stdin","r");
@@ -205,12 +193,12 @@ function mediacommons_base_import_show_options(array $commands = array()) {
   mediacommons_base_import_run(trim($line), $commands);
 }
 
-function mediacommons_base_import_init(array $options = array()) {
+function mediacommons_base_import_init ( array $options = array() ) {
 
   // We need extra memory for GD
   ini_set("memory_limit", "512MM");
 
-  mediacommons_base_import_d6_configured();
+  mediacommons_base_import_d6_configured () ;
 
   $trace = debug_backtrace();
 
@@ -237,11 +225,12 @@ function mediacommons_base_import_init(array $options = array()) {
 
   }
   else mediacommons_base_import_show_options( $commands ) ;
+
 }
 
-$trace = debug_backtrace();
+$trace = debug_backtrace ( ) ;
 
-$caller = (isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__);
+$caller = ( isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__ ) ;
 
 /**
  * This script is meant to be "extended", not to be used by itself.

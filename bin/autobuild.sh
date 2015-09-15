@@ -25,7 +25,7 @@ done
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-while getopts ":hump" opt; do
+while getopts ":e:hum" opt; do
  case $opt in
   u)
     UPDATE=true
@@ -33,8 +33,8 @@ while getopts ":hump" opt; do
   m)
     MAINTENANCES=true
     ;;
-  p)
-    PREPARE=true
+  e)
+    ENVIRONMENT=$OPTARG
     ;;
   h)
    echo " "
@@ -43,8 +43,7 @@ while getopts ":hump" opt; do
    echo " Options:"
    echo "   -h           Show brief help"
    echo "   -u           Get the latest make file and do any other task before running jobs."   
-   echo "   -m           Run some house cleaning before running job."
-   echo "   -p           Takes care of grabbing the most recent production databases and import them."   
+   echo "   -m           Run some house cleaning before running job."   
    echo " "  
    exit 0
    ;;
@@ -55,49 +54,55 @@ done
 if [ $UPDATE ] ; then $DIR/update.sh ; fi
 
 # Do some house cleaning before running job
-if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi
+# if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi
 
-# Takes care of grabbing the most recent production databases and import them
-if [ $PREPARE ] ; then $DIR/prepare.sh ; fi
+# Build Field Guide
+$DIR/build.sh -c configs/fieldguide.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
+ if [ $? -eq 0 ] ; 
+    then 
+    #  echo "Successful: Build Field Guide" ;
+    # Migrate the content
+    #$DIR/migrate.sh -c configs/fieldguide.conf
+  #else 
+    # echo ${LINENO} "build" "Fail: Build Field Guide." ; 
+#fi ;
+
+# Build In Media Res
+echo Build In Media Res
+$DIR/build.sh -c configs/imr.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
+if [ $? -eq 0 ] ; 
+  then 
+    echo "Successful: Build In Media Res" ;
+    # Migrate the content
+    $DIR/migrate.sh -c configs/imr.conf
+  else 
+    echo ${LINENO} "build" "Fail: Build In Media Res" ; 
+fi ;
+
+exit 1
 
 # Build MediaCommons umbrella
 # $DIR/build.sh -c configs/mediacommons.conf -m mediacommons.make -s -k
 # if [ $? -eq 0 ] ; 
-#   then 
-#     echo "Successful: Build MediaCommons umbrella" ;
-#     # Migrate the content
+#  then 
+#    echo "Successful: Build MediaCommons umbrella" ;
+     # Migrate the content
 #     $DIR/migrate.sh -c configs/mediacommons.conf
 #   else 
 #     die ${LINENO} "build" "Fail: Build MediaCommons umbrella." ; 
 # fi ;
 
-# Build Field Guide
-$DIR/build.sh -c configs/fieldguide.conf -m mediacommons.make -s -k
-if [ $? -eq 0 ] ; 
-  then 
-    echo "Successful: Build Field Guide" ;
-    # Migrate the content
-    $DIR/migrate.sh -c configs/fieldguide.conf
-  else 
-    echo ${LINENO} "build" "Fail: Build Field Guide." ; 
-fi ;
-
-exit 0
-
 # Build Alt-Academy
-$DIR/build.sh -c configs/alt-ac.conf -m mediacommons.make -s -k
+$DIR/build.sh -c configs/alt-ac.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
 if [ $? -eq 0 ] ; then echo "Successful: Build Alt-Academy" ; else echo ${LINENO} "build" "Fail: Build Alt-Academy." ; fi ;
 
 # Build [in]Transition
-$DIR/build.sh -c configs/intransition.conf -m mediacommons.make -s -k
+$DIR/build.sh -c configs/intransition.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
 if [ $? -eq 0 ] ; then echo "Successful: Build [in]Transition" ; else echo ${LINENO} "build" "Fail: Build [in]Transition." ; fi ;
 
-# Build In Media Res
-$DIR/build.sh -c configs/imr.conf -m mediacommons.make -s -k
-if [ $? -eq 0 ] ; then echo "Successful: Build In Media Res" ; else echo ${LINENO} "build" "Fail: Build In Media Res." ; fi ;
 
 # Build The New Everyday
-$DIR/build.sh -c configs/tne.conf -m mediacommons.make -s -k
+$DIR/build.sh -c configs/tne.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
 if [ $? -eq 0 ] ; then echo "Successful: Build The New Everyday" ; else echo ${LINENO} "build" "Fail: Build The New Everyday." ; fi ;
 
 # Run a basic test and report if error

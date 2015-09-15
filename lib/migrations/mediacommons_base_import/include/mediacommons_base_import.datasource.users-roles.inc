@@ -1,30 +1,27 @@
 <?php
 
-/** Users */
-
 /**
  *  Find out if user is already in the system by its Drupal 6 user id
  */
-function mediacommons_base_import_user_exists ( $ouid ) {
-
-	$ouid = (int)$ouid;
+function user_exists_by_ouid ( $ouid ) {
 
 	if ( $ouid == 1 ) return 1 ;
 
-	$author_exist = db_query('SELECT uid FROM mediacommons_base_import_user_map u WHERE ouid = :ouid', array(':ouid' => $ouid));
+	$author_exist = db_query('SELECT uid FROM mediacommons_base_import_user_map u WHERE ouid = :ouid', array( ':ouid' => (int) $ouid) ) ;
 
-	$count = $author_exist->rowCount();
+	if ( $author_exist->rowCount() > 0) {
 
-	if ( $count > 0) {
-		$author = $author_exist->fetchObject();
+		$author = $author_exist->fetchObject() ;
+
 		return $author->uid;
+
 	}
 
 	return FALSE;
 
 }
 
-function mediacommons_base_import_d6_user_one() {
+function d6_user_one ( ) {
 
 	$users = array();
 
@@ -69,16 +66,16 @@ function mediacommons_base_import_d6_user_one() {
 
 }
 
-function mediacommons_base_import_d6_users_list() {
+function d6_users () {
 
-	$users = array();
+	$users = array () ;
 
 	/** Create a database connection to the source (d6) database */
 	$query = Database::getConnection('default', 'drupal6')
 
 	->select('users', 'u')
 
-	->fields('u', array(
+	->fields('u', array (
 			'uid',
 			'name',
 			'pass',
@@ -94,21 +91,19 @@ function mediacommons_base_import_d6_users_list() {
 			'picture',
 			'init',
 			'timezone_name'
-	)
+	  )
 	)
 	->condition('u.uid', 1, '>');
 
 	$query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
 
-	$query->groupBy('uid');
+	$query->groupBy('uid') ;
 
 	$query->addExpression("GROUP_CONCAT(DISTINCT ur.rid SEPARATOR ',')", 'roles');
 
 	$results = $query->execute();
 
-	foreach ($results as $result) {
-		$users[$result->uid] = $result;
-	}
+	foreach ( $results as $result ) $users[$result->uid] = $result ;
 
 	return $users;
 
@@ -161,7 +156,22 @@ function mediacommons_base_import_d7_vid_by_d6_name ( $name ) {
 
 }
 
-function mediacommons_base_import_d7_vid_by_d6_vid ( $ovid ) {
+function d6_users_realname ( $ouid ) {
+
+	/** Create a database connection to the source (d6) database */
+	$query = Database::getConnection('default', 'drupal6')->select('realname', 'r')->fields('r', array( 'uid', 'realname' ) )->condition('r.uid', $ouid, '=') ;
+
+	$results = $query->execute();
+
+	$uid = $results->fetchObject() ;
+
+	if ( $uid ) return $uid->realname ;
+
+	else return FALSE ;
+
+}
+
+function vid_by_ovid ( $ovid ) {
 
 	$vocabulary = db_query("SELECT vid FROM mediacommons_base_import_vocabulary_map WHERE vuid = :vuid", array ( ':vuid' => $ovid ) ) ;
 
@@ -171,28 +181,7 @@ function mediacommons_base_import_d7_vid_by_d6_vid ( $ovid ) {
 
 }
 
-function mediacommons_base_import_get_role_by_name ($name) {
-	return array_search( $name, user_roles() );
-}
-
-/** Drupal 6 Realname */
-
-function mediacommons_base_import_d6_users_realname_list() {
-
-	$users = array();
-
-	/** Create a database connection to the source (d6) database */
-	$query = Database::getConnection('default', 'drupal6')->select('realname', 'r')->fields('r', array( 'uid', 'realname' ) )->condition('r.uid', 1, '>');
-
-	$results = $query->execute();
-
-	foreach ( $results as $result ) $users[$result->uid] = $result;
-
-	return $users;
-
-}
-
-function mediacommons_base_import_get_role_rid_by_orid ( $orid ) {
+function rid_by_orid ( $orid ) {
 
 	/** Create a database connection to the source (d6) database */
 	$result = db_query("SELECT rid FROM {mediacommons_base_import_role_map} WHERE orid = :orid", array(':orid' => $orid ) );
@@ -202,5 +191,15 @@ function mediacommons_base_import_get_role_rid_by_orid ( $orid ) {
 	if ( $rid ) return $rid->rid ;
 
 	else return FALSE ;
+
+}
+
+function ouid_by_onid ( $onid ) {
+
+  $query = "SELECT uid FROM {node} WHERE nid = :onid";
+
+  $user = Database::getConnection('default', 'drupal6')->query($query, array(':onid' => $onid), array())->fetchObject();
+
+  return $user->uid;
 
 }

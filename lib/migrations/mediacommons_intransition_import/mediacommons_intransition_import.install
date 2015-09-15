@@ -1,9 +1,0 @@
-<?php
-
-/** Implements hook_schema(). */
-function mediacommons_intransition_import_schema() {
-
-  $schema = array();
-
-  return $schema;
-}
