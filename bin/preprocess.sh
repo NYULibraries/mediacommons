@@ -18,20 +18,12 @@ TODAY=`date +%Y%m%d`
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-DEBUG=""
-
-while getopts ":c:htd" opt; do
+while getopts ":c:h" opt; do
  case $opt in
   c)
    [ -f $OPTARG ] || die "Configuration file does not exist." 
    CONF_FILE=$OPTARG
    ;;
-  d)
-    DEBUG=true
-    ;;
-  t)
-    SIMULATE=true
-    ;;    
   h)
    echo " "
    echo " Usage: ./preprocess.sh -c example.conf"
@@ -39,7 +31,6 @@ while getopts ":c:htd" opt; do
    echo " Options:"
    echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
    echo "   -h           Show brief help"
-   echo "   -t           Tell all relevant actions (don't actually change the system)."
    echo " "  
    exit 0
    ;;
