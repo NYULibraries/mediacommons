@@ -34,7 +34,7 @@ while getopts ":c:htd" opt; do
     ;;    
   h)
    echo " "
-   echo " Usage: ./cron.sh -c example.conf"
+   echo " Usage: ./preprocess.sh -c example.conf"
    echo " "
    echo " Options:"
    echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
