@@ -17,11 +17,7 @@ while [ -h "$SOURCE" ]; do
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
 
-TODAY=`date +%Y%m%d`
-
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
-DEBUG=""
 
 while getopts ":c:h" opt; do
  case $opt in
