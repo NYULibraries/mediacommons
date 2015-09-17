@@ -1,0 +1,17 @@
+name = MediaCommons Umbrella Migration
+description = Migration script for MediaCommons Umbrella
+core = 7.x
+version = 7.x-1.0
+
+mediacommons[project] = mediacommons
+mediacommons[umbrella] = mediacommons
+mediacommons[environment] = development
+
+mediacommons[environments][local][imr] = http://localhost:8000/mediacommons/
+mediacommons[environments][local][mediacommons] = http://localhost:8000/mediacommons/
+
+mediacommons[environments][development][imr] = http://devmc.dlib.nyu.edu/mediacommons/
+mediacommons[environments][development][mediacommons] = http://devmc.dlib.nyu.edu/mediacommons/
+
+mediacommons[environments][production][imr] = http://mediacommons.futureofthebook.org/mediacommons/
+mediacommons[environments][production][mediacommons] = http://mediacommons.futureofthebook.org/
