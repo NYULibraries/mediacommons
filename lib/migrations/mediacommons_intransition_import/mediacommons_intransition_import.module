@@ -11,6 +11,7 @@ function init ( ) {
       	// 'mediacommons_base_import_prepare_taxonomy_fields',
       	// 'mediacommons_base_import_download_files', // download files that are managed by Drupal
       	// 'mediacommons_base_import_generate_all_users',
+      	'migrate_pages',
       	'migrate_posts',
       	'migrate_theme_weeks',
       ),
