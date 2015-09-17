@@ -4,7 +4,7 @@
  * Migrate Theme Weeks.
  */
 function migrate_theme_weeks () {
-  foreach ( theme_weeks() as $key => $source ) migrate_theme_week ( $source ) ;
+  foreach ( theme_weeks() as $key => $old_node ) migrate_theme_week ( $old_node ) ;
 }
 
 /**
@@ -12,8 +12,7 @@ function migrate_theme_weeks () {
  */
 function migrate_theme_week ( $old_node ) {
 
-  /** Prepare node */
-  $node = array() ;
+  $node = array ( ) ;
 
   $node['title'] =  theme_weeks_title (  $old_node->title ) ;
 
@@ -48,13 +47,7 @@ function migrate_theme_week ( $old_node ) {
 
   if ( isset ( $old_node->terms ) ) foreach ( explode(', ', $old_node->terms ) as $tid ) $node['field_tags'][] = $tid ;
 
-  if ( isset ( $old_node->body ) ) {
-
-  	extract_iframe_sources ( $old_node->body ) ;
-
-  	$node['field_body'] = $old_node->body ;
-
-  }
+  if ( isset ( $old_node->body ) ) $node['field_body'] = $old_node->body ;
 
   /**
    * Post in Theme Weeks are a set of fields, we assume n match week day
@@ -165,92 +158,4 @@ function theme_week_dates ( $date_source ) {
       'end' => $end_month . ' ' . $end_day . ', ' . $years[0],
     );
   }
-}
-
-function embed_field () {
-
-  include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
-
-  $source = array ( ) ;
-
-  foreach ( spokes () as $node ) {
-
-    $alter = FALSE;
-
-    /** load node */
-    $entity = node_load ( $node->nid ) ;
-
-    $elemets = array ( 'nid' => $node->nid , 'object' => array ( ) , 'embed' => array ( ) , 'div' =>  array ( ), 'source' =>  '' ) ;
-
-    /** Wrap it with Entity API */
-    $ewrapper = entity_metadata_wrapper('node', $entity);
-
-    $embed = $ewrapper->field_embed->value();
-
-    $html = str_get_html( $embed['value'] ) ;
-
-    // Find all object
-    foreach ( $html->find('object') as $element) {
-      foreach ( $html->find('embed') as $sub_element ) {
-        if ( ! in_array ( $sub_element->src, $elemets['object'] ) ) {
-          $alter = TRUE;
-          $elemets['object'][] = $sub_element->src;
-        }
-      }
-    }
-
-    // Find all embed
-    foreach ( $html->find('embed') as $element ) {
-      if ( ! in_array ( $element->src, $elemets['object'] ) ) {
-        $alter = TRUE;
-        $elemets['embed'][] = $element->src;
-      }
-    }
-
-    // Find all div
-    if ( empty ( $elemets['embed'] ) && empty ( $elemets['object'] ) ) {
-      foreach ( $html->find('div') as $element ) {
-        foreach ( $element->find('param[name=movie]') as $sub_element ) {
-          $alter = TRUE;
-          $elemets['div'][] = $sub_element->value ;
-        }
-      }
-    }
-
-    if ( $alter ) {
-
-      $elemets['source'] = $embed['value'];
-
-      $source[] = $elemets ;
-
-    }
-
-  }
-
-  foreach ( $source as $node_data ) {
-
-    $html = '';
-
-    $srcs = array_unique ( array_merge( $node_data['object'], $node_data['embed'], $node_data['div'] ) );
-
-    foreach ( $srcs as $src ) {
-      if ( $src ) {
-        $html .= theme('html_tag', array( 'element' => array( '#tag' => 'iframe', '#attributes' => array( 'class' => array( 'altered' ), 'src' => $src, 'data-onid' => $node_data['nid'], 'data-onid' => $node_data['nid'] ) ) ) ) ;
-      }
-    }
-
-    /** load node */
-    $entity = node_load ( $node_data['nid'] ) ;
-
-    /** Wrap it with Entity API */
-    $ewrapper = entity_metadata_wrapper('node', $entity);
-
-    $ewrapper->field_embed->set( array ( 'value' => $html ) );
-
-    drush_log ( url('node/' . $entity->nid , array( 'absolute'=> TRUE ) ) , 'status' ) ;
-
-    $ewrapper->save();
-
-  }
-
 }

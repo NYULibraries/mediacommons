@@ -1,55 +1,20 @@
 <?php
 
-function  mediacommons_intransition_import_init ( ) {
+function init ( ) {
   $commands = array (
     array (
-      'label' => t('Migrate Intransition'),
+      'label' => t('Migrate site'),
       'callback' => array (
-      	'mediacommons_base_import_generate_vocabulary',
-      	'mediacommons_base_import_generate_terms',
-      	'mediacommons_base_import_prepare_taxonomy_fields',
-      	'mediacommons_base_import_map_roles',
-      	'mediacommons_base_import_download_files', // download files that are managed by Drupal
-      	'mediacommons_base_import_generate_all_users',
-      	// 'migrate_posts',
-      	// 'migrate_theme_weeks',
-      	// 'embed_field', // find <embed> and <object> and convert them into <iframe>
-      ),
-      
-      // 'mediacommons_base_import_embed_field', // find <embed> and <object> and convert them into <iframe>
-      // 'mediacommons_base_import_body_field', // find <embed> and <object> and convert them into <iframe>
-        
-    ),
-    
-    
-    array (
-      'label' => t('Migrate Intransition posts'),
-      'callback' => array (
+      	// 'mediacommons_base_import_generate_vocabulary',
+      	// 'mediacommons_base_import_generate_terms',
+      	// 'mediacommons_base_import_map_roles',
+      	// 'mediacommons_base_import_prepare_taxonomy_fields',
+      	// 'mediacommons_base_import_download_files', // download files that are managed by Drupal
+      	// 'mediacommons_base_import_generate_all_users',
       	'migrate_posts',
-      ),
-    ),    
-    
-    array (
-      'label' => t('Migrate Intransition theme weeks'),
-      'callback' => array (
       	'migrate_theme_weeks',
-      ),    
+      ),
     ),
-    
-
-    array (
-      'label' => t('mediacommons_base_import_delete_post'),
-      'callback' => array (
-      	'mediacommons_base_import_delete_post',
-      	'mediacommons_base_import_delete_hubs',
-      	'mediacommons_base_import_delete_comments',
-      	'mediacommons_base_import_delete_alias',
-      )
-    ),    
-    
-    
-    
-    
   ) ;
 
   mediacommons_base_import_init ( array ( 'commands' => $commands ) );
@@ -62,4 +27,4 @@ if ( ! file_exists ( $base_file ) ) exit ( drush_set_error ( dt ('Unable to find
 
 include_once ( $base_file ) ;
 
-mediacommons_intransition_import_init ( ) ;
+init() ;
