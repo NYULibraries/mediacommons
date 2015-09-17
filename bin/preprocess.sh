@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This file has a dependency cron.sh
+# Note: cron.sh is not part of this repo, in its own private repo for security reasons
+
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
   exit 1;
@@ -17,6 +20,8 @@ done
 TODAY=`date +%Y%m%d`
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+DEBUG=""
 
 while getopts ":c:h" opt; do
  case $opt in
@@ -44,7 +49,9 @@ done
 . $CONF_FILE
 
 # Copy sites files
-rsync -vrh --exclude '.htaccess' ${BACKUP_FILES_DIR}/ ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
+if [ -d "$BACKUP_FILES_DIR" ]; then
+  rsync -vrh --exclude '.htaccess' ${BACKUP_FILES_DIR}/ ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
+fi
 
 # make sure there is a link to the default folder using our Drupal 6 convention
 ln -s ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/mediacommons.futureofthebook.org.${BUILD_BASE_NAME}
