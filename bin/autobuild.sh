@@ -54,56 +54,32 @@ done
 if [ $UPDATE ] ; then $DIR/update.sh ; fi
 
 # Do some house cleaning before running job
-# if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi
+if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi
 
-# Build Field Guide
-$DIR/build.sh -c configs/fieldguide.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
- if [ $? -eq 0 ] ; 
-    then 
-    #  echo "Successful: Build Field Guide" ;
-    # Migrate the content
-    #$DIR/migrate.sh -c configs/fieldguide.conf
-  #else 
-    # echo ${LINENO} "build" "Fail: Build Field Guide." ; 
-#fi ;
+projects=( tne )
 
-# Build In Media Res
-echo Build In Media Res
-$DIR/build.sh -c configs/imr.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
-if [ $? -eq 0 ] ; 
-  then 
-    echo "Successful: Build In Media Res" ;
-    # Migrate the content
-    $DIR/migrate.sh -c configs/imr.conf
-  else 
-    echo ${LINENO} "build" "Fail: Build In Media Res" ; 
-fi ;
+for project in ${projects[*]}
+  do
+    $DIR/build.sh -c configs/${project}.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
+    if [ $? -eq 0 ] ; 
+      then
+       
+        echo "Successful: Build ${project}" ;
+    
+        # Run preprocess task
+        $DIR/preprocess.sh -c configs/${project}.conf ;
+   
+        # Migrate the content
+        $DIR/migrate.sh -c configs/${project}.conf ;
 
-exit 1
+      else 
+        echo ${LINENO} "build" "Fail: Build ${project}" ; 
+    fi ;
+done
 
-# Build MediaCommons umbrella
-# $DIR/build.sh -c configs/mediacommons.conf -m mediacommons.make -s -k
-# if [ $? -eq 0 ] ; 
-#  then 
-#    echo "Successful: Build MediaCommons umbrella" ;
-     # Migrate the content
-#     $DIR/migrate.sh -c configs/mediacommons.conf
-#   else 
-#     die ${LINENO} "build" "Fail: Build MediaCommons umbrella." ; 
-# fi ;
-
-# Build Alt-Academy
-$DIR/build.sh -c configs/alt-ac.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
-if [ $? -eq 0 ] ; then echo "Successful: Build Alt-Academy" ; else echo ${LINENO} "build" "Fail: Build Alt-Academy." ; fi ;
-
-# Build [in]Transition
-$DIR/build.sh -c configs/intransition.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
-if [ $? -eq 0 ] ; then echo "Successful: Build [in]Transition" ; else echo ${LINENO} "build" "Fail: Build [in]Transition." ; fi ;
+exit 0
 
 
-# Build The New Everyday
-$DIR/build.sh -c configs/tne.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
-if [ $? -eq 0 ] ; then echo "Successful: Build The New Everyday" ; else echo ${LINENO} "build" "Fail: Build The New Everyday." ; fi ;
 
 # Run a basic test and report if error
 # ./bin/report_error.sh
