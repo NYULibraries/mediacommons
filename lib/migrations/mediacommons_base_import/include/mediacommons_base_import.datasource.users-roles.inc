@@ -121,7 +121,8 @@ function mediacommons_base_import_d6_roles () {
 /**
  *  Drupal 7 roles
  */
-function mediacommons_base_import_d7_roles() {
+function d7_roles () {
+
 	/** find all */
 	$query = db_query("SELECT * FROM {role}");
 

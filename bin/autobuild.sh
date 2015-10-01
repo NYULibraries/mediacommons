@@ -56,7 +56,7 @@ if [ $UPDATE ] ; then $DIR/update.sh ; fi
 # Do some house cleaning before running job
 if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi
 
-projects=( tne )
+projects=( tne alt-ac fieldguide imr intransition mediacommons )
 
 for project in ${projects[*]}
   do
@@ -78,8 +78,6 @@ for project in ${projects[*]}
 done
 
 exit 0
-
-
 
 # Run a basic test and report if error
 # ./bin/report_error.sh

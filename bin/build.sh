@@ -1,8 +1,9 @@
 #!/bin/bash
 
 die () {
-  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  exit 1;
+  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}" ;
+  rm ${DIR}/../temp/${BUILD_BASE_NAME}.build.pid ;
+  exit 1 ;
 }
 
 tell () { 
@@ -82,6 +83,8 @@ done
 
 # load configuration file
 . $CONF_FILE
+
+echo $$ > ${DIR}/../temp/${BUILD_BASE_NAME}.build.pid
 
 # Drupal need a valid email for user account
 DRUPAL_ACCOUNT_MAIL_VALID=$(echo ${DRUPAL_ACCOUNT_MAIL} | grep -E "^(([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))\.)*([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))@\w((-|\w)*\w)*\.(\w((-|\w)*\w)*\.)*\w{2,4}$")
@@ -221,5 +224,7 @@ if [ ! $SIMULATE ] ;
     chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default
     chmod -R 2777 $BUILD_DIR/$BUILD_NAME/sites/default/files
 fi ;
+
+rm ${DIR}/../temp/${BUILD_BASE_NAME}.build.pid
 
 exit 0
