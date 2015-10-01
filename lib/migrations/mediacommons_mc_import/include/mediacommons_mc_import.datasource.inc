@@ -1,13 +1,13 @@
 <?php
 
-function mediacommons_mc_import_d6_frontpage_list() {
+function frontpages ( ) {
 
   $type = 'front_page_post';
-  
+
   $query = "
-    SELECT 
+    SELECT
       n.nid,
-      MAX(n.vid) AS vid, 
+      MAX(n.vid) AS vid,
       n.type,
       n.language,
       n.uid,
@@ -23,7 +23,7 @@ function mediacommons_mc_import_d6_frontpage_list() {
       f.filename AS filename
     FROM {node} n
       LEFT JOIN {node_revisions} nr
-        ON n.vid = nr.vid    
+        ON n.vid = nr.vid
       LEFT JOIN {content_type_front_page_post} ct
         ON n.vid = ct.vid
     LEFT JOIN {files} f
@@ -33,9 +33,9 @@ function mediacommons_mc_import_d6_frontpage_list() {
     WHERE n.type = :type
     AND n.status > 0
     GROUP BY n.nid
-    ORDER BY n.nid";  
+    ORDER BY n.nid";
 
   /** Create and return a database connection to the source (d6) database */
   return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
-  	
+
 }
