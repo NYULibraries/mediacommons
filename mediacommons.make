@@ -14,7 +14,6 @@ projects[ds][version] = "2.11"
 projects[entity][version] = "1.6"
 projects[features_extra][version] = "1.0"
 projects[features][version] = "2.6"
-projects[flexslider][version] = "2.0-rc1"
 projects[imagefield_crop][version] = "1.1"
 projects[jquery_update][version] = "2.6"
 projects[libraries][version] = "2.2"
@@ -60,10 +59,6 @@ libraries[Mobile_Detect][download][url] = "https://github.com/serbanghita/Mobile
 libraries[Mobile_Detect][directory_name] = "Mobile_Detect"
 libraries[Mobile_Detect][type] = "library"
 
-libraries[flexslider][download][type] = "git"
-libraries[flexslider][download][url] = "https://github.com/woothemes/FlexSlider.git"
-libraries[flexslider][directory_name] = "flexslider"
-libraries[flexslider][type] = "library"
 
 libraries[simplehtmldom][download][type] = "get"
 libraries[simplehtmldom][download][url] = "http://downloads.sourceforge.net/project/simplehtmldom/simplehtmldom/1.5/simplehtmldom_1_5.zip"
