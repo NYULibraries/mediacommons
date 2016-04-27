@@ -8,8 +8,8 @@ Configure and build
 
 Configure the build script by copying the default template default.project.conf as project.conf and fill out the blanks
 
-	cp default.project.conf project.conf
+	cp default.project.conf configs/project.conf
 
 Build the drupal distribution, e.g.
 
-	sh scripts/deploy_build.sh mediacommons.make
+	./bin/build.sh -c configs/project.conf -m mediacommons.make -k -s -e development
