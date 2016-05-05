@@ -52,7 +52,7 @@ projects[mediacommons_profile][download][branch] = "manualcrop"
 
 projects[rubik][version] = "4.4"
 projects[tao][version] = "3.1"
-projects[zen][version] = "5.5"
+projects[zen][version] = "5.6"
 
 projects[mediacommons][download][type] = "git"
 projects[mediacommons][download][url] = "https://github.com/lhenze/mediacommons.git"
