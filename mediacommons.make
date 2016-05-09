@@ -57,7 +57,6 @@ projects[zen][version] = "5.6"
 projects[mediacommons][download][type] = "git"
 projects[mediacommons][download][url] = "https://github.com/lhenze/mediacommons.git"
 projects[mediacommons][type] = "theme"
-projects[mediacommons][download][branch] = "manualcrop"
 
 ; Libraries
 
