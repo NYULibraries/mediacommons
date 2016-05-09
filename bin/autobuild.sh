@@ -9,10 +9,13 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
+  rm ${DIR}/../temp/autobuild.pid
   exit 1;
 }
 
 SOURCE="${BASH_SOURCE[0]}"
+
+ENVIRONMENT="local"
 
 # resolve $SOURCE until the file is no longer a symlink
 while [ -h "$SOURCE" ]; do 
@@ -50,36 +53,37 @@ while getopts ":e:hum" opt; do
   esac
 done
 
+ROOT=${DIR}/..
+
+echo $$ > ${ROOT}/temp/autobuild.pid
+
 # Get the latest make file and do any other task before running jobs
 if [ $UPDATE ] ; then $DIR/update.sh ; fi
 
 # Do some house cleaning before running job
 if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi
 
-projects=( tne alt-ac fieldguide imr intransition mediacommons )
+projects=( mediacommons alt-ac fieldguide imr intransition tne mono )
 
 for project in ${projects[*]}
   do
-    $DIR/build.sh -c configs/${project}.conf -m mediacommons.make -e ${ENVIRONMENT} -k -s ;
+    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -k -s -e ${ENVIRONMENT} ;
     if [ $? -eq 0 ] ; 
       then
        
         echo "Successful: Build ${project}" ;
     
         # Run preprocess task
-        $DIR/preprocess.sh -c configs/${project}.conf ;
+        $DIR/preprocess.sh -c ${ROOT}/configs/${project}.conf ;
    
         # Migrate the content
-        $DIR/migrate.sh -c configs/${project}.conf ;
+        $DIR/migrate.sh -c ${ROOT}/configs/${project}.conf ;
 
       else 
         echo ${LINENO} "build" "Fail: Build ${project}" ; 
     fi ;
 done
 
-exit 0
-
-# Run a basic test and report if error
-# ./bin/report_error.sh
+rm ${ROOT}/temp/autobuild.pid
 
 exit 0
