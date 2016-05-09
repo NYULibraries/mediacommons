@@ -18,6 +18,6 @@ MAKE_FILE=$DIR/../mediacommons.make
 # make sure the most recent changes to *.make file are in place
 rm $MAKE_FILE
 
-wget https://raw.githubusercontent.com/NYULibraries/mediacommons/master/mediacommons.make
+wget https://raw.githubusercontent.com/NYULibraries/mediacommons/master/mediacommons.make -P ${DIR}/../
 
 exit 0
