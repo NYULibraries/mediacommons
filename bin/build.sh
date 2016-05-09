@@ -10,9 +10,27 @@ tell () {
   echo "file: ${0} | line: ${1} | step: ${2} | command: ${3}";
 }
 
-function is_drupal_online () {
-  SITE_ONLINE=`drush -d -v core-status --root=${BUILD_DIR}/${BUILD_NAME} --uri=${BASE_URL} --user=1`
-  if [[ $SITE_ONLINE =~ "Connected" ]] && [[ $SITE_ONLINE =~ "Successful" ]] ; then return 0 ; else return 1 ; fi
+is_drupal_online () {
+  DRUSH_STATUS_COMMAND="${DRUSH} -d -v core-status \
+    --root=${BUILD_DIR}/${BUILD_NAME}              \
+    --uri=${BASE_URL}                              \
+    --user=1"
+
+  DRUPAL_DATABASE_CONNECTION_OK="Successfully connected to the Drupal database"
+  DRUPAL_BOOTSTRAP_OK="Drupal bootstrap                :  Successful"
+
+  # Using $(echo $DRUSH_STATUS_COMMAND) to remove extra whitespace
+  tell ${LINENO} 'is_drupal_online()' "$(echo $DRUSH_STATUS_COMMAND)"
+
+  # NOTE: 2>&1 doesn't work when put into DRUSH_STATUS_COMMAND string, so have to
+  #   do the redirect here.
+  SITE_ONLINE=`${DRUSH_STATUS_COMMAND} 2>&1`
+
+  if [[ $SITE_ONLINE =~ $DRUPAL_DATABASE_CONNECTION_OK ]] && \
+     [[ $SITE_ONLINE =~ $DRUPAL_BOOTSTRAP_OK ]]
+     then return 0
+     else return 1
+   fi
 }
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -34,7 +52,7 @@ DEBUG=""
 
 ENVIRONMENT="local"
 
-while getopts ":e:c:m:hdsikt" opt; do
+while getopts ":e:c:m:hdlsikt" opt; do
  case $opt in
   c)
    [ -f $OPTARG ] || die "Configuration file does not exist." 
@@ -49,6 +67,9 @@ while getopts ":e:c:m:hdsikt" opt; do
     ;;
   d)
     DEBUG='-d -v'
+    ;;
+  l)
+    LEGACY_DRUSH=true
     ;;
   s)
     SASS=true
@@ -67,6 +88,7 @@ while getopts ":e:c:m:hdsikt" opt; do
    echo "   -h           Show brief help"
    echo "   -e           Set the environment variable (default to local) if not set."
    echo "   -k           Allow site to share cookies accross domain"   
+   echo "   -l           Use legacy drush (whatever is in your path) instead of repo drush"
    echo "   -s           Find SASS based themes and compile"   
    echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
    echo "   -m <file>    Specify the make file to use (e.g., -m example.make)."
@@ -76,6 +98,15 @@ while getopts ":e:c:m:hdsikt" opt; do
    ;;
   esac
 done
+
+ # https://jira.nyu.edu/browse/DLTSVIEWER-16
+# Our web server php is lower than version 5.4, which causes bin/drush to break.
+if [ $LEGACY_DRUSH ]
+then
+    DRUSH=$(which drush)
+else
+    DRUSH=$DIR/drush
+fi
 
 [ $CONF_FILE ] || die "No configuration file provided."
 
@@ -108,7 +139,7 @@ if [ -z ${DRUPAL_ACCOUNT_PASS} -a ${DRUPAL_ACCOUNT_PASS}=="" ]; then DRUPAL_ACCO
 echo "Prepare new site using ${MAKE_FILE}." ;
 
 # Step 2: Download and prepare for the installation using make file
-STEP_2="drush ${DEBUG} make --prepare-install -y ${MAKE_FILE} ${BUILD_DIR}/${BUILD_NAME} --uri=${BASE_URL} --environment=${ENVIRONMENT} --strict=0" ;
+STEP_2="${DRUSH} ${DEBUG} make --prepare-install -y ${MAKE_FILE} ${BUILD_DIR}/${BUILD_NAME} --uri=${BASE_URL} --environment=${ENVIRONMENT} --strict=0" ;
 
 if [ ! $SIMULATE ] ; then eval $STEP_2 ; else tell ${LINENO} 2 "${STEP_2}" ; fi ;
 
@@ -143,7 +174,7 @@ fi ;
 echo "Install new site" ;
 
 # Step 4: Run the site installation
-STEP_4="drush ${DEBUG} -y site-install ${DRUPAL_INSTALL_PROFILE_NAME} --site-name='${DRUPAL_SITE_NAME}' --account-pass="${DRUPAL_ACCOUNT_PASS}" --account-name=${DRUPAL_ACCOUNT_NAME} --account-mail=${DRUPAL_ACCOUNT_MAIL} --site-mail=${DRUPAL_SITE_MAIL} --db-url=${DRUPAL_SITE_DB_TYPE}://${DRUPAL_SITE_DB_USER}:${DRUPAL_SITE_DB_PASS}@${DRUPAL_SITE_DB_ADDRESS}/${DRUPAL_DB_NAME} --root=${BUILD_DIR}/${BUILD_NAME} --environment=${ENVIRONMENT} --strict=0"
+STEP_4="${DRUSH} ${DEBUG} -y site-install ${DRUPAL_INSTALL_PROFILE_NAME} --site-name='${DRUPAL_SITE_NAME}' --account-pass="${DRUPAL_ACCOUNT_PASS}" --account-name=${DRUPAL_ACCOUNT_NAME} --account-mail=${DRUPAL_ACCOUNT_MAIL} --site-mail=${DRUPAL_SITE_MAIL} --db-url=${DRUPAL_SITE_DB_TYPE}://${DRUPAL_SITE_DB_USER}:${DRUPAL_SITE_DB_PASS}@${DRUPAL_SITE_DB_ADDRESS}/${DRUPAL_DB_NAME} --root=${BUILD_DIR}/${BUILD_NAME} --environment=${ENVIRONMENT} --strict=0"
 
 echo $STEP_4 ;
 
