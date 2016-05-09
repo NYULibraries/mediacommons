@@ -26,6 +26,7 @@ projects[realname][version] = "1.2"
 projects[strongarm][version] = "2.0"
 projects[token][version] = "1.6"
 projects[views][version] = "3.13"
+projects[views_fieldsets][version] = "2.1"
 projects[admin_menu][version] = "3.0-rc5"
 projects[devel][version] = "1.5"
 projects[field_group][version] = "1.5"
@@ -33,15 +34,19 @@ projects[email][version] = "1.3"
 projects[telephone][version] = "1.0-alpha1"
 projects[gravatar][version] = "1.1"
 projects[ckeditor][version] = "1.16"
-projects[views_fieldsets][version] = "2.1"
+projects[manualcrop][version] = "1.x-dev"
+projects[uuid][version] = "1.0-beta1"
+
 
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
 projects[mediacommons_modules][download][url] = "https://github.com/NYULibraries/mediacommons_modules.git"
+projects[mediacommons_modules][download][branch] = "manualcrop"
 
 projects[mediacommons_profile][type] = "profile"
 projects[mediacommons_profile][download][type] = "git"
 projects[mediacommons_profile][download][url] = "https://github.com/NYULibraries/mediacommons_profile.git"
+projects[mediacommons_profile][download][branch] = "manualcrop"
 
 ; Themes
 
@@ -55,13 +60,20 @@ projects[mediacommons][type] = "theme"
 
 ; Libraries
 
-libraries[Mobile_Detect][download][type] = "git"
-libraries[Mobile_Detect][download][url] = "https://github.com/serbanghita/Mobile-Detect.git"
-libraries[Mobile_Detect][directory_name] = "Mobile_Detect"
-libraries[Mobile_Detect][type] = "library"
-
-
 libraries[simplehtmldom][download][type] = "get"
 libraries[simplehtmldom][download][url] = "http://downloads.sourceforge.net/project/simplehtmldom/simplehtmldom/1.5/simplehtmldom_1_5.zip"
 libraries[simplehtmldom][directory_name] = "simplehtmldom"
 libraries[simplehtmldom][type] = "library"
+
+; imagesLoaded.
+libraries[jquery.imagesloaded][download][type] = file
+libraries[jquery.imagesloaded][download][url] = https://github.com/desandro/imagesloaded/archive/v2.1.2.tar.gz
+libraries[jquery.imagesloaded][download][subtree] = imagesloaded-2.1.2
+libraries[jquery.imagesloaded][type] = "library"
+
+
+libraries[jquery.imgareaselect][download][type] = file
+libraries[jquery.imgareaselect][download][url] = https://github.com/odyniec/imgareaselect/archive/v0.9.11-rc.1.tar.gz
+libraries[jquery.imgareaselect][download][subtree] = imgareaselect-0.9.11-rc.1
+libraries[jquery.imgareaselect][type] = "library"
+
