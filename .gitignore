@@ -6,7 +6,6 @@
 settings.php
 settings.json
 *.local.make
-builds
 
 *.conf
 !default.project.conf
@@ -29,3 +28,10 @@ lib/scripts/*
 .settings/*
 
 *.sql
+
+# Commit empty build/ and temp/ so new clones will work out of the box.
+builds/*
+!builds/.commit-empty-dir
+
+temp/*
+!temp/.commit-empty-dir
