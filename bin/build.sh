@@ -133,7 +133,7 @@ STEP_1="mkdir ${BUILD_DIR}" ;
 
 if [ ! -d $BUILD_DIR ] ; then if [ ! $SIMULATE ] ; then eval $STEP_1 ; else tell ${LINENO} 1 "${STEP_1}" ; fi ; fi ;
 
-# read password from configuration file; if not available or empty assing $TODAY as a temporary password
+# read password from configuration file; if not available or empty adding $TODAY as a temporary password
 if [ -z ${DRUPAL_ACCOUNT_PASS} -a ${DRUPAL_ACCOUNT_PASS}=="" ]; then DRUPAL_ACCOUNT_PASS=${TODAY} ; fi ;
   
 echo "Prepare new site using ${MAKE_FILE}." ;
@@ -236,13 +236,13 @@ if [ ! $SIMULATE ] ;
     tell ${LINENO} 7 "${STEP_7}" ;
 fi ;
 
-# Step 8: Assing theme class
+# Step 8: Adding theme class
 STEP_8="${DIR}/theme_variable.sh ${BUILD_DIR}/${BUILD_NAME} ${DRUPAL_SPECIAL_BODY_CLASS}"
 
 if [ ! $SIMULATE ] ; 
   then
     eval $STEP_8 ; 
-    if [ $? ] ; then echo "Successful: Assing theme class." ; else die ${LINENO} 8 "Fail: Assing theme class." ; fi ;
+    if [ $? ] ; then echo "Successful: Adding theme class." ; else die ${LINENO} 8 "Fail: Adding theme class." ; fi ;
   else 
     tell ${LINENO} 8 "${STEP_8}" ;
 fi ;
