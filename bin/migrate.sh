@@ -2,6 +2,7 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
+  rm ${DIR}/../temp/${BUILD_BASE_NAME}.migrate.pid ;
   exit 1;
 }
 
@@ -53,6 +54,12 @@ done
 # load configuration file
 . $CONF_FILE
 
+PROD_CONTENT_DB_BASENAME=`basename $PROD_CONTENT_DB_URL`
+
+echo $$ > ${DIR}/../temp/${BUILD_BASE_NAME}.migrate.pid
+
+[ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}" ;
+
 if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
   
   [ -w $BUILD_DIR/$BUILD_BASE_NAME/sites/default ] || die ${LINENO} "test" "Unable to write to ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default directory." ;
@@ -87,48 +94,49 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     DBSTRING+="),"
     DBSTRING+=");"
     
-    # find if we have the file or we need to get it from source
-    find ${BUILD_BASE_NAME}.content.sql -mtime -1 -print
-    if [ $? -eq 0 ] ; 
+    PROD_CONTENT_DB_BASENAME=`basename $PROD_CONTENT_DB_URL`
+
+    PROD_SHARED_DB_BASENAME=`basename $PROD_SHARED_DB_URL`
+
+    if [[ -f ${PROD_CONTENT_DB_URL} ]] ; 
       then 
-        echo "Found ${BUILD_BASE_NAME}.content.sql in ${DIR}." ; 
+        echo "Found ${PROD_CONTENT_DB_URL}." ; 
+        cp ${PROD_CONTENT_DB_URL} ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME}
       else
-        echo "Unable to find ${BUILD_BASE_NAME}.content.sql in ${DIR}. Will try to get the latest one."  
-        if [[ $PROD_CONTENT_DB_URL =~ "http" ]]; 
+        echo "Unable to find ${PROD_CONTENT_DB_URL}. Will try to get the latest one."  
+        if [[ $PROD_CONTENT_DB_URL =~ "http" ]] ; 
           then
             # We need to curl the DB 
-            echo "Get ${BUILD_BASE_NAME}.content.sql from source" ; 
-            curl -u build:+EiBAPkL5L] $PROD_CONTENT_DB_URL > $BUILD_BASE_NAME.content.sql ;
-          else
-            # DB in disk; check if we can read 
-            [ -r $PROD_CONTENT_DB_URL ] || die ${LINENO} "test" "Unable to read to ${PROD_CONTENT_DB_URL}." ;
-            cp ${PROD_CONTENT_DB_URL} ./$BUILD_BASE_NAME.content.sql;
-        fi ;        
+            echo "Get ${$PROD_CONTENT_DB_URL}" ; 
+            curl -u build:+EiBAPkL5L] $PROD_CONTENT_DB_URL > ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME} ;
+        fi ;
     fi ;
 
-    
-    # find if we have the file or we need to get it from source
-    find ${BUILD_BASE_NAME}.share.sql -mtime -1 -print
-    if [ $? -eq 0 ] ; 
+    if [[ -f ${PROD_SHARED_DB_URL} ]] ; 
       then 
-        echo "Found ${BUILD_BASE_NAME}.share.sql in ${DIR}." ; 
+        echo "Found ${PROD_SHARED_DB_URL}." ; 
+        cp ${PROD_SHARED_DB_URL} ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME}
       else
-        echo "Unable to find ${BUILD_BASE_NAME}.share.sql in ${DIR}. Will try to get the latest one."  
+        echo "Unable to find ${PROD_SHARED_DB_URL}. Will try to get the latest one."  
         if [[ $PROD_SHARED_DB_URL =~ "http" ]]; 
           then
             # We need to curl the DB 
             echo "Get ${BUILD_BASE_NAME}.share.sql from source" ; 
             curl -u build:+EiBAPkL5L] $PROD_SHARED_DB_URL > $BUILD_BASE_NAME.share.sql ;
-          else
-            # DB in disk; check if we can read 
-            [ -r $PROD_SHARED_DB_URL ] || die ${LINENO} "test" "Unable to read to ${PROD_SHARED_DB_URL}." ;
-            cp ${PROD_SHARED_DB_URL} ./$BUILD_BASE_NAME.share.sql;
         fi ;        
     fi ;
-    
+
+    # DB in disk; check if we can read 
+    [ -r ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME} ] || die ${LINENO} "test" "Unable to read to ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME}." ;
+    [ -r ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME} ] || die ${LINENO} "test" "Unable to read to ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME}." ;
+
     mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS -e "DROP DATABASE IF EXISTS ${D6_DATABASE}; CREATE DATABASE ${D6_DATABASE}; DROP DATABASE IF EXISTS ${D6_SHARED}; CREATE DATABASE ${D6_SHARED};"
-    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_DATABASE < $BUILD_BASE_NAME.content.sql
-    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_SHARED < $BUILD_BASE_NAME.share.sql
+    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_DATABASE < ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME}
+    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_SHARED < ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME}
+    
+    # Remove database files
+    rm ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME}
+    rm ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME}
     
     # make a copy of the settings file
     cp $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.${BUILD_DATE}.off
@@ -147,7 +155,6 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     SITE_ONLINE=`drush -d -v core-status --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1`    
     if [[ $SITE_ONLINE =~ "Connected" ]] && [[ $SITE_ONLINE =~ "Successful" ]] ; 
       then
-        # echo $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --environment=${ENVIRONMENT} --strict=0 --task="${MIGRATION_TASK}"
         drush $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --environment=${ENVIRONMENT} --strict=0 --task="${MIGRATION_TASK}"
       else
         die ${LINENO} "test" "Unable to connect to Drupal. URI: ${BASE_URL} ROOT: ${BUILD_DIR}/${BUILD_BASE_NAME}"  
@@ -156,5 +163,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     die ${LINENO} "test" "Unable to ${MIGRATION_TASK} make sure ${BUILD_DIR}/${BUILD_BASE_NAME} it's the root directory of Drupal 7 installation."
   fi
 fi
+
+rm ${DIR}/../temp/${BUILD_BASE_NAME}.migrate.pid ;
 
 exit 0

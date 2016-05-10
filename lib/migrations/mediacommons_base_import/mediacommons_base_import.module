@@ -159,13 +159,33 @@ function mediacommons_base_import_initialize_schema ( $module, &$schema ) {
   }
 }
 
+// status 1: running
+
 function mediacommons_base_import_run ( $task, array $commands = array() ) {
-  if (isset($commands[$task]) && isset($commands[$task]['callback'])) {
-    foreach ($commands[$task]['callback'] as $callback) {
+
+	$mediacommons_migration_status = array ( ) ;
+
+  if ( isset ( $commands[$task] ) && isset ( $commands[$task]['callback'] ) ) {
+
+  	$mediacommons_migration_status = array (
+  		'task' => $commands[$task]['label'] ,
+  		'callbacks' => $commands[$task]['callback'],
+  		'count' => count ( $commands[$task]['callback'] ) ,
+  		'step' => NULL,
+  	) ;
+
+    foreach ($commands[$task]['callback'] as $key => $callback) {
       if ( function_exists ( $callback ) ) {
-        $callback() ;
+
+      	$mediacommons_migration_status['step'] = $key ;
+
+      	variable_set('mediacommons_migration_status', json_encode ( $mediacommons_migration_status ) ) ;
+
+      	$callback() ;
+
       }
     }
+
   }
   else {
     drush_log('Unable to perform task', 'error');
@@ -215,11 +235,15 @@ function mediacommons_base_import_init ( array $options = array() ) {
 
   mediacommons_base_import_prepare ( $caller ) ;
 
+  $mediacommons_migration_ran = variable_get('mediacommons_migration_ran', NULL) ;
+
+  if ( ! $mediacommons_migration_ran ) variable_set('mediacommons_migration_ran', 1) ;
+
   if ( $task ) {
 
     foreach ( $commands as $key => $command ) if ( $commands[$key]['label'] == $task ) $action = $key ;
 
-    if ( $action ) mediacommons_base_import_run ($action, $commands ) ;
+    if ( $action ) mediacommons_base_import_run ( $action, $commands ) ;
 
     else drush_log('Unable to load task', 'error') ;
 
