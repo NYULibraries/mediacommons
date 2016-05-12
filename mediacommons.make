@@ -41,12 +41,12 @@ projects[uuid][version] = "1.0-beta1"
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
 projects[mediacommons_modules][download][url] = "https://github.com/NYULibraries/mediacommons_modules.git"
-projects[mediacommons_modules][download][branch] = "manualcrop"
+; projects[mediacommons_modules][download][branch] = "manualcrop"
 
 projects[mediacommons_profile][type] = "profile"
 projects[mediacommons_profile][download][type] = "git"
 projects[mediacommons_profile][download][url] = "https://github.com/NYULibraries/mediacommons_profile.git"
-projects[mediacommons_profile][download][branch] = "manualcrop"
+; projects[mediacommons_profile][download][branch] = "manualcrop"
 
 ; Themes
 
