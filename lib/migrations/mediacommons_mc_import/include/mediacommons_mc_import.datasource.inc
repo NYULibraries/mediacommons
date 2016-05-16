@@ -1,9 +1,7 @@
 <?php
 
-function frontpages ( ) {
-
+function frontpages () {
   $type = 'front_page_post';
-
   $query = "
     SELECT
       n.nid,
@@ -20,7 +18,8 @@ function frontpages ( ) {
       n.sticky,
       nr.title,
       ct.*,
-      f.filename AS filename
+      f.filename AS filename,
+  		f.fid AS fid
     FROM {node} n
       LEFT JOIN {node_revisions} nr
         ON n.vid = nr.vid
@@ -34,8 +33,6 @@ function frontpages ( ) {
     AND n.status > 0
     GROUP BY n.nid
     ORDER BY n.nid";
-
   /** Create and return a database connection to the source (d6) database */
   return Database::getConnection('default', 'drupal6')->query($query, array(':type' => $type), array());
-
 }

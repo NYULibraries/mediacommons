@@ -95,7 +95,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     DBSTRING+=");"
     
     PROD_CONTENT_DB_BASENAME=`basename $PROD_CONTENT_DB_URL`
-
+    
     PROD_SHARED_DB_BASENAME=`basename $PROD_SHARED_DB_URL`
 
     if [[ -f ${PROD_CONTENT_DB_URL} ]] ; 
@@ -107,8 +107,8 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
         if [[ $PROD_CONTENT_DB_URL =~ "http" ]] ; 
           then
             # We need to curl the DB 
-            echo "Get ${$PROD_CONTENT_DB_URL}" ; 
-            curl -u build:+EiBAPkL5L] $PROD_CONTENT_DB_URL > ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME} ;
+            echo "Get ${PROD_CONTENT_DB_URL}"; 
+            curl -u build:+EiBAPkL5L] $PROD_CONTENT_DB_URL > ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql;
         fi ;
     fi ;
 
@@ -122,20 +122,22 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
           then
             # We need to curl the DB 
             echo "Get ${BUILD_BASE_NAME}.share.sql from source" ; 
-            curl -u build:+EiBAPkL5L] $PROD_SHARED_DB_URL > $BUILD_BASE_NAME.share.sql ;
+            curl -u build:+EiBAPkL5L] $PROD_SHARED_DB_URL > ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql ;
         fi ;        
     fi ;
-
+    
     # DB in disk; check if we can read 
     [ -r ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME} ] || die ${LINENO} "test" "Unable to read to ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME}." ;
     [ -r ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME} ] || die ${LINENO} "test" "Unable to read to ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME}." ;
 
+    # do we want to force .my.cnf
     mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS -e "DROP DATABASE IF EXISTS ${D6_DATABASE}; CREATE DATABASE ${D6_DATABASE}; DROP DATABASE IF EXISTS ${D6_SHARED}; CREATE DATABASE ${D6_SHARED};"
     mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_DATABASE < ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME}
     mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_SHARED < ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME}
     
     # Remove database files
     rm ${TEMP_DIR}/${PROD_CONTENT_DB_BASENAME}
+
     rm ${TEMP_DIR}/${PROD_SHARED_DB_BASENAME}
     
     # make a copy of the settings file
