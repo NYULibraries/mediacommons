@@ -9,7 +9,7 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${DIR}/../temp/autobuild.pid
+  rm ${TEMP_DIR}/autobuild.pid
   exit 1;
 }
 
@@ -28,8 +28,12 @@ done
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-while getopts ":e:hum" opt; do
+while getopts ":c:e:hum" opt; do
  case $opt in
+  c)
+    [ -f $OPTARG ] || die "Configuration file does not exist." 
+    CONF_FILE=$OPTARG
+    ;;   
   u)
     UPDATE=true
     ;;
@@ -55,35 +59,43 @@ done
 
 ROOT=${DIR}/..
 
-echo $$ > ${ROOT}/temp/autobuild.pid
+echo $$ > ${TEMP_DIR}/autobuild.pid
+
+[ $CONF_FILE ] || die ${LINENO} "test" "No configuration file provided."
+
+# load configuration file
+. $CONF_FILE
 
 # Get the latest make file and do any other task before running jobs
-if [ $UPDATE ] ; then $DIR/update.sh ; fi
+if [ $UPDATE ]; then $DIR/update.sh; fi;
 
 # Do some house cleaning before running job
-if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi
+if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi;
 
-projects=( mediacommons alt-ac fieldguide imr intransition tne )
+projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
-    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -k -s -e ${ENVIRONMENT} ;
-    if [ $? -eq 0 ] ;
+    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -k -s -e ${ENVIRONMENT};
+    if [ $? -eq 0 ];
       then
-
-        echo "Successful: Build ${project}" ;
-
+        echo "Successful: Build ${project}";
         # Run preprocess task
-        $DIR/preprocess.sh -c ${ROOT}/configs/${project}.conf ;
-
+        $DIR/preprocess.sh -c ${ROOT}/configs/${project}.conf;
         # Migrate the content
-        $DIR/migrate.sh -c ${ROOT}/configs/${project}.conf ;
-
+        $DIR/migrate.sh -c ${ROOT}/configs/${project}.conf;
+        # Run post process task
+        # Step 1: Generic post tasks        
+        # $DIR/postprocess.sh -c ${ROOT}/configs/${project}.conf;
+        # Step 2: Export database
+        $DIR/export_db.sh -c ${ROOT}/configs/${project}.conf;
       else
-        echo ${LINENO} "build" "Fail: Build ${project}" ;
-    fi ;
-done
+        echo ${LINENO} "build" "Fail: Build ${project}";
+    fi;
+done;
 
-rm ${ROOT}/temp/autobuild.pid
+if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
+  rm ${TEMP_DIR}/autobuild.pid;
+fi
 
-exit 0
+exit 0;
