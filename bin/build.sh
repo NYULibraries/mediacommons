@@ -225,8 +225,7 @@ if [ ! $SIMULATE ] ;
     if [ $? ] ; then echo "Successful: Assing list of modules to enable for this specific site." ; else die ${LINENO} 9 "Fail: Assing list of modules to enable for this specific site." ; fi ;
   else
     tell ${LINENO} 9 "${STEP_9}" ;
-fi ;
-
+fi;
 
 if [ ! $SIMULATE ] ;
   then
@@ -237,6 +236,8 @@ if [ ! $SIMULATE ] ;
     chmod -R 2777 $BUILD_DIR/$BUILD_NAME/sites/default/files
 fi ;
 
-rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid
+if [[ -f ${TEMP_DIR}/build.pid ]]; then
+  rm ${TEMP_DIR}/autobuild.pid;
+fi
 
 exit 0
