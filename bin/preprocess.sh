@@ -47,17 +47,17 @@ done
 # Copy sites files
 if [ -d "$BACKUP_FILES_DIR" ]; then
   # rsync -vrh --exclude '.htaccess' ${BACKUP_FILES_DIR}/ ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
-  rsync -vrh --exclude '.htaccess' ${BACKUP_FILES_DIR}/ ${FILES_DIR}
+  # rsync -vrh --exclude '.htaccess' ${BACKUP_FILES_DIR}/ ${FILES_DIR}
 fi
 
 # make sure there is a link to the default folder using our Drupal 6 convention
 ln -s ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/mediacommons.futureofthebook.org.${BUILD_BASE_NAME}
 
-rm -rf ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
+# rm -rf ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
 
-ln -s ${FILES_DIR} ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
+# ln -s ${FILES_DIR} ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
 
 # somehow there are links to the file folder inside the file folder 
-ln -s ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files/files
+# ln -s ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files/files
 
 exit 0
