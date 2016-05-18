@@ -7,6 +7,8 @@ settings.php
 settings.json
 *.local.make
 builds
+lib/files
+temp
 
 *.conf
 !default.project.conf

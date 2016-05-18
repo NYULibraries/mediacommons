@@ -59,12 +59,16 @@ done
 
 ROOT=${DIR}/..
 
-echo $$ > ${TEMP_DIR}/autobuild.pid
-
 [ $CONF_FILE ] || die ${LINENO} "test" "No configuration file provided."
 
 # load configuration file
 . $CONF_FILE
+
+if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
+  rm ${TEMP_DIR}/autobuild.pid;
+fi
+
+echo $$ > ${TEMP_DIR}/autobuild.pid
 
 # Get the latest make file and do any other task before running jobs
 if [ $UPDATE ]; then $DIR/update.sh; fi;
@@ -81,13 +85,13 @@ for project in ${projects[*]}
       then
         echo "Successful: Build ${project}";
         # Run preprocess task
+        echo "Run preprocess task";
         $DIR/preprocess.sh -c ${ROOT}/configs/${project}.conf;
         # Migrate the content
+        echo "Migrate the content";
         $DIR/migrate.sh -c ${ROOT}/configs/${project}.conf;
-        # Run post process task
-        # Step 1: Generic post tasks        
-        # $DIR/postprocess.sh -c ${ROOT}/configs/${project}.conf;
-        # Step 2: Export database
+        # Step 1: Export database
+        echo "Export database";
         $DIR/export_db.sh -c ${ROOT}/configs/${project}.conf;
       else
         echo ${LINENO} "build" "Fail: Build ${project}";

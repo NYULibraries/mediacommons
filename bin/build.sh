@@ -84,7 +84,11 @@ done
 # load configuration file
 . $CONF_FILE
 
-echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid
+if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
+  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
+fi
+
+echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
 
 # Drupal need a valid email for user account
 DRUPAL_ACCOUNT_MAIL_VALID=$(echo ${DRUPAL_ACCOUNT_MAIL} | grep -E "^(([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))\.)*([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))@\w((-|\w)*\w)*\.(\w((-|\w)*\w)*\.)*\w{2,4}$")
@@ -236,8 +240,8 @@ if [ ! $SIMULATE ] ;
     chmod -R 2777 $BUILD_DIR/$BUILD_NAME/sites/default/files
 fi ;
 
-if [[ -f ${TEMP_DIR}/build.pid ]]; then
-  rm ${TEMP_DIR}/autobuild.pid;
+if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
+  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
 fi
 
 exit 0
