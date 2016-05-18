@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo ${0}
+
 # Don't use me! ... well, do it if you know what you are doing.
 #
 # In theory I should work; but in practice I'm almost certain that I will
@@ -31,9 +33,9 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 while getopts ":c:e:hum" opt; do
  case $opt in
   c)
-    [ -f $OPTARG ] || die "Configuration file does not exist." 
+    [ -f $OPTARG ] || die "Configuration file does not exist."
     CONF_FILE=$OPTARG
-    ;;   
+    ;;
   u)
     UPDATE=true
     ;;
@@ -64,6 +66,8 @@ ROOT=${DIR}/..
 # load configuration file
 . $CONF_FILE
 
+# Here I need to test if the autobuild is running and kill this process
+# or remove the pid file and keep going
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
   rm ${TEMP_DIR}/autobuild.pid;
 fi
@@ -74,7 +78,7 @@ echo $$ > ${TEMP_DIR}/autobuild.pid
 if [ $UPDATE ]; then $DIR/update.sh; fi;
 
 # Do some house cleaning before running job
-if [ $MAINTENANCES ] ; then $DIR/maintenances.sh ; fi;
+# if [ $MAINTENANCES ] ; then $DIR/maintenances.sh -c ${CONF_FILE} ; fi;
 
 projects=(${PROJECTS})
 
@@ -86,13 +90,13 @@ for project in ${projects[*]}
         echo "Successful: Build ${project}";
         # Run preprocess task
         echo "Run preprocess task";
-        $DIR/preprocess.sh -c ${ROOT}/configs/${project}.conf;
+        $DIR/utilities/preprocess.sh -c ${ROOT}/configs/${project}.conf;
         # Migrate the content
         echo "Migrate the content";
         $DIR/migrate.sh -c ${ROOT}/configs/${project}.conf;
         # Step 1: Export database
         echo "Export database";
-        $DIR/export_db.sh -c ${ROOT}/configs/${project}.conf;
+        $DIR/utilities/export_db.sh -c ${ROOT}/configs/${project}.conf;
       else
         echo ${LINENO} "build" "Fail: Build ${project}";
     fi;

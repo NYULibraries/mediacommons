@@ -61,7 +61,7 @@ while getopts ":e:c:m:hdsikt" opt; do
     ;;
   h)
    echo " "
-   echo " Usage: ./build.sh -m example.make -c example.conf"
+   echo " Usage: ./build.sh -m example.make -c example.conf -e local"
    echo " "
    echo " Options:"
    echo "   -h           Show brief help"
@@ -77,13 +77,15 @@ while getopts ":e:c:m:hdsikt" opt; do
   esac
 done
 
-[ $CONF_FILE ] || die "No configuration file provided."
+[ $CONF_FILE ] || die ${LINENO} "fail" "No configuration file provided."
 
-[ $MAKE_FILE ] || die "No make file provided."
+[ $MAKE_FILE ] || die ${LINENO} "fail" "No make file provided."
 
 # load configuration file
 . $CONF_FILE
 
+# Here I need to test if the build is running and kill this process
+# or remove the pid file and keep going
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
   rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
 fi
@@ -134,7 +136,7 @@ if [ ! $SIMULATE ] ; then
 fi
 
  # Step 3: Reuse code that has been linked in the lib folder
-STEP_3="${DIR}/link_build.sh -c ${CONF_FILE}" ;
+STEP_3="${DIR}/utilities/link_build.sh -c ${CONF_FILE}";
 
 if [ ! $SIMULATE ] ;
   then
@@ -172,7 +174,7 @@ if [ -f $BUILD_DIR/$BUILD_NAME/sites/default ] ; then
 fi ;
 
 # Step 5: Remove text files and rename install.php to install.php.off
-STEP_5="${DIR}/cleanup.sh ${BUILD_DIR}/${BUILD_NAME}" ;
+STEP_5="${DIR}/utilities/cleanup.sh -c ${CONF_FILE}";
 
 if [ ! $SIMULATE ] ;
   then
@@ -183,7 +185,7 @@ if [ ! $SIMULATE ] ;
 fi ;
 
 # Step 6: Find SASS config.rb and compile the CSS file
-STEP_6="${DIR}/sass.sh ${BUILD_DIR}/${BUILD_NAME}" ;
+STEP_6="${DIR}/utilities/sass.sh -c ${CONF_FILE}";
 
 if [ ! $SIMULATE ] ;
   then
@@ -197,7 +199,7 @@ if [ ! $SIMULATE ] ;
 fi
 
 # Step 7: Share cookies
-STEP_7="${DIR}/cookies.sh -c ${CONF_FILE} -b ${BUILD_DIR}/${BUILD_NAME}"
+STEP_7="$DIR/utilities/cookies.sh -c ${CONF_FILE}"
 if [ ! $SIMULATE ] ;
   then
     if [ $COOKIES ] ;
@@ -210,7 +212,7 @@ if [ ! $SIMULATE ] ;
 fi ;
 
 # Step 8: Assing theme class
-STEP_8="${DIR}/theme_variable.sh ${BUILD_DIR}/${BUILD_NAME} ${DRUPAL_SPECIAL_BODY_CLASS}"
+STEP_8="${DIR}/utilities/theme_variable.sh -c ${CONF_FILE}"
 
 if [ ! $SIMULATE ] ;
   then
@@ -221,7 +223,7 @@ if [ ! $SIMULATE ] ;
 fi ;
 
 # Step 9: Set custume modules
-STEP_9="${DIR}/enable_modules.sh ${BUILD_DIR}/${BUILD_NAME} ${DRUPAL_SITE_SPECIFIC_MODULES}"
+STEP_9="${DIR}/utilities/enable_modules.sh -c ${CONF_FILE}"
 
 if [ ! $SIMULATE ] ;
   then
@@ -234,10 +236,10 @@ fi;
 if [ ! $SIMULATE ] ;
   then
     # do a quick status check
-    $DIR/check_build.sh $BUILD_DIR/$BUILD_NAME $BASE_URL
-    chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php
-    chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default
-    chmod -R 2777 $BUILD_DIR/$BUILD_NAME/sites/default/files
+    $DIR/utilities/check_build.sh -c ${CONF_FILE}
+    chmod 755 ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php
+    chmod 755 ${BUILD_DIR}/${BUILD_NAME}/sites/default
+    chmod -R 2777 ${BUILD_DIR}/${BUILD_NAME}/sites/default/files
 fi ;
 
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
