@@ -34,7 +34,7 @@ if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php ]]; then
   MATCH=`grep -c 'DRUPAL_ROOT' ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php`
   if [ $MATCH -gt 0 ]; then
     # share cookie
-    echo "\$cookie_domain = '.${COOKIE_DOMAIN}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+    echo "\$cookie_domain = '${COOKIE_DOMAIN}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
   fi
 fi
 

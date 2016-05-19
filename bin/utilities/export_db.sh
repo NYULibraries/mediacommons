@@ -47,9 +47,9 @@ done
 # load configuration file
 . $CONF_FILE
 
-echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.export.pid
-
 [ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}";
+
+echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.export.pid
 
 if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
   [ -w ${SQL_DUMP_DESTINATION} ] || die ${LINENO} "test" "Unable to write inside ${SQL_DUMP_DESTINATION}";
