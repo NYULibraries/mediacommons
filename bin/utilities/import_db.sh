@@ -1,8 +1,10 @@
 #!/bin/bash
 
+PID_FILE=${TEMP_DIR}/${BUILD_BASE_NAME}.import.pid
+
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.import.pid;
+  rm ${PID_FILE}
   exit 1;
 }
 
@@ -32,7 +34,7 @@ done
 
 [ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}";
 
-echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.import.pid
+echo $$ > ${PID_FILE}
 
 if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
   # Get database from source
