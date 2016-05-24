@@ -47,7 +47,7 @@ done
 # load configuration file
 . $CONF_FILE
 
-LIBRARY="$(dirname "$DIR")"/lib
+LIBRARY="$(dirname "$DIR")"/../lib
 
 [ -d $LIBRARY ] || die "Library directory ${LIBRARY} does not exist"
 
