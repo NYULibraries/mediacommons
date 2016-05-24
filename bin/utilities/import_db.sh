@@ -2,7 +2,7 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.export.pid;
+  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.import.pid;
   exit 1;
 }
 
