@@ -1,14 +1,13 @@
 # Ignore configuration files that may contain sensitive information.
 
+\#*
+*~
 .DS_Store
 .project
 .sass-cache
 settings.php
 settings.json
 *.local.make
-builds
-lib/files
-temp
 
 *.conf
 !default.project.conf
@@ -31,3 +30,10 @@ lib/scripts/*
 .settings/*
 
 *.sql
+
+# Commit empty build/ and temp/ so new clones will work out of the box.
+builds/*
+!builds/.commit-empty-dir
+
+temp/*
+!temp/.commit-empty-dir
