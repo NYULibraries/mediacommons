@@ -2,11 +2,11 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}" ;
-  rm ${DIR}/../temp/${BUILD_BASE_NAME}.build.pid ;
+  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ;
   exit 1 ;
 }
 
-tell () { 
+tell () {
   echo "file: ${0} | line: ${1} | step: ${2} | command: ${3}";
 }
 
@@ -36,10 +36,10 @@ is_drupal_online () {
 SOURCE="${BASH_SOURCE[0]}"
 
 # resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do 
+while [ -h "$SOURCE" ]; do
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve it 
+  # if $SOURCE was a relative symlink, we need to resolve it
   # relative to the path where the symlink file was located
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
@@ -55,7 +55,7 @@ ENVIRONMENT="local"
 while getopts ":e:c:m:hdlsikt" opt; do
  case $opt in
   c)
-   [ -f $OPTARG ] || die "Configuration file does not exist." 
+   [ -f $OPTARG ] || die "Configuration file does not exist."
    CONF_FILE=$OPTARG
    ;;
   m)
@@ -79,10 +79,10 @@ while getopts ":e:c:m:hdlsikt" opt; do
     ;;
   t)
     SIMULATE=true
-    ;;    
+    ;;
   h)
    echo " "
-   echo " Usage: ./build.sh -m example.make -c example.conf"
+   echo " Usage: ./build.sh -m example.make -c example.conf -e local"
    echo " "
    echo " Options:"
    echo "   -h           Show brief help"
@@ -93,7 +93,7 @@ while getopts ":e:c:m:hdlsikt" opt; do
    echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
    echo "   -m <file>    Specify the make file to use (e.g., -m example.make)."
    echo "   -t           Tell all relevant actions (don't actually change the system)."
-   echo " "  
+   echo " "
    exit 0
    ;;
   esac
@@ -108,14 +108,20 @@ else
     DRUSH=$DIR/drush
 fi
 
-[ $CONF_FILE ] || die "No configuration file provided."
+[ $CONF_FILE ] || die ${LINENO} "fail" "No configuration file provided."
 
-[ $MAKE_FILE ] || die "No make file provided."
+[ $MAKE_FILE ] || die ${LINENO} "fail" "No make file provided."
 
 # load configuration file
 . $CONF_FILE
 
-echo $$ > ${DIR}/../temp/${BUILD_BASE_NAME}.build.pid
+# Here I need to test if the build is running and kill this process
+# or remove the pid file and keep going
+if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
+  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
+fi
+
+echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
 
 # Drupal need a valid email for user account
 DRUPAL_ACCOUNT_MAIL_VALID=$(echo ${DRUPAL_ACCOUNT_MAIL} | grep -E "^(([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))\.)*([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+|(\"([][,:;<>\&@a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~-]|(\\\\[\\ \"]))+\"))@\w((-|\w)*\w)*\.(\w((-|\w)*\w)*\.)*\w{2,4}$")
@@ -135,7 +141,7 @@ if [ ! -d $BUILD_DIR ] ; then if [ ! $SIMULATE ] ; then eval $STEP_1 ; else tell
 
 # read password from configuration file; if not available or empty adding $TODAY as a temporary password
 if [ -z ${DRUPAL_ACCOUNT_PASS} -a ${DRUPAL_ACCOUNT_PASS}=="" ]; then DRUPAL_ACCOUNT_PASS=${TODAY} ; fi ;
-  
+
 echo "Prepare new site using ${MAKE_FILE}." ;
 
 # Step 2: Download and prepare for the installation using make file
@@ -148,7 +154,7 @@ if [ $? ] ; then echo "Successful: Downloaded and prepared for the installation 
 if [ ! $SIMULATE ] ; then [ -d $BUILD_DIR/$BUILD_NAME ] || die ${LINENO} 2 "Unable to install new site, build ${BUILD_DIR}/${BUILD_NAME} does not exist." ; fi
 
 # link to the lastes build if BUILD_BASE_NAME it's different from BUILD_NAME
-if [ ! $SIMULATE ] ; then 
+if [ ! $SIMULATE ] ; then
   if [ $BUILD_BASE_NAME != $BUILD_NAME ]; then
     # build base name its a link?
     if [[ -h $BUILD_DIR/$BUILD_BASE_NAME ]]; then
@@ -161,13 +167,13 @@ if [ ! $SIMULATE ] ; then
 fi
 
  # Step 3: Reuse code that has been linked in the lib folder
-STEP_3="${DIR}/link_build.sh -c ${CONF_FILE}" ;
+STEP_3="${DIR}/utilities/link_build.sh -c ${CONF_FILE}";
 
-if [ ! $SIMULATE ] ; 
-  then 
+if [ ! $SIMULATE ] ;
+  then
     eval $STEP_3 ;
-    if [ $? ] ; then echo "Successful: Reuse code that has been linked in the lib folder." ; else die ${LINENO} 3 "Fail: Reuse code that has been linked in the lib folder." ; fi ; 
-  else 
+    if [ $? ] ; then echo "Successful: Reuse code that has been linked in the lib folder." ; else die ${LINENO} 3 "Fail: Reuse code that has been linked in the lib folder." ; fi ;
+  else
     tell ${LINENO} 3 "${STEP_3}" ;
 fi ;
 
@@ -178,19 +184,19 @@ STEP_4="${DRUSH} ${DEBUG} -y site-install ${DRUPAL_INSTALL_PROFILE_NAME} --site-
 
 echo $STEP_4 ;
 
-if [ ! $SIMULATE ] ; 
-  then 
+if [ ! $SIMULATE ] ;
+  then
     eval $STEP_4 ;
-    if [ $? ] ; then echo "Successful: Ran the site installation." ; else die ${LINENO} 4 "Fail: Run the site installation" ; fi ; 
-  else 
+    if [ $? ] ; then echo "Successful: Ran the site installation." ; else die ${LINENO} 4 "Fail: Run the site installation" ; fi ;
+  else
     tell ${LINENO} 4 "${STEP_4}" ;
 fi ;
 
-if [ ! $SIMULATE ] ; then if is_drupal_online ; then echo "Successful: Drupal is online" ; else die ${LINENO} "test" "Fail: Drupal is offline." ; fi ; fi; 
+if [ ! $SIMULATE ] ; then if is_drupal_online ; then echo "Successful: Drupal is online" ; else die ${LINENO} "test" "Fail: Drupal is offline." ; fi ; fi;
 
 if [ -f $BUILD_DIR/$BUILD_NAME/sites/default/settings.php ] ; then
   chmod 777 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php ;
-  if [ $? ] ; then echo "Successful: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; else die ${LINENO} "test" "Fail: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; fi ;    
+  if [ $? ] ; then echo "Successful: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; else die ${LINENO} "test" "Fail: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; fi ;
 fi ;
 
 if [ -f $BUILD_DIR/$BUILD_NAME/sites/default ] ; then
@@ -199,24 +205,24 @@ if [ -f $BUILD_DIR/$BUILD_NAME/sites/default ] ; then
 fi ;
 
 # Step 5: Remove text files and rename install.php to install.php.off
-STEP_5="${DIR}/cleanup.sh ${BUILD_DIR}/${BUILD_NAME}" ;
+STEP_5="${DIR}/utilities/cleanup.sh -c ${CONF_FILE}";
 
-if [ ! $SIMULATE ] ; 
-  then 
-    eval $STEP_5 ; 
+if [ ! $SIMULATE ] ;
+  then
+    eval $STEP_5 ;
   if [ $? ] ; then echo "Successful: Remove text files and rename install.php to install.php.off." ; else die ${LINENO} 5 "Fail: Remove text files and rename install.php to install.php.off." ; fi ;
-  else 
-    tell ${LINENO} 5 "${STEP_5}" ; 
+  else
+    tell ${LINENO} 5 "${STEP_5}" ;
 fi ;
 
 # Step 6: Find SASS config.rb and compile the CSS file
-STEP_6="${DIR}/sass.sh ${BUILD_DIR}/${BUILD_NAME}" ;
- 
-if [ ! $SIMULATE ] ; 
-  then 
+STEP_6="${DIR}/utilities/sass.sh -c ${CONF_FILE}";
+
+if [ ! $SIMULATE ] ;
+  then
     if [ $SASS ] ;
-      then  
-        eval $STEP_6 ; 
+      then
+        eval $STEP_6 ;
         if [ $? ] ; then echo "Successful: Find SASS config.rb and compile the CSS file." ; else die ${LINENO} 6 "Fail: Find SASS config.rb and compile the CSS file." ; fi ;
       fi ;
   else
@@ -224,22 +230,22 @@ if [ ! $SIMULATE ] ;
 fi
 
 # Step 7: Share cookies
-STEP_7="${DIR}/cookies.sh -c ${CONF_FILE} -b ${BUILD_DIR}/${BUILD_NAME}"
-if [ ! $SIMULATE ] ; 
+STEP_7="$DIR/utilities/cookies.sh -c ${CONF_FILE}"
+if [ ! $SIMULATE ] ;
   then
-    if [ $COOKIES ] ; 
-      then 
-        eval $STEP_7 ; 
+    if [ $COOKIES ] ;
+      then
+        eval $STEP_7 ;
         if [ $? ] ; then echo "Successful: Share cookies." ; else die ${LINENO} 7 "Fail: Share cookies." ; fi ;
     fi ;
-  else 
+  else
     tell ${LINENO} 7 "${STEP_7}" ;
 fi ;
 
-# Step 8: Adding theme class
-STEP_8="${DIR}/theme_variable.sh ${BUILD_DIR}/${BUILD_NAME} ${DRUPAL_SPECIAL_BODY_CLASS}"
+# Step 8: Assing theme class
+STEP_8="${DIR}/utilities/theme_variable.sh -c ${CONF_FILE}"
 
-if [ ! $SIMULATE ] ; 
+if [ ! $SIMULATE ] ;
   then
     eval $STEP_8 ; 
     if [ $? ] ; then echo "Successful: Adding theme class." ; else die ${LINENO} 8 "Fail: Adding theme class." ; fi ;
@@ -247,15 +253,28 @@ if [ ! $SIMULATE ] ;
     tell ${LINENO} 8 "${STEP_8}" ;
 fi ;
 
-if [ ! $SIMULATE ] ; 
+# Step 9: Set custume modules
+STEP_9="${DIR}/utilities/enable_modules.sh -c ${CONF_FILE}"
+
+if [ ! $SIMULATE ] ;
+  then
+    eval $STEP_9 ;
+    if [ $? ] ; then echo "Successful: Assing list of modules to enable for this specific site." ; else die ${LINENO} 9 "Fail: Assing list of modules to enable for this specific site." ; fi ;
+  else
+    tell ${LINENO} 9 "${STEP_9}" ;
+fi;
+
+if [ ! $SIMULATE ] ;
   then
     # do a quick status check
-    $DIR/check_build.sh $BUILD_DIR/$BUILD_NAME $BASE_URL
-    chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php
-    chmod 755 $BUILD_DIR/$BUILD_NAME/sites/default
-    chmod -R 2777 $BUILD_DIR/$BUILD_NAME/sites/default/files
+    $DIR/utilities/check_build.sh -c ${CONF_FILE}
+    chmod 755 ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php
+    chmod 755 ${BUILD_DIR}/${BUILD_NAME}/sites/default
+    chmod -R 2777 ${BUILD_DIR}/${BUILD_NAME}/sites/default/files
 fi ;
 
-rm ${DIR}/../temp/${BUILD_BASE_NAME}.build.pid
+if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
+  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
+fi
 
 exit 0

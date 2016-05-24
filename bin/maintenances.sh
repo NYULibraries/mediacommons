@@ -85,8 +85,8 @@ for BUILD_NAME in `ls -1 | xargs -l readlink`
     disable_drupal_clean_url $BUILD_DIR/$BUILD_NAME
 done
 
-# Find and remove 14 days old directories
-find $BUILD_DIR/* -maxdepth 0 -type d -mtime +14 -exec bash -c 'remove_if_symlink_does_not_link $0' {} \;
+# Find and remove 1 days old directories
+find $BUILD_DIR/* -maxdepth 0 -type d -mtime +1 -exec bash -c 'remove_if_symlink_does_not_link $0' {} \;
 
 exit 0
 

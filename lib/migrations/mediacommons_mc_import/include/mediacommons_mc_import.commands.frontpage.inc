@@ -3,14 +3,14 @@
 /**
  * Migrate frontpage nodes.
  */
-function migrate_frontpages ( ) {
+function migrate_frontpages() {
 	foreach ( frontpages () as $key => $old_node ) migrate_frontpage ( $old_node ) ;
 }
 
 /**
- * Migrate IMR posts.
+ * Migrate frontpage nodes.
  */
-function migrate_frontpage ( $old_node ) {
+function migrate_frontpage($old_node) {
 
 	/** prepare node */
 	$node = array () ;
@@ -33,31 +33,46 @@ function migrate_frontpage ( $old_node ) {
 
 	$node['sticky'] = $old_node->sticky ;
 
+	// we need to add this to the content type?
 	$node['field_pubstat'] = $old_node->status ;
 
 	extract_iframe_sources ( $old_node->field_fpp_description_value ) ;
 
-	$node['field_body'] = $old_node->field_fpp_description_value ;
-
-	/**
-	if (isset($hub->field_fpp_link_url) && isset($hub->field_fpp_link_title)) {
-
-		$node['field_link'] = (object) array(
-				'title' => $hub->field_fpp_link_title,
-				'link' => $hub->field_fpp_link_url,
-		);
+	// Description
+	if (isset($old_node->field_fpp_description_value)) {
+	  $node['field_body'] = $old_node->field_fpp_description_value;
 	}
-	*/
 
-	/**
-	if (isset($hub->field_fpp_project_value)) {
-		$node['field_project'] = $hub->field_fpp_project_value;
+	// Link to Resource
+	if (isset($old_node->field_fpp_link_title) && isset($old_node->field_fpp_link_url)) {
+	  $node['field_rlink'] = (object) array(
+		  'title' => $old_node->field_fpp_link_title,
+		  'url' => $old_node->field_fpp_link_url,
+	  );
 	}
-	*/
 
-	/** representative image */
-	// if ( isset ( $old_node->field_fpp_image_fid ) ) $node['field_attached_images_ri'] = ( object ) array ( 'fid' => $old_node->field_fpp_image_fid ) ;
+	// Project
+	$allowed_project_value = array(
+	  'MediaCommons' => 'mc',
+		'Field Guide' => 'fg',
+		'In Media Res' => 'imr',
+		'The New Everyday' => 'tne',
+		'Alt-Ac' => 'alt',
+		'MediaCommons Press' => 'mcpress',
+		'[in]Transition' => 'int',
+	);
 
-	create_spoke ( $node ) ;
+	if (isset($old_node->field_fpp_project_value) && isset($allowed_project_value[$old_node->field_fpp_project_value])) {
+		$node['field_project'] = $allowed_project_value[$old_node->field_fpp_project_value];
+	}
+
+	if (isset($old_node->filename)) {
+		// Featured Image Thumb
+		$node['field_featured_image_thumb'] = ( object ) array ( 'filename' => $old_node->filename , 'fid' => $old_node->fid);
+		// Large image
+		$node['field_large_image'] = ( object ) array ( 'filename' => $old_node->filename, 'fid' => $old_node->fid);
+	}
+
+	create_frontpage($node);
 
 }
