@@ -84,7 +84,7 @@ projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
-    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -k -s -e ${ENVIRONMENT};
+    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -l -e ${ENVIRONMENT};
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
