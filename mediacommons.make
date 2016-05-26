@@ -61,6 +61,10 @@ projects[mediacommons][type] = "theme"
 
 ; Libraries
 
+libraries[simplehtmldom][download][type] = "get"
+libraries[simplehtmldom][download][url] = "http://downloads.sourceforge.net/project/simplehtmldom/simplehtmldom/1.5/simplehtmldom_1_5.zip"
+libraries[simplehtmldom][directory_name] = "simplehtmldom"
+libraries[simplehtmldom][type] = "library"
 
 ; imagesLoaded.
 libraries[jquery.imagesloaded][download][type] = file
