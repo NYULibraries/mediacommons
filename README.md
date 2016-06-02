@@ -18,7 +18,7 @@ Build the drupal distribution, e.g.
 Usage options for build.sh
 ============
 
-	./bin/build.sh -m example.make -c example.conf
+	./bin/build.sh -m example.make -c example.conf -l
 
 Options:
 ============
@@ -32,6 +32,7 @@ s | Find SASS based themes and compile
 c | Specify the configuration file to use (e.g., -c example.conf).
 m |  Specify the make file to use (e.g., -m example.make).
 t | Tell all relevant actions (don't actually change the system).
+l | Legacy option
 
 
 migrate.sh
