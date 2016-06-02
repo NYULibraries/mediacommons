@@ -29,6 +29,9 @@ lib/scripts/*
 .buildpath
 .settings/*
 
+# Ignore Intellij stuff
+.idea/
+
 *.sql
 
 # Commit empty build/ and temp/ so new clones will work out of the box.
