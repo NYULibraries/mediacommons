@@ -33,6 +33,7 @@ lib/scripts/*
 .idea/
 
 *.sql
+!bin/fix-bad-html-in-tne-node-135.sql
 
 # Commit empty build/ and temp/ so new clones will work out of the box.
 builds/*
