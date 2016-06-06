@@ -37,7 +37,7 @@ projects[ckeditor][version] = "1.16"
 projects[manualcrop][version] = "1.x-dev"
 projects[uuid][version] = "1.0-beta1"
 projects[better_exposed_filters][version] = "3.2"
-projects[multiblock][version] = "1.4"
+;projects[multiblock][version] = "1.4"
 
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
