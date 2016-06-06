@@ -59,6 +59,10 @@ projects[mediacommons][download][type] = "git"
 projects[mediacommons][download][url] = "https://github.com/lhenze/mediacommons.git"
 projects[mediacommons][type] = "theme"
 
+projects[mediacommons_admin][download][type] = "git"
+projects[mediacommons_admin][download][url] = "https://github.com/NYULibraries/mediacommons_admin.git"
+projects[mediacommons_admin][type] = "theme"
+
 ; Libraries
 
 libraries[simplehtmldom][download][type] = "get"
