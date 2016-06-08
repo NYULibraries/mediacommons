@@ -56,7 +56,7 @@ projects[tao][version] = "3.1"
 projects[zen][version] = "5.6"
 
 projects[mediacommons][download][type] = "git"
-projects[mediacommons][download][url] = "https://github.com/lhenze/mediacommons.git"
+projects[mediacommons][download][url] = "https://github.com/NYULibraries/mediacommons_theme"
 projects[mediacommons][type] = "theme"
 
 projects[mediacommons_admin][download][type] = "git"

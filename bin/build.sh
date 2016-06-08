@@ -153,7 +153,7 @@ if [ $? ] ; then echo "Successful: Downloaded and prepared for the installation 
 
 if [ ! $SIMULATE ] ; then [ -d $BUILD_DIR/$BUILD_NAME ] || die ${LINENO} 2 "Unable to install new site, build ${BUILD_DIR}/${BUILD_NAME} does not exist." ; fi
 
-# link to the lastes build if BUILD_BASE_NAME it's different from BUILD_NAME
+# link to the latest build if BUILD_BASE_NAME it's different from BUILD_NAME
 if [ ! $SIMULATE ] ; then
   if [ $BUILD_BASE_NAME != $BUILD_NAME ]; then
     # build base name its a link?
