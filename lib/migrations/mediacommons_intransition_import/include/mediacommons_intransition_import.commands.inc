@@ -40,6 +40,5 @@ function mediacommons_intransition_import_MC151 () {
     menu_edit_item_validate(array(), $form_state);
     // Save the item to database.
     menu_link_save($form_state['values']);
-  }
 
 }
