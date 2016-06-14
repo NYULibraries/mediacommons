@@ -7,7 +7,6 @@ function mediacommons_imr_import_extend_fields () {
   return array('field_embed');
 }
 
-
 // The relevant page for IMR on production is
 // "Current Calls" :
 // http://mediacommons.futureofthebook.org/imr/current-calls
