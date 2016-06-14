@@ -12,6 +12,8 @@ function migrate_posts ( ) {
  */
 function migrate_post ( $old_node ) {
 
+  extract_iframe_sources($old_node->body);
+
   /** prepare node */
   $node = array () ;
 
@@ -35,11 +37,9 @@ function migrate_post ( $old_node ) {
 
   $node['field_pubstat'] = $old_node->status ;
 
-  extract_iframe_sources ( $old_node->body ) ;
-
   $node['field_body'] = $old_node->body ;
 
-  foreach ( explode (', ', $old_node->terms ) as $tid )  $node['field_tags'][] = $tid ;
+  foreach (explode (', ', $old_node->terms ) as $tid )  $node['field_tags'][] = $tid ;
 
   /** representative image */
   if ( isset ( $old_node->field_tease_image_fid ) ) $node['field_attached_images_ri'] = ( object ) array ( 'fid' => $old_node->field_tease_image_fid ) ;

@@ -1,8 +1,8 @@
 <?php
 
-function init ( ) {
-  $commands = array (
-    array (
+function init() {
+  $commands = array(
+    array(
       'label' => t('Migrate site'),
       'callback' => array (
       	'mediacommons_base_import_generate_vocabulary',
@@ -14,19 +14,17 @@ function init ( ) {
       	'migrate_pages',
       	'migrate_posts',
       	'migrate_theme_weeks',
-        'mediacommons_intransition_import_MC151', // See: https://jira.nyu.edu/browse/MC-151        
+        'mediacommons_intransition_import_MC151', // See: https://jira.nyu.edu/browse/MC-151
       ),
     ),
-  ) ;
-
-  mediacommons_base_import_init ( array ( 'commands' => $commands ) );
-
+  );
+  mediacommons_base_import_init(array('commands' => $commands));
 }
 
 $base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';
 
-if ( ! file_exists ( $base_file ) ) exit ( drush_set_error ( dt ('Unable to find "@file".', array ( '@file' => $base_file ) ) ) ) ;
+if (!file_exists($base_file)) exit(drush_set_error(dt('Unable to find "@file".', array('@file' => $base_file))));
 
-include_once ( $base_file ) ;
+include_once($base_file);
 
-init() ;
+init();
