@@ -14,6 +14,7 @@ function init ( ) {
       	'migrate_pages',
       	'migrate_posts',
       	'migrate_theme_weeks',
+        'mediacommons_intransition_import_MC151', // See: https://jira.nyu.edu/browse/MC-151        
       ),
     ),
   ) ;
