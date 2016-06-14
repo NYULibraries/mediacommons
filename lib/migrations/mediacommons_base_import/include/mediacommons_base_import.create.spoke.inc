@@ -1,6 +1,6 @@
 <?php
 
-function create_spoke ( $old_node ) {
+function create_spoke($old_node) {
 
   global $settings;
 
@@ -74,14 +74,14 @@ function create_spoke ( $old_node ) {
     		if ( $fid = fid_by_ofid  ( $image ) ) $new_node->field_attached_images[$new_node->language][] = (array) file_load ( $fid->fid ) ;
     	}
     }
-
   }
 
   /** Tags */
-  if ( isset ( $old_node->field_tags ) ) {
-    foreach ( $old_node->field_tags as $tag_id) {
-      if ( $tag = mediacommons_base_import_find_term_id ( $tag_id ) ) {
-        $new_node->field_tags[$new_node->language][] = array ( 'tid' => $tag ) ;
+  if (isset($old_node->field_tags)) {
+    foreach ($old_node->field_tags as $tag_id) {
+      $tag = mediacommons_base_import_find_term_id($tag_id);
+      if ($tag) {
+        $new_node->field_taxonomy[$new_node->language][] = array('tid' => $tag);
       }
     }
   }
