@@ -1,7 +1,6 @@
 <?php
 
 function init () {
-
   $commands = array (
     array (
       'label' => t('Migrate site'),
@@ -20,15 +19,13 @@ function init () {
       ),
     ),
   ) ;
-
-  mediacommons_base_import_init ( array ( 'commands' => $commands ) ) ;
-
+  mediacommons_base_import_init(array('commands' => $commands));
 }
 
-$base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module' ;
+$base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';
 
-if ( ! file_exists ( $base_file ) ) exit ( drush_set_error ( dt ('Unable to find "@file".', array ( '@file' => $base_file ) ) ) ) ;
+if (!file_exists($base_file)) exit(drush_set_error(dt('Unable to find "@file".', array('@file' => $base_file))));
 
-include_once ( $base_file ) ;
+include_once($base_file);
 
-init() ;
+init();

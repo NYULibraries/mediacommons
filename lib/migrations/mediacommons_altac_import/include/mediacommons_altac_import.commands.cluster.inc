@@ -1,36 +1,36 @@
 <?php
 
 function migrate_clusters () {
-  foreach ( clusters () as $entity ) migrate_cluster ( $entity ) ;
+  foreach (clusters () as $entity) migrate_cluster($entity);
 }
 
-function migrate_cluster ( $entity ) {
+function migrate_cluster($entity) {
 
 	/** Prepare node */
 
-	$node = array ( ) ;
+	$node = array();
 
-	$node['title'] =  $entity->title ;
+	$node['title'] =  $entity->title;
 
-	$node['ouid'] = $entity->uid ;
+	$node['ouid'] = $entity->uid;
 
-	$node['onid'] = $entity->nid ;
+	$node['onid'] = $entity->nid;
 
-	$node['language'] = LANGUAGE_NONE ;
+	$node['language'] = LANGUAGE_NONE;
 
-	$node['date'] = date ( 'Y-m-j H:i:s', $entity->created ) ;
+	$node['date'] = date('Y-m-j H:i:s', $entity->created);
 
-	$node['status'] = $entity->status ;
+	$node['status'] = $entity->status;
 
-	$node['promote'] = $entity->promote ;
+	$node['promote'] = $entity->promote;
 
-	$node['moderate'] = $entity->moderate ;
+	$node['moderate'] = $entity->moderate;
 
-	$node['field_pubstat'] = $entity->status ;
+	$node['field_pubstat'] = $entity->status;
 
-	$node['sticky'] = $entity->sticky ;
+	$node['sticky'] = $entity->sticky;
 
-	if ( isset ( $entity->field_description_value ) ) $node['field_body'] = $entity->field_description_value ;
+	if (isset($entity->field_description_value)) $node['field_body'] = $entity->field_description_value;
 
 	/**
 	 * Representative image
@@ -71,9 +71,13 @@ function migrate_cluster ( $entity ) {
 			}
 	}
 
-	if ( isset ( $entity->pieces ) ) $node['field_spokes'] = explode( ', ', $entity->pieces ) ;
+	if (isset($entity->pieces)) $node['field_spokes'] = explode( ', ', $entity->pieces );
 
-	if ( isset ( $entity->contributors ) ) $node['field_contributors'] = explode (', ', $entity->contributors ) ;
+	if (isset($entity->contributors)) $node['field_contributors'] = explode (', ', $entity->contributors);
+
+  foreach (explode (', ', $entity->terms ) as $tid) {
+    if (!empty($tid)) $node['field_tags'][] = $tid;
+  }
 
 	/**
 	 * Dates
@@ -83,6 +87,6 @@ function migrate_cluster ( $entity ) {
 
 	if ( isset ( $entity->field_period_value2 ) ) $node['field_period_2'] = strtotime ( $entity->field_period_value2 ) ;
 
-	create_hub ( $node ) ;
+	create_hub($node);
 
 }

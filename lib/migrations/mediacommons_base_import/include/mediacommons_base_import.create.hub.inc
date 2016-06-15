@@ -105,8 +105,18 @@ function create_hub ( array $old_node ) {
   }
 
   /** pubstat */
-  if ( isset ( $old_node->field_pubstat ) ) {
+  if (isset($old_node->field_pubstat)) {
     $new_node->field_pubstat[$old_node->language][0] = array( 'value' => $old_node->field_pubstat ) ;
+  }
+
+  /** Tags */
+  if (isset($old_node->field_tags)) {
+    foreach ($old_node->field_tags as $tag_id) {
+      $tag = mediacommons_base_import_find_term_id($tag_id);
+      if ($tag) {
+        $new_node->field_taxonomy[$new_node->language][] = array('tid' => $tag);
+      }
+    }
   }
 
   /** add extended fields (fields that are not part of mediacommons_base distribution) */

@@ -1,5 +1,5 @@
 name = #Alt-Academy Migration
-description = Migration script for MediaCommons #Alt-Academ
+description = Migration script for MediaCommons #Alt-Academy
 core = 7.x
 version = 7.x-1.0
 

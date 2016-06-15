@@ -1,7 +1,6 @@
 <?php
 
 function response () {
-
   $query = "
     SELECT
       c.cid,
@@ -25,9 +24,7 @@ function response () {
         ON n.nid = c.cid
     WHERE n.status = 1
   ";
-
   $results = Database::getConnection('default', 'drupal6')->query($query, array(), array());
-
   /** Create and return a database connection to the source (d6) database */
   return Database::getConnection('default', 'drupal6')->query($query, array(':onid' => $onid), array());
 }
@@ -75,10 +72,8 @@ function clusters () {
 
 }
 
-function contributed_pieces ( $nid = NULL ) {
-
+function contributed_pieces($nid = NULL) {
 	$options = array () ;
-
   $query = "
     SELECT
       n.nid,
