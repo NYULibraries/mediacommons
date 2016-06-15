@@ -76,6 +76,12 @@ function migrate_cluster ( $entity ) {
 
   if ( isset ( $entity->contributors ) ) $node['field_contributors'] = explode ( ',', $entity->contributors ) ;
 
+  if (isset ($entity->terms)) {
+    foreach (explode (', ', $entity->terms ) as $tid) {
+      if (!empty($tid)) $node['field_tags'][] = $tid;
+    }
+  }
+  
   /**
    * Dates
    * If $dates is set proceed, no good comes from setting dates with wrong values
