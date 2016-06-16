@@ -1,7 +1,6 @@
 <?php
 
-function survey_response_by_question_nid ( $nid ) {
-
+function survey_response_by_question_nid($nid) {
 	$query = "
       SELECT n.nid,
 			 nodequeue.position
@@ -21,7 +20,6 @@ function survey_response_by_question_nid ( $nid ) {
 }
 
 function survey_responses () {
-
   $query = "
     SELECT n.nid,
        MAX(n.vid) AS vid,
@@ -70,7 +68,7 @@ function attached_images_by_ofid ( $ofid ) {
 }
 
 function survey_questions ( ) {
-  
+
   $query = "
     SELECT n.nid,
        MAX(n.vid) AS vid,
