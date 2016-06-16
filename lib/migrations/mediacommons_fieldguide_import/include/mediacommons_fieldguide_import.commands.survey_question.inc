@@ -20,7 +20,7 @@ function migrate_survey_question($old_node) {
   create_hub($node);
 }
 
-function test_this() {
+function JIRA_MC186() {
   $nodes = mediacommons_base_import_find_nodes('hub');
   foreach ($nodes as $node) {
     // array to hold contributors user ids
