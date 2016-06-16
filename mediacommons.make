@@ -2,7 +2,7 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.43"
+projects[drupal][version] = "7.44"
 
 ; Modules
 
@@ -20,12 +20,12 @@ projects[libraries][version] = "2.3"
 projects[link][version] = "1.4"
 projects[menu_token][version] = "1.0-beta7"
 projects[references][version] = "2.1"
-projects[nodequeue][version] = "2.0"
+projects[nodequeue][version] = "2.1"
 projects[pathauto][version] = "1.3"
 projects[realname][version] = "1.2"
 projects[strongarm][version] = "2.0"
 projects[token][version] = "1.6"
-projects[views][version] = "3.13"
+projects[views][version] = "3.14"
 projects[views_fieldsets][version] = "2.1"
 projects[admin_menu][version] = "3.0-rc5"
 projects[devel][version] = "1.5"
@@ -38,18 +38,23 @@ projects[manualcrop][version] = "1.x-dev"
 projects[uuid][version] = "1.0-beta1"
 projects[better_exposed_filters][version] = "3.2"
 projects[viewfield][version] = "2.0"
+projects[node_export][version] = "3.x-dev"
+projects[multiblock][version] = "1.4"
 
-;projects[multiblock][version] = "1.4"
-
+; in-house modules
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
 projects[mediacommons_modules][download][url] = "https://github.com/NYULibraries/mediacommons_modules.git"
-; projects[mediacommons_modules][download][branch] = "manualcrop"
+
+; Profiles
 
 projects[mediacommons_profile][type] = "profile"
 projects[mediacommons_profile][download][type] = "git"
 projects[mediacommons_profile][download][url] = "https://github.com/NYULibraries/mediacommons_profile.git"
-; projects[mediacommons_profile][download][branch] = "manualcrop"
+
+projects[mcumb_profile][type] = "profile"
+projects[mcumb_profile][download][type] = "git"
+projects[mcumb_profile][download][url] = "https://github.com/lhenze/mcumb_profile.git"
 
 ; Themes
 
@@ -83,4 +88,3 @@ libraries[jquery.imgareaselect][download][type] = file
 libraries[jquery.imgareaselect][download][url] = https://github.com/odyniec/imgareaselect/archive/v0.9.11-rc.1.tar.gz
 libraries[jquery.imgareaselect][download][subtree] = imgareaselect-0.9.11-rc.1
 libraries[jquery.imgareaselect][type] = "library"
-
