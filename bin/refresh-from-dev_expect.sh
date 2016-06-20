@@ -19,7 +19,7 @@ set timeout -1
 spawn ${REFRESH_SCRIPT} ${DATABASE_DUMPS} ${MC_FILES} ${DEV_SERVER_USERNAME}
 
 for {set i 1} {\$i <= ${RSYNC_COUNT}} {incr i 1} {
-    expect "arjanik@devmc.dlib.nyu.edu's password:"
+    expect "${DEV_SERVER_USERNAME}@${DEV_SERVER}'s password:"
 
     send "$password\r";
 
