@@ -157,4 +157,7 @@ do_database_grants
 
 fix_tne_wbr_problem
 
+# This string tells the expect script wrapper that refresh run has completed.
+echo $SCRIPT_RUN_COMPLETE
+
 set +x
