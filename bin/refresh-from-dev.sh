@@ -7,11 +7,6 @@ source $MEDIACOMMONS/bin/$(basename $0 .sh)_common.sh
 
 DRUSH=$MEDIACOMMONS/bin/drush
 
-DEV_SERVER=devmc.dlib.nyu.edu
-DEV_SERVER_MC_BUILDS=/www/sites/drupal/scripts/mediacommons/builds
-DEV_SERVER_DATABASE_DUMPS=/www/sites/drupal/scripts/mediacommons/builds/dbs/7
-DEV_SERVER_FILES=/content/dev/pa/drupal/mediacommons/7
-
 function copy_drupal_code() {
     cd $MEDIACOMMONS
 

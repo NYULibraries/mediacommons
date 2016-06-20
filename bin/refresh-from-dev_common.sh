@@ -1,6 +1,11 @@
 # This string tells the expect script wrapper that refresh run has completed.
 SCRIPT_RUN_COMPLETE='Mediacommons refresh run completed.'
 
+DEV_SERVER=devmc.dlib.nyu.edu
+DEV_SERVER_MC_BUILDS=/www/sites/drupal/scripts/mediacommons/builds
+DEV_SERVER_DATABASE_DUMPS=/www/sites/drupal/scripts/mediacommons/builds/dbs/7
+DEV_SERVER_FILES=/content/dev/pa/drupal/mediacommons/7
+
 # Directory where storing local copies of devmc database dumps
 DATABASE_DUMPS=$1
 
