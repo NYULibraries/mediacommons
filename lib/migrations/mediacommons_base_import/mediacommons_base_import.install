@@ -100,24 +100,37 @@ function mediacommons_base_import_schema() {
   $schema['mediacommons_base_import_term_map'] = array(
       'description' => 'Stores a record of imported vocabularies.',
       'fields' => array(
+          'id' => array(
+            'description' => 'The identifier',
+            'type' => 'serial',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+          ),
           'toid' => array(
-              'description' => 'The primary identifier for the Drupal 6 vocabulary',
-              'type' => 'serial',
-              'unsigned' => TRUE,
-              'not null' => TRUE,
+            'description' => 'The primary identifier for the Drupal 6 vocabulary',
+            'type' => 'serial',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+            'default' => 0,
           ),
           'tid' => array(
-              'description' => 'The primary identifier for the Drupal 7 vocabulary',
-              'type' => 'int',
-              'unsigned' => TRUE,
-              'not null' => TRUE,
-              'default' => 0,
+            'description' => 'The primary identifier for the Drupal 7 vocabulary',
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+            'default' => 0,
           ),
+          'project' => array('type' => 'varchar','length' => 255),
+          'name' => array('type' => 'text', 'size' => 'big'),
+          'md5' => array('type' => 'varchar','length' => 255),
       ),
       'indexes' => array(
-          'tid' => array('tid'),
+        'tid' => array('tid'),
       ),
-      'primary key' => array('toid'),
+      'primary key' => array('id'),
+      'unique keys' => array(
+        'id' => array('id'),
+      ),
   );
 
   $schema['mediacommons_base_import_node_map'] = array(
