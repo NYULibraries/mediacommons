@@ -159,7 +159,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     # Append database set-up to settings.php file
     echo $DBSTRING >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
 
-    $SHARE_STRING="$databases['default']['default']['prefix'] = array ('default' => '', 'mediacommons_base_import_vocabulary_map' => 'shared.', 'mediacommons_base_import_term_map' => 'shared.', 'taxonomy_vocabulary' => 'shared.', 'taxonomy_term_data' => 'shared.', 'taxonomy_term_hierarchy' => 'shared.', );"
+    $SHARE_STRING="\$databases['default']['default']['prefix'] = array ('default' => '', 'mediacommons_base_import_vocabulary_map' => 'shared.', 'mediacommons_base_import_term_map' => 'shared.', 'taxonomy_vocabulary' => 'shared.', 'taxonomy_term_data' => 'shared.', 'taxonomy_term_hierarchy' => 'shared.', );"
 
     echo $SHARE_STRING >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
 
