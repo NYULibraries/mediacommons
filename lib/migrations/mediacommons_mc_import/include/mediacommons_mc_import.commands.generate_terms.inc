@@ -1,6 +1,6 @@
 <?php
 
-function test () {
+function generate_terms () {
 
   // Looks like we are only have to migrate tags
 
