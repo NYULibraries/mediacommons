@@ -107,14 +107,14 @@ function mediacommons_base_import_schema() {
             'not null' => TRUE,
           ),
           'toid' => array(
-            'description' => 'The primary identifier for the Drupal 6 vocabulary',
-            'type' => 'serial',
+            'description' => 'The primary identifier for the Drupal 6 term',
+            'type' => 'int',
             'unsigned' => TRUE,
             'not null' => TRUE,
             'default' => 0,
           ),
           'tid' => array(
-            'description' => 'The primary identifier for the Drupal 7 vocabulary',
+            'description' => 'The primary identifier for the Drupal 7 term',
             'type' => 'int',
             'unsigned' => TRUE,
             'not null' => TRUE,
