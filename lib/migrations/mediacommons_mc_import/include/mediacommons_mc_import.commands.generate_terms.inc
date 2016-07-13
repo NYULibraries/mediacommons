@@ -7,7 +7,7 @@ function generate_terms () {
   $g = taxonomy_vocabulary_get_names();
 
 	// Drupal 7 vocabulary id
-	$vid = g['tags']->vid;
+	$vid = $g['tags']->vid;
 
 	unset($g);
 
