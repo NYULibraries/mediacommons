@@ -4,8 +4,12 @@ function generate_terms () {
 
   // Looks like we are only have to migrate tags
 
+  $g = taxonomy_vocabulary_get_names();
+
 	// Drupal 7 vocabulary id
-	$vid = taxonomy_vocabulary_get_names()['tags']->vid;
+	$vid = g['tags']->vid;
+
+	unset($g);
 
 	$v = array();
 
