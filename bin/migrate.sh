@@ -98,7 +98,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     DBSTRING+="'profile_values' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
     DBSTRING+="'sequences' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
     DBSTRING+="'users' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
-    if [[ $BUILD_BASE_NAME != *"intransition"* ]] && [[ $BUILD_BASE_NAME != *"imr"* ]] 
+    if [[ $BUILD_BASE_NAME != *"intransition"* ]] && [[ $BUILD_BASE_NAME != *"imr"* ]]
       then
       DBSTRING+="'vocabulary' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
       DBSTRING+="'term_data' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
@@ -106,6 +106,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     DBSTRING+="),"
     DBSTRING+="),"
     DBSTRING+=");"
+    DBSTRING+="\$databases['default']['default']['prefix']=array('default'=>'','mediacommons_base_import_vocabulary_map'=>'shared.','mediacommons_base_import_term_map'=>'shared.','taxonomy_vocabulary'=>'shared.','taxonomy_term_data'=>'shared.','taxonomy_term_hierarchy'=>'shared.',);"
 
     # Our multisites have a shared database
 
@@ -158,10 +159,6 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
 
     # Append database set-up to settings.php file
     echo $DBSTRING >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
-
-    $SHARE_STRING="\$databases['default']['default']['prefix'] = array ('default' => '', 'mediacommons_base_import_vocabulary_map' => 'shared.', 'mediacommons_base_import_term_map' => 'shared.', 'taxonomy_vocabulary' => 'shared.', 'taxonomy_term_data' => 'shared.', 'taxonomy_term_hierarchy' => 'shared.', );"
-
-    echo $SHARE_STRING >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
 
     # we have what it looks like a Drupal site
     # test if we can connect to the database and login as user 1
