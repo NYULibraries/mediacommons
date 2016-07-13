@@ -98,8 +98,11 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     DBSTRING+="'profile_values' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
     DBSTRING+="'sequences' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
     DBSTRING+="'users' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
-    DBSTRING+="'vocabulary' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
-    DBSTRING+="'term_data' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
+    if [[ $BUILD_BASE_NAME != *"intransition"* ]] && [[ $BUILD_BASE_NAME != *"imr"* ]] 
+      then
+      DBSTRING+="'vocabulary' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
+      DBSTRING+="'term_data' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"      
+    fi
     DBSTRING+="),"
     DBSTRING+="),"
     DBSTRING+=");"

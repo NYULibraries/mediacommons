@@ -73,7 +73,7 @@ projects[mediacommons_admin][type] = "theme"
 ; Libraries
 
 libraries[simplehtmldom][download][type] = "get"
-libraries[simplehtmldom][download][url] = "http://downloads.sourceforge.net/project/simplehtmldom/simplehtmldom/1.5/simplehtmldom_1_5.zip"
+libraries[simplehtmldom][download][url] = "http://dlib.nyu.edu/files/simplehtmldom.zip"
 libraries[simplehtmldom][directory_name] = "simplehtmldom"
 libraries[simplehtmldom][type] = "library"
 

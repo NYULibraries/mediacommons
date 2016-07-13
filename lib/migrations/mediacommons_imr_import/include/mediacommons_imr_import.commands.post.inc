@@ -11,6 +11,7 @@ function migrate_posts() {
  * Migrate IMR posts.
  */
 function migrate_post($old_node) {
+
   extract_iframe_sources($old_node->body);
 
   /** prepare node */
@@ -68,4 +69,5 @@ function migrate_post($old_node) {
   }
 
   create_spoke ($node);
+
 }

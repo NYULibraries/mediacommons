@@ -1,44 +1,37 @@
 <?php
 
-function mediacommons_base_import_find_term_id ( $tid ) {
-	$term_d7_tid = db_query("SELECT tid FROM mediacommons_base_import_term_map WHERE toid = :toid", array(':toid' => $tid));
-	if ($term_d7_tid->rowCount() > 0 && $term = $term_d7_tid->fetchObject()) {
-		return $term->tid;
-	}
+function find_tid_with_otid($otid) {
+	return mediacommons_base_import_find_term_id($otid);
+}
+
+// See: https://jira.nyu.edu/browse/MC-156
+function mediacommons_base_import_find_term_id($toid, $project = 'drupal6') {
+	$query = db_query("SELECT tid FROM {mediacommons_base_import_term_map} WHERE toid = :toid AND project = :project", array(':toid' => $toid, ':project' => $project));
+	if ($query->rowCount() > 0 && $result = $query->fetchObject()) {
+    return $result->tid;
+  }
 	return FALSE;
 }
 
 function mediacommons_base_import_find_term($tid) {
-
 	$term = array();
-
-	$term_d7_tid = db_query("SELECT tid FROM mediacommons_base_import_term_map WHERE toid = :toid", array(':toid' => $tid));
-
+	$term_d7_tid = db_query("SELECT tid FROM {mediacommons_base_import_term_map} WHERE toid = :toid", array(':toid' => $tid));
 	if (!$term_d7_tid->rowCount()) {
-
-		drush_print_r('old term does not exist; will try to create');
-
 		$query = '
       SELECT term.tid, term.vid, term.name, term.description, term.weight, hierarchy.parent
       FROM {term_data} term
       LEFT JOIN {term_hierarchy} hierarchy
         ON term.tid = hierarchy.tid
       WHERE term.tid = :tid';
-
 		/** Create a database connection to the source (d6) database */
 		$result = Database::getConnection('default', 'drupal6')->query($query, array(':tid' => $tid), array());
-
 		$term = mediacommons_base_import_create_taxonomy_term($result->fetchObject());
-
 	}
-
 	else {
 		$t = $term_d7_tid->fetchObject();
 		$term = taxonomy_term_load($t->tid);
 	}
-
 	return $term;
-
 }
 
 
@@ -46,7 +39,7 @@ function mediacommons_base_import_find_vocabulary( $vid ) {
 
 	$vocabulary = array();
 
-	$vocabulary_d7_vid = db_query("SELECT vid FROM mediacommons_base_import_vocabulary_map WHERE vuid = :vuid", array(':vuid' => $vid));
+	$vocabulary_d7_vid = db_query("SELECT vid FROM {mediacommons_base_import_vocabulary_map} WHERE vuid = :vuid", array(':vuid' => $vid));
 
 	if ( ! $vocabulary_d7_vid->rowCount() ) {
 		$query = '
