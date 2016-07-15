@@ -102,6 +102,23 @@ for project in ${projects[*]}
     fi;
 done;
 
+# Export the shared database.  There is no replated conf file so can't use
+# `export_db.sh`.  Also, there is no associated Drupal site so can't use drush.
+# This export depends on the user being able to run mysqldump without entering a
+# password in their current environment (terminal session or cron job).  It also
+# requires that they have the appropriate permissions on the `shared` database.
+echo "Export shared database";
+SHARED_DATABASE_DUMP_FILE=/www/sites/drupal/scripts/mediacommons/builds/dbs/7/shared.sql
+mysqldump shared > $SHARED_DATABASE_DUMP_FILE
+if [ $? -eq 0 ]; then
+    # Make dump file group-writable
+    chmod 660 $SHARED_DATABASE_DUMP_FILE
+
+    echo "Database exported to ${SHARED_DATABASE_DUMP_FILE}."
+else
+    echo >&2 "Export of database to ${SHARED_DATABASE_DUMP_FILE} failed."
+fi
+
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
   rm ${TEMP_DIR}/autobuild.pid;
 fi

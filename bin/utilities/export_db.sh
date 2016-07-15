@@ -68,6 +68,8 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
         drush -d -v sql-dump --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1 --environment=${ENVIRONMENT} --strict=0 > ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}
         if [[ -f ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME} ]]; then
           echo "Success: See dump database ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}"
+          # Make dump file group-writable
+          chmod 660 ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}
         else
           echo "Error: Unable to dump database ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}"
         fi
