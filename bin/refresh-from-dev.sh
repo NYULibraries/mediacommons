@@ -110,6 +110,12 @@ function recreate_databases() {
 
         cd ..
     done
+
+    # Shared database has no associated Drupal site or conf file.
+    # Nothing to run `recreate_user` with, so assume that user credentials are
+    # the same as those used by the last site.
+    recreate_database $SHARED_DATABASE
+    import_database_dump $SHARED_DATABASE
 }
 
 function do_database_grants() {
@@ -126,6 +132,11 @@ function do_database_grants() {
 
         cd ..
     done
+
+    # Shared database has no associated Drupal site or conf file.
+    # Assume that credentials for the user are the same as those used by the last site
+    # just processed in the loop above.
+    mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON ${SHARED_DATABASE}.* TO '${dbuser}'@'localhost' IDENTIFIED BY '${dbpassword}'"
 }
 
 function fix_tne_wbr_problem() {

@@ -15,6 +15,9 @@ MC_FILES=$2
 # Username on dev server
 DEV_SERVER_USERNAME=$3
 
+# Shared database has no associated Drupal site or conf file
+SHARED_DATABASE='shared'
+
 function usage() {
     script_name=$(basename $0)
 
