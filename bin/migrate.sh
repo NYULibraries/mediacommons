@@ -106,59 +106,17 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     DBSTRING+="),"
     DBSTRING+="),"
     DBSTRING+=");"
-    DBSTRING+="\$databases['default']['default']['prefix']=array('default'=>'','mediacommons_base_import_vocabulary_map'=>'shared.','mediacommons_base_import_term_map'=>'shared.','taxonomy_vocabulary'=>'shared.','taxonomy_term_data'=>'shared.','taxonomy_term_hierarchy'=>'shared.',);"
-
-    # Our multisites have a shared database
-
-    # Look for Drupal 6 content database
-    if [[ -f ${PROD_CONTENT_DB_URL} ]];
-      then
-        echo "Found ${PROD_CONTENT_DB_URL}" ;
-        cp ${PROD_CONTENT_DB_URL} ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql
-      else
-        echo "${PROD_CONTENT_DB_URL} not found"
-        if [[ $PROD_CONTENT_DB_URL =~ "http" ]] ;
-          then
-            echo "CULR: ${PROD_CONTENT_DB_URL} > ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql"
-            curl -u ${CURL_USER}:${CURL_PASS} $PROD_CONTENT_DB_URL > ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql
-        fi;
-    fi;
-    # Look for Drupal 6 shared database
-    if [[ -f ${PROD_SHARED_DB_URL} ]] ;
-      then
-        echo "Found ${PROD_SHARED_DB_URL}" ;
-        cp ${PROD_SHARED_DB_URL} ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql
-      else
-        echo "${PROD_SHARED_DB_URL} not found"
-        if [[ $PROD_SHARED_DB_URL =~ "http" ]];
-          then
-            echo "CULR: ${PROD_SHARED_DB_URL} > ${TEMP_DIR}/${BUILD_BASE_NAME}.share.sql" ;
-            curl -u ${CURL_USER}:${CURL_PASS} $PROD_SHARED_DB_URL > ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql
-        fi;
-    fi;
-
-    # DB in disk; check if we can read
-    [ -r ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql ] || die ${LINENO} "test" "Not found ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql" ;
-    [ -r ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql ] || die ${LINENO} "test" "Not found ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql" ;
-
-    # do we want to force .my.cnf
-    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS -e "DROP DATABASE IF EXISTS ${D6_DATABASE}; CREATE DATABASE ${D6_DATABASE}; DROP DATABASE IF EXISTS ${D6_SHARED}; CREATE DATABASE ${D6_SHARED};"
-    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_DATABASE < ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql
-    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_SHARED < ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql
-
-    # Remove database files from temporary directory
-    rm ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql
-
-    rm ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql
 
     # make a copy of the settings file
     cp $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.${BUILD_DATE}.off
-
+    
     # owner or sudo can read
     chmod 700 $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.${BUILD_DATE}.off
 
     # Append database set-up to settings.php file
     echo $DBSTRING >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
+    
+    cat ${DIR}/shared_fields.txt >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
 
     # we have what it looks like a Drupal site
     # test if we can connect to the database and login as user 1

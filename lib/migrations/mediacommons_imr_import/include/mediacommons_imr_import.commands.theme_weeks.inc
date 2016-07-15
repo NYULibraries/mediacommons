@@ -12,10 +12,6 @@ function migrate_theme_weeks () {
  */
 function migrate_theme_week ( $old_node ) {
 
-  print_r($old_node);
-
-  return;
-
   $node = array ( ) ;
 
   $node['title'] =  theme_weeks_title (  $old_node->title ) ;
@@ -89,9 +85,7 @@ function migrate_theme_week ( $old_node ) {
 
   }
 
-  print_r($node);
-
-  // return create_hub ( $node ) ;
+  return create_hub ( $node ) ;
 
 }
 

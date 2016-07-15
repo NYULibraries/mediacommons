@@ -75,7 +75,10 @@ fi
 echo $$ > ${TEMP_DIR}/autobuild.pid
 
 # Get the latest make file and do any other task before running jobs
-if [ $UPDATE ]; then $DIR/update.sh; fi;
+$DIR/update.sh; fi;
+
+# Build and migrate Umbrella before anything else
+$DIR/umbrella.sh;
 
 # Do some house cleaning before running job
 # if [ $MAINTENANCES ] ; then $DIR/maintenances.sh -c ${CONF_FILE} ; fi;
@@ -84,7 +87,7 @@ projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
-    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -l -e ${ENVIRONMENT};
+    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -l -e ${ENVIRONMENT} -k;
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
