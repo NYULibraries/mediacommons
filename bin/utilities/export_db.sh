@@ -68,6 +68,16 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
         drush -d -v sql-dump --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1 --environment=${ENVIRONMENT} --strict=0 > ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}
         if [[ -f ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME} ]]; then
           echo "Success: See dump database ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}"
+          # Add the shared tables from "origin"
+          if [[ $DRUPAL_DB_NAME != *"mediacommons"* ]]
+            then
+              # dump the shared tables
+              TABLES="mediacommons_base_import_vocabulary_map mediacommons_base_import_term_map taxonomy_vocabulary taxonomy_term_data taxonomy_term_hierarchy mediacommons_base_import_user_map mediacommons_base_import_role_map field_revision_field_url field_revision_field_twitter field_revision_field_title field_revision_field_subtitle field_revision_field_state field_revision_field_skype field_revision_field_profile_name field_revision_field_plan field_revision_field_phone field_revision_field_organization field_revision_field_last_name field_revision_field_first_name field_revision_field_email field_revision_field_bio field_revision_field_aim field_data_field_url field_data_field_twitter field_data_field_title field_data_field_subtitle field_data_field_state field_data_field_skype field_data_field_profile_name field_data_field_plan field_data_field_phone field_data_field_organization field_data_field_last_name field_data_field_first_name field_data_field_email field_data_field_bio field_data_field_aim cache_gravatar block_role blocked_ips shortcut_set_users realname users users_roles sessions role role_permission authmap"
+              DUMP=`mysqldump mediacommons ${TABLES}`
+              echo "/* Umbrella dump to overwrite to avoid multiple databases dependency while we develop */;" >> ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}
+              echo ${DUMP} >> ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}                            
+              echo "/* end: Umbrella dump */;" >> ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}                            
+          fi          
         else
           echo "Error: Unable to dump database ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}"
         fi

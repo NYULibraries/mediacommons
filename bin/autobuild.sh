@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo ${0}
-
 # Don't use me! ... well, do it if you know what you are doing.
 #
 # In theory I should work; but in practice I'm almost certain that I will
@@ -30,7 +28,7 @@ done
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-while getopts ":c:e:hum" opt; do
+while getopts ":c:e:hm" opt; do
  case $opt in
   c)
     [ -f $OPTARG ] || die "Configuration file does not exist."
@@ -51,7 +49,6 @@ while getopts ":c:e:hum" opt; do
    echo " "
    echo " Options:"
    echo "   -h           Show brief help"
-   echo "   -u           Get the latest make file and do any other task before running jobs."
    echo "   -m           Run some house cleaning before running job."
    echo " "
    exit 0
@@ -75,7 +72,7 @@ fi
 echo $$ > ${TEMP_DIR}/autobuild.pid
 
 # Get the latest make file and do any other task before running jobs
-$DIR/update.sh; fi;
+$DIR/update.sh
 
 # Build and migrate Umbrella before anything else
 $DIR/umbrella.sh;
@@ -97,9 +94,12 @@ for project in ${projects[*]}
         # Migrate the content
         echo "Migrate the content";
         $DIR/migrate.sh -c ${ROOT}/configs/${project}.conf;
-        # Step 1: Export database
+        # Step: Export database
         echo "Export database";
         $DIR/utilities/export_db.sh -c ${ROOT}/configs/${project}.conf;
+        echo "Set-up and clean-up others";        
+        $DIR/utilities/postprocess.sh -c ${ROOT}/configs/${project}.conf;        
+        
       else
         echo ${LINENO} "build" "Fail: Build ${project}";
     fi;

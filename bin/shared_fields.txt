@@ -1,6 +1,3 @@
-
-define("MEDIACOMMONS_SHARED", "mediacommons.");
-
 $databases['default']['default']['prefix'] = array(
   'default'=>'','mediacommons_base_import_vocabulary_map'=> MEDIACOMMONS_SHARED,
   'mediacommons_base_import_term_map'=>MEDIACOMMONS_SHARED,

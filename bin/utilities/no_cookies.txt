@@ -1,0 +1,1 @@
+if (isset($_SERVER['SERVER_NAME']) && isset($cookie_domain)) { if (!strpos($cookie_domain, $_SERVER['SERVER_NAME'])) $cookie_domain = false; }
