@@ -74,6 +74,8 @@ echo $$ > ${TEMP_DIR}/autobuild.pid
 # Get the latest make file and do any other task before running jobs
 $DIR/update.sh
 
+chmod 777 ${ROOT}/mediacommons.make
+
 # Build and migrate Umbrella before anything else
 $DIR/umbrella.sh;
 
@@ -97,9 +99,9 @@ for project in ${projects[*]}
         # Step: Export database
         echo "Export database";
         $DIR/utilities/export_db.sh -c ${ROOT}/configs/${project}.conf;
-        echo "Set-up and clean-up others";        
-        $DIR/utilities/postprocess.sh -c ${ROOT}/configs/${project}.conf;        
-        
+        echo "Set-up and clean-up others";
+        $DIR/utilities/postprocess.sh -c ${ROOT}/configs/${project}.conf;
+
       else
         echo ${LINENO} "build" "Fail: Build ${project}";
     fi;
