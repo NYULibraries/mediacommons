@@ -74,8 +74,6 @@ echo $$ > ${TEMP_DIR}/autobuild.pid
 # Get the latest make file and do any other task before running jobs
 $DIR/update.sh
 
-chmod 777 ${ROOT}/mediacommons.make
-
 # Build and migrate Umbrella before anything else
 $DIR/umbrella.sh;
 
