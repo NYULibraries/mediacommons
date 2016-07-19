@@ -30,4 +30,6 @@ rm ${MAKE_FILE}
 
 wget https://raw.githubusercontent.com/NYULibraries/mediacommons/master/mediacommons.make -P ${DIR}/../
 
+chmod 777 ${DIR}/../mediacommons.make
+
 exit 0

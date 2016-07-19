@@ -97,9 +97,9 @@ for project in ${projects[*]}
         # Step: Export database
         echo "Export database";
         $DIR/utilities/export_db.sh -c ${ROOT}/configs/${project}.conf;
-        echo "Set-up and clean-up others";        
-        $DIR/utilities/postprocess.sh -c ${ROOT}/configs/${project}.conf;        
-        
+        echo "Set-up and clean-up others";
+        $DIR/utilities/postprocess.sh -c ${ROOT}/configs/${project}.conf;
+
       else
         echo ${LINENO} "build" "Fail: Build ${project}";
     fi;
