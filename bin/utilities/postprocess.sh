@@ -35,12 +35,14 @@ done
 
 DIR=`dirname $0`
 
+CURRENT_PATH=`readlink -f ${DIR}`
+
 if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php ]]; then
   # check if this directory looks like Drupal 7
   MATCH=`grep -c 'DRUPAL_ROOT' ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php`
   if [ $MATCH -gt 0 ]; then
     # share cookie
-    cat no_cookies.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+    cat ${CURRENT_PATH}/no_cookies.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
   fi
 fi
 
