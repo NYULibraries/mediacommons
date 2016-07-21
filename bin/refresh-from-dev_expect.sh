@@ -17,7 +17,7 @@ RSYNC_COUNT=8
 /usr/local/bin/expect<<EOF
 set timeout -1
 
-spawn ${REFRESH_SCRIPT} ${DATABASE_DUMPS} ${MC_FILES} ${DEV_SERVER_USERNAME}
+spawn ${REFRESH_SCRIPT} -e -d ${DATABASE_DUMPS} -f ${MC_FILES} -u ${DEV_SERVER_USERNAME}
 
 for {set i 1} {\$i <= ${RSYNC_COUNT}} {incr i 1} {
     expect "${DEV_SERVER_USERNAME}@${DEV_SERVER}'s password:"
