@@ -31,11 +31,16 @@ function usage() {
 
     cat <<EOF
 
-usage: ${script_name} DATABASE_DUMPS MC_FILES DEV_SERVER_USERNAME
+usage: ${script_name} DATABASE_DUMPS MC_FILES [DEV_SERVER_USERNAME]
 
 examples:
 
+    # Specify user name on dev server
     ./${script_name} ~/mediacommons_databases ~/mediacommons_files somebody
+
+    # Use user name on local machine as login name on dev server
+    ./${script_name} ~/mediacommons_databases ~/mediacommons_files
+
 EOF
 }
 
