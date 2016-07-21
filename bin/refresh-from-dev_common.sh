@@ -63,4 +63,26 @@ function validate_args() {
     fi
 }
 
+function select_sites() {
+    # Clear selected sites list
+    selected_sites=()
+
+    options_list="All ${ALL_SITES[@]} Done"
+    until [ "${choice}" == "All" ] || [ "${choice}" == "Done" ]; do
+        select choice in $options_list; do
+            if [ $choice == "All" ]; then
+                selected_sites=("${ALL_SITES[@]}")
+                break
+            elif [ $choice == "Done" ]; then
+                break
+            else
+                selected_sites+=($choice)
+                break
+            fi
+        done
+    done
+
+    echo "Selected sites to refresh: ${selected_sites[*]}"
+}
+
 validate_args
