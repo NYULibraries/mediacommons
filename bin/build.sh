@@ -17,7 +17,7 @@ is_drupal_online () {
     --user=1"
 
   DRUPAL_DATABASE_CONNECTION_OK="Successfully connected to the Drupal database"
-  DRUPAL_BOOTSTRAP_OK="Drupal bootstrap                :  Successful"
+  DRUPAL_BOOTSTRAP_OK="Drupal bootstrap *: *Successful"
 
   # Using $(echo $DRUSH_STATUS_COMMAND) to remove extra whitespace
   tell ${LINENO} 'is_drupal_online()' "$(echo $DRUSH_STATUS_COMMAND)"
