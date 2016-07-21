@@ -10,7 +10,7 @@ DRUSH=$MEDIACOMMONS/bin/drush
 function copy_drupal_code() {
     cd $MEDIACOMMONS
 
-    for site in {alt-ac,fieldguide,imr,intransition,mediacommons,tne}; do
+    for site in "${selected_sites[@]}"; do
         rm -fr builds/${site}
         rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_MC_BUILDS}/${site}/ builds/${site}/
  
@@ -30,7 +30,7 @@ function copy_drupal_code() {
 function fix_symlinks() {
     cd $MEDIACOMMONS/builds/
     
-    for site in {alt-ac,fieldguide,imr,intransition,mediacommons,tne}
+    for site in "${selected_sites[@]}"
     do
         cd ${site}/profiles/
         rm README
@@ -95,7 +95,7 @@ function recreate_user() {
 function recreate_databases() {
     cd $MEDIACOMMONS/builds/
 
-    for site in {alt-ac,fieldguide,imr,intransition,mediacommons,tne}; do
+    for site in "${selected_sites[@]}"; do
         cd $site
 
         database=$( echo $site | sed 's/-//' )
@@ -115,7 +115,7 @@ function recreate_databases() {
 function do_database_grants() {
     cd $MEDIACOMMONS/builds/
 
-    for site in {alt-ac,fieldguide,imr,intransition,mediacommons,tne}; do
+    for site in "${selected_sites[@]}"; do
         cd $site
 
         database=$( echo $site | sed 's/-//' )

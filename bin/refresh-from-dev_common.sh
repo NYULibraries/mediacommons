@@ -14,6 +14,13 @@ MC_FILES=$2
 
 # Username on dev server
 DEV_SERVER_USERNAME=$3
+# Mediacommons main site and channel sites
+declare -a ALL_SITES=( alt-ac fieldguide imr intransition mediacommons tne )
+
+# Sites that user would like to refresh.  Default to all of them.  If user runs
+# the `expect` refresh script, there will be an option to select which sites
+# to refresh.
+declare -a selected_sites=("${ALL_SITES[@]}")
 
 function usage() {
     script_name=$(basename $0)
