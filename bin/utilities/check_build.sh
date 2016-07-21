@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# i don't think we are using this anymore
+
 echo ${0}
 
 while getopts ":c:h" opt; do
@@ -28,7 +30,7 @@ done
 
 STATUS=`curl -s -o /dev/null -w "%{http_code}" $BASE_URL`
 
-echo "Base URL ${BASE_URL}I reported status ${STATUS}"
+echo "Base URL ${BASE_URL} reported status ${STATUS}"
 
 drush status --root=${BUILD_DIR}/${BUILD_BASE_NAME} --uri=${BASE_URL} --user=1
 

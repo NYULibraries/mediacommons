@@ -2,7 +2,7 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${DIR}/../temp/${BUILD_BASE_NAME}.migrate.pid ;
+  rm -f ${DIR}/../temp/${BUILD_BASE_NAME}.migrate.pid;
   exit 1;
 }
 
@@ -57,7 +57,7 @@ done
 # Here I need to test if the migration is running and kill this process
 # or remove the pid file and keep going
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid ]]; then
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid;
+  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid;
 fi
 
 echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid
@@ -149,7 +149,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
 fi
 
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid ]]; then
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid;
+  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid;
 fi
 
 exit 0

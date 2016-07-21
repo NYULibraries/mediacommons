@@ -9,13 +9,13 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${TEMP_DIR}/autobuild.pid
+  rm -f ${TEMP_DIR}/autobuild.pid
   exit 1;
 }
 
 SOURCE="${BASH_SOURCE[0]}"
 
-ENVIRONMENT="local"
+ENVIRONMENT="development"
 
 # resolve $SOURCE until the file is no longer a symlink
 while [ -h "$SOURCE" ]; do
@@ -66,7 +66,7 @@ ROOT=${DIR}/..
 # Here I need to test if the autobuild is running and kill this process
 # or remove the pid file and keep going
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
-  rm ${TEMP_DIR}/autobuild.pid;
+  rm -f ${TEMP_DIR}/autobuild.pid;
 fi
 
 echo $$ > ${TEMP_DIR}/autobuild.pid
@@ -74,16 +74,19 @@ echo $$ > ${TEMP_DIR}/autobuild.pid
 # Get the latest make file and do any other task before running jobs
 $DIR/update.sh
 
-# Build and migrate Umbrella before anything else
-$DIR/umbrella.sh;
-
 # Do some house cleaning before running job
-# if [ $MAINTENANCES ] ; then $DIR/maintenances.sh -c ${CONF_FILE} ; fi;
+$DIR/maintenances.sh -c ${ROOT}/configs/build.conf;
+
+# Build and migrate Umbrella before anything else
+$DIR/umbrella.sh -c ${ROOT}/configs/build.conf;
 
 projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
+    # -l run in legacy mode
+    # -e environment we are building
+    # -k use cookies to share databases
     $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -l -e ${ENVIRONMENT} -k;
     if [ $? -eq 0 ];
       then
@@ -99,14 +102,13 @@ for project in ${projects[*]}
         $DIR/utilities/export_db.sh -c ${ROOT}/configs/${project}.conf;
         echo "Set-up and clean-up others";
         $DIR/utilities/postprocess.sh -c ${ROOT}/configs/${project}.conf;
-
       else
         echo ${LINENO} "build" "Fail: Build ${project}";
     fi;
 done;
 
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
-  rm ${TEMP_DIR}/autobuild.pid;
+  rm -f ${TEMP_DIR}/autobuild.pid;
 fi
 
 exit 0;

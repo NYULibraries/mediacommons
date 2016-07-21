@@ -1,79 +1,97 @@
 #!/bin/bash
 
+# if anything in this script fail; FAIL big! WE MUST STOP any other 
+# process related to autobuild.sh.
+
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${TEMP_DIR}/autobuild.pid
+  rm -f ${TEMP_DIR}/autobuild.pid
   exit 1;
 }
 
-SOURCE="${BASH_SOURCE[0]}"
-
-# resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve it relative to the path where
-  # the symlink file was located
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-
-while getopts ":s" opt; do
+while getopts ":c:s" opt; do
   case $opt in
+    c)
+      [ -f $OPTARG ] || die "Configuration file does not exist."
+      CONF_FILE=$OPTARG
+      ;;
     s)
       SKIP=true
       ;;
   esac
 done
 
-ENVIRONMENT="development"
+[ $CONF_FILE ] || die ${LINENO} "fail" "No configuration file provided."
 
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
-ROOT=/www/sites/drupal/scripts/mediacommons
-
-TEMP_DIR=${ROOT}/temp
-
-DBS=/www/sites/drupal/databases/migrations/dbs
+# load configuration file
+. $CONF_FILE
 
 # Take care of importing databasaes
 if [ ! $SKIP ];
   then
-    # ALT-AC
-    echo "Import ALT-AC content database"
-    mysql altac_d6_content < ${DBS}/alt-ac.sql
-    echo "Import ALT-AC shared database"
-    mysql altac_d6_shared < ${DBS}/mcshared.sql
-    # Fieldguide
-    echo "Import Fieldguide content database"
-    mysql fieldguide_d6_content < ${DBS}/mediacommons.sql
-    echo "Import Fieldguide shared database"
-    mysql fieldguide_d6_shared < ${DBS}/mcshared.sql
-    # In Media Res
-    echo "Import In Media Res content database"
-    mysql imr_d6_content < ${DBS}/imr.sql
-    echo "Import In Media Res shared database"
-    mysql imr_d6_shared < ${DBS}/mcshared.sql
-    # [in]Transition
-    echo "Import [in]Transition content database"
-    mysql intransition_d6_content <${DBS}/intransition.sql
-    echo "Import [in]Transition shared database"
-    mysql intransition_d6_shared < ${DBS}/mcshared.sql
-    # MediaCommons
-    echo "Import MediaCommons content database"
-    mysql mediacommons_d6_content < ${DBS}/mediacommons.sql
-    echo "Import MediaCommons shared database"
-    mysql mediacommons_d6_shared < ${DBS}/mcshared.sql
-    # The New Everyday
-    echo "Import The New Everyday content database"
-    mysql tne_d6_content < ${DBS}/tne.sql
-    echo "Import The New Everyday content database"
-    mysql tne_d6_shared < ${DBS}/mcshared.sql
+    if [ -r ${DBS}/mcshared.sql ]
+      then
+        # MediaCommons share tables (user tables and others)
+        # we use the same database for each site later on
+        # to solve some issues with colliding ids (IMR and 
+        # [in]T taxonomy) we map them by requesting MediaCommons
+        # Umbrela to be the first migrated
+        echo "Import shared database"
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} altac_d6_shared < ${DBS}/mcshared.sql
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} fieldguide_d6_shared < ${DBS}/mcshared.sql
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} imr_d6_shared < ${DBS}/mcshared.sql
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} intransition_d6_shared < ${DBS}/mcshared.sql
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} mediacommons_d6_shared < ${DBS}/mcshared.sql
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} tne_d6_shared < ${DBS}/mcshared.sql
+      else
+        die ${LINENO} "test" "Unable to read shared database"
+    fi
+    if [ -r ${DBS}/mediacommons.sql ]
+      then
+        echo "Import Fieldguide database"
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} fieldguide_d6_content < ${DBS}/mediacommons.sql
+        echo "Import MediaCommons database"        
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} mediacommons_d6_content < ${DBS}/mediacommons.sql
+      else
+        die ${LINENO} "test" "Unable to read Mediacommons content database"
+    fi
+    if [ -r ${DBS}/alt-ac.sql ]
+      then
+        echo "Import ALT-AC database"
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} altac_d6_content < ${DBS}/alt-ac.sql
+      else
+        die ${LINENO} "test" "Unable to read ALT-AC database"
+    fi
+    if [ -r ${DBS}/imr.sql ]
+      then
+        echo "Import In Media Res database"
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} imr_d6_content < ${DBS}/imr.sql
+      else
+        die ${LINENO} "test" "Unable to read In Media Res database"
+    fi
+    if [ -r ${DBS}/intransition.sql ]
+      then
+        echo "Import [in]Transition database"
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} intransition_d6_content <${DBS}/intransition.sql
+      else
+        die ${LINENO} "test" "Unable to read [in]Transition database"
+    fi
+    if [ -r ${DBS}/intransition.sql ]
+      then
+        echo "Import The New Everyday database"
+        mysql -u ${SITE_DB_USER} -p${DB_PASS} tne_d6_content < ${DBS}/tne.sql
+      else
+        die ${LINENO} "test" "Unable to read [in]Transition database"
+    fi
 fi
+
 # Build Umbrella
 [ ${ROOT}/configs/mediacommons.conf ] || die ${LINENO} "test" "No configuration file provided."
+
 # Load configuration file
 . ${ROOT}/configs/mediacommons.conf
-${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${ROOT}/mediacommons.make -l -e ${ENVIRONMENT} -k;
+
+${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${ROOT}/mediacommons.make  -k -l -e ${ENVIRONMENT};
 if [ $? -eq 0 ];
   then
     echo "Successful: Build MediaCommons Umbrella";
@@ -97,5 +115,7 @@ if [ $? -eq 0 ];
     echo "Set-up and clean-up others";        
     ${ROOT}/bin/utilities/postprocess.sh -c ${ROOT}/configs/mediacommons.conf;         
   else
-    echo ${LINENO} "build" "Fail: Build ${project}";
+   die ${LINENO} "test" "build" "Fail: Unable to build";
 fi;
+
+exit  0

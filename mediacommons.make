@@ -2,7 +2,7 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.44"
+projects[drupal][version] = "7.50"
 
 ; Modules
 
@@ -22,7 +22,7 @@ projects[menu_token][version] = "1.0-beta7"
 projects[references][version] = "2.1"
 projects[nodequeue][version] = "2.1"
 projects[pathauto][version] = "1.3"
-projects[realname][version] = "1.2"
+projects[realname][version] = "1.3"
 projects[strongarm][version] = "2.0"
 projects[token][version] = "1.6"
 projects[views][version] = "3.14"
