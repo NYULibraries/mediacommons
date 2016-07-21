@@ -117,10 +117,3 @@ if [ -z $DEV_SERVER_USERNAME ]; then
 fi
 
 validate_args
-
-echo $DATABASE_DUMPS
-echo $MC_FILES
-echo $DEV_SERVER_USERNAME
-echo $EXPECT_MODE
-
-exit
