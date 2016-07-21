@@ -2,6 +2,7 @@
 
 # Root of mediacommons repo
 MEDIACOMMONS=$(cd "$(dirname "$0")" ; cd ..; pwd -P )
+
 REFRESH_SCRIPT=${MEDIACOMMONS}/bin/$(basename $0 _expect.sh).sh
 
 source $MEDIACOMMONS/bin/$(basename $REFRESH_SCRIPT .sh)_common.sh
