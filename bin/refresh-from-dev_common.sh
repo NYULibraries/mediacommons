@@ -14,6 +14,10 @@ MC_FILES=$2
 
 # Username on dev server
 DEV_SERVER_USERNAME=$3
+if [ -z $DEV_SERVER_USERNAME ]; then
+    DEV_SERVER_USERNAME=$(whoami)
+fi
+
 # Mediacommons main site and channel sites
 declare -a ALL_SITES=( alt-ac fieldguide imr intransition mediacommons tne )
 
