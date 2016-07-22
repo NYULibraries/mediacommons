@@ -1,5 +1,8 @@
 # This string tells the expect script wrapper that refresh run has completed.
 SCRIPT_RUN_COMPLETE='Mediacommons refresh run completed.'
+# Used by select_sites() to report what sites have been selected, and by `expect`
+# script to know when to return from `interact`
+EXPECT_SIGNAL_SELECT_SITES_COMPLETED="EXPECT: NUMBER OF SITES SELECTED = "
 
 DEV_SERVER=devmc.dlib.nyu.edu
 DEV_SERVER_MC_BUILDS=/www/sites/drupal/scripts/mediacommons/builds
@@ -71,4 +74,12 @@ function select_sites() {
 
     echo "Selected sites to refresh: ${selected_sites[*]}"
 
-validate_args
+    if [ "${EXPECT_MODE}" == "true" ]; then
+        num_selected_sites=${#selected_sites[@]}
+
+        # Number of sites + files/ + database dumps = 6 + 1 + 1 = 8
+        num_rsyncs_to_perform=$((num_selected_sites+2))
+
+        echo "${EXPECT_SIGNAL_SELECT_SITES_COMPLETED}${num_rsyncs_to_perform}"
+    fi
+}

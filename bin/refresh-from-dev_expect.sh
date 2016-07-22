@@ -54,26 +54,40 @@ echo
 # Number of sites + files/ + database dumps = 6 + 1 + 1 = 8
 RSYNC_COUNT=8
 
-/usr/local/bin/expect<<EOF
+# Originally had heredoc:
+# /usr/local/bin/expect<<EOF
+# ...but when added `interact` command it didn't work right.  Nothing was being
+# echoed from the spawned process, and everything just seemed to hang.
+/usr/local/bin/expect -c "
 set timeout -1
+
+set return_signal \"${EXPECT_SIGNAL_SELECT_SITES_COMPLETED}(\\\\d+)\"
 
 spawn ${REFRESH_SCRIPT} -e -d ${DATABASE_DUMPS} -f ${MC_FILES} -u ${DEV_SERVER_USERNAME}
 
-for {set i 1} {\$i <= ${RSYNC_COUNT}} {incr i 1} {
-    expect "${DEV_SERVER_USERNAME}@${DEV_SERVER}'s password:"
+interact {
+    -o -re \$return_signal {
+        set num_rsyncs \$interact_out(1,string)
+        return
+    }
+}
 
-    send "$password\r";
+puts \"\\nNumber of rsyncs to perform: \$num_rsyncs\"
+
+for {set i 1} {\$i <= \$num_rsyncs} {incr i 1} {
+    expect \"${DEV_SERVER_USERNAME}@${DEV_SERVER}'s password:\"
+
+    send \"$password\r\";
 
     expect {
-        -re "total size is .*  speedup is " { puts "\nrsync #\$i completed successfully." }
+        -re \"total size is .*  speedup is \" { puts \"\nrsync #\$i completed successfully.\" }
 
-        "Permission denied, please try again." {
-             puts "\nYou will need to run this script again and re-type your password."
+        \"Permission denied, please try again.\" {
+             puts \"\nYou will need to run this script again and re-type your password.\"
              exit 1
         }
     }
 }
 
-expect "${SCRIPT_RUN_COMPLETE}"
-EOF
-
+expect \"${SCRIPT_RUN_COMPLETE}\"
+"

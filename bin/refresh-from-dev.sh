@@ -182,6 +182,8 @@ fi
 
 validate_args
 
+select_sites
+
 set -x
 
 copy_drupal_code
