@@ -93,7 +93,8 @@ function copy_files() {
 
 function copy_database_dumps() {
     # To keep things simple, copy all the database dumps regardless of which sites
-    # were selected for refresh.  Faster, simpler.
+    # were selected for refresh.  Faster, simpler.  Safe because only databases
+    # for selected sites will actually be recreated.
     rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/ $DATABASE_DUMPS/
 
     mv $DATABASE_DUMPS/alt-ac.sql $DATABASE_DUMPS/altac.sql
