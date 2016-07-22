@@ -205,6 +205,8 @@ recreate_databases
 
 do_database_grants
 
+# Run this regardless of whether TNE was selected for refresh.  No harm done if
+# this fix has already been applied before.
 fix_tne_wbr_problem
 
 # This string tells the expect script wrapper that refresh run has completed.
