@@ -7,6 +7,37 @@ source $MEDIACOMMONS/bin/$(basename $0 .sh)_common.sh
 
 DRUSH=$MEDIACOMMONS/bin/drush
 
+function usage() {
+    script_name=$(basename $0)
+
+    cat <<EOF
+
+usage: ${script_name} -d DATABASE_DUMPS [-e] -f MC_FILES [-u DEV_SERVER_USERNAME]
+    options:
+        -d DATABASE_DUMPS       Full path to local directory where database dumps
+                                    will be stored.
+        -e                      "expect" mode.  Indicates this script is being run from
+                                    the expect wrapper script.
+        -f MC_FILES             Full path to local directory where Drupal files/
+                                    directories will be stored.
+        -u DEV_SERVER_USERNAME  Optional username to use when logging into the dev
+                                    server.  Defaults to \$(whoami).
+
+examples:
+
+    # Specify user name on dev server
+    ./${script_name} -d ~/mediacommons_databases -f ~/mediacommons_files -u somebody
+
+    # Use user name on local machine as login name on dev server
+    ./${script_name} -d ~/mediacommons_databases -f ~/mediacommons_files
+
+    # Call from expect script only, for automating the interactions with rsync.
+    # Should never run this directly on the command line.
+    ./${script_name} -d ~/mediacommons_databases -f ~/mediacommons_files -e
+
+EOF
+}
+
 function copy_drupal_code() {
     cd $MEDIACOMMONS
 
@@ -133,6 +164,23 @@ function fix_tne_wbr_problem() {
     
     mysql tne < $MEDIACOMMONS/bin/fix-bad-html-in-tne-node-135.sql
 }
+
+while getopts d:ef:u: opt
+do
+    case $opt in
+        d) DATABASE_DUMPS=$OPTARG ;;
+        e) EXPECT_MODE=true ;;
+        f) MC_FILES=$OPTARG ;;
+        u) DEV_SERVER_USERNAME=$OPTARG ;;
+        *) echo >&2 "Options not set correctly."; usage; exit 1 ;;
+    esac
+done
+
+if [ -z $DEV_SERVER_USERNAME ]; then
+    DEV_SERVER_USERNAME=$(whoami)
+fi
+
+validate_args
 
 set -x
 
