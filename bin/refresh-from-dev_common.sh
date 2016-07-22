@@ -62,7 +62,7 @@ function select_sites() {
     # anyway just in case.
     remaining_sites_menu_options=("${ALL_SITES[@]}")
 
-    options_list="All ${remaining_sites_menu_options[@]} Done"
+    options_list="Done ${remaining_sites_menu_options[@]} All"
     until [ "${choice}" == "All" ] || [ "${choice}" == "Done" ]; do
         select choice in $options_list; do
             if [ $choice == "All" ]; then
@@ -84,7 +84,7 @@ function select_sites() {
                 unset remaining_sites_menu_options[${array_index_of_site}]
                 # Re-index array
                 remaining_sites_menu_options=( "${remaining_sites_menu_options[@]}" )
-                options_list="All ${remaining_sites_menu_options[@]} Done"
+                options_list="Done ${remaining_sites_menu_options[@]} All"
 
                 break
             fi
