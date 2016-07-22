@@ -85,10 +85,15 @@ function change_tne_database_name() {
 }
 
 function copy_files() {
-    rsync -azvh --delete ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/ $MC_FILES/
+    for site in "${selected_sites[@]}"
+    do
+        rsync -azvh --delete ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${site} ${MC_FILES}/${site}
+    done
 }
 
 function copy_database_dumps() {
+    # To keep things simple, copy all the database dumps regardless of which sites
+    # were selected for refresh.  Faster, simpler.
     rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/ $DATABASE_DUMPS/
 
     mv $DATABASE_DUMPS/alt-ac.sql $DATABASE_DUMPS/altac.sql

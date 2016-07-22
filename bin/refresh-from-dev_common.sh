@@ -90,9 +90,6 @@ function select_sites() {
     if [ "${EXPECT_MODE}" == "true" ]; then
         num_selected_sites=${#selected_sites[@]}
 
-        # Number of sites + files/ + database dumps = 6 + 1 + 1 = 8
-        num_rsyncs_to_perform=$((num_selected_sites+2))
-
-        echo "${EXPECT_SIGNAL_SELECT_SITES_COMPLETED}${num_rsyncs_to_perform}"
+        echo "${EXPECT_SIGNAL_SELECT_SITES_COMPLETED}${num_selected_sites}"
     fi
 }

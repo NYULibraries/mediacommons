@@ -67,14 +67,21 @@ spawn ${REFRESH_SCRIPT} -e -d ${DATABASE_DUMPS} -f ${MC_FILES} -u ${DEV_SERVER_U
 
 interact {
     -o -re \$return_signal {
-        set num_rsyncs \$interact_out(1,string)
+        set num_selected_sites \$interact_out(1,string)
         return
     }
 }
 
-puts \"\\nNumber of rsyncs to perform: \$num_rsyncs\"
 
-for {set i 1} {\$i <= \$num_rsyncs} {incr i 1} {
+# number of Drupal directories + number of files/ directories + database dumps directory
+#     number of Drupal directories = number of sites
+#     number of files/ directories = number of sites
+#     database dumps directory     = 1
+set num_rsyncs_to_perform \"[expr ( \$num_selected_sites * 2 ) + 1]\"
+
+puts \"\\nNumber of rsyncs to perform: \$num_rsyncs_to_perform\"
+
+for {set i 1} {\$i <= \$num_rsyncs_to_perform} {incr i 1} {
     expect \"${DEV_SERVER_USERNAME}@${DEV_SERVER}'s password:\"
 
     send \"$password\r\";
