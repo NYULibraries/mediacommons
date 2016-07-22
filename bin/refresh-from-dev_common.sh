@@ -28,6 +28,8 @@ declare -a ALL_SITES=( alt-ac fieldguide imr intransition mediacommons tne )
 # the `expect` refresh script, there will be an option to select which sites
 # to refresh.
 declare -a selected_sites=("${ALL_SITES[@]}")
+# Sites that have not yet been selected to display in the selection menu.
+declare -a remaining_sites_menu_options=("${ALL_SITES[@]}")
 
 function validate_args() {
 
@@ -56,8 +58,11 @@ function validate_args() {
 function select_sites() {
     # Clear selected sites list
     selected_sites=()
+    # This initialization should have already been done before, but do it again
+    # anyway just in case.
+    remaining_sites_menu_options=("${ALL_SITES[@]}")
 
-    options_list="All ${ALL_SITES[@]} Done"
+    options_list="All ${remaining_sites_menu_options[@]} Done"
     until [ "${choice}" == "All" ] || [ "${choice}" == "Done" ]; do
         select choice in $options_list; do
             if [ $choice == "All" ]; then
@@ -67,6 +72,14 @@ function select_sites() {
                 break
             else
                 selected_sites+=($choice)
+
+                # Adjust menu
+                array_index_of_site=$((REPLY-2))
+                unset remaining_sites_menu_options[${array_index_of_site}]
+                # Re-index array
+                remaining_sites_menu_options=( "${remaining_sites_menu_options[@]}" )
+                options_list="All ${remaining_sites_menu_options[@]} Done"
+
                 break
             fi
         done
