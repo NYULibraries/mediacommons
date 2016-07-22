@@ -152,7 +152,16 @@ function recreate_databases() {
 function do_database_grants() {
     cd $MEDIACOMMONS/builds/
 
-    for site in "${selected_sites[@]}"; do
+    # Have to do grants for all sites, not just selected sites.  The reason being
+    # that at the moment the database user is the same for all sites, and
+    # `recreate_user()` does a DROP USER followed by CREATE USER, which effectively
+    # deletes the previous GRANTs for all sites.
+    # So if we only do GRANTs for selected sites, when the user selects only a
+    # subset of sites to refresh the non-selected sites will have their GRANTs
+    # deleted without subsequent re-creation.
+    # Ideally we would run the GRANT in `recreate_user()`, but initial attempts
+    # to do that failed.  See comments in `recreate_user()` for the details.
+    for site in "${ALL_SITES[@]}"; do
         cd $site
 
         database=$( echo $site | sed 's/-//' )
