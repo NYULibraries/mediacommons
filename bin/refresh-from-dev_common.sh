@@ -55,6 +55,12 @@ function validate_args() {
     fi
 }
 
+function get_menu_options_list() {
+    local options=$1
+
+    echo "Done ${options} All"
+}
+
 function select_sites() {
     # Clear selected sites list
     selected_sites=()
@@ -62,7 +68,7 @@ function select_sites() {
     # anyway just in case.
     remaining_sites_menu_options=("${ALL_SITES[@]}")
 
-    options_list="Done ${remaining_sites_menu_options[@]} All"
+    options_list=$(get_menu_options_list "${remaining_sites_menu_options[*]}")
     until [ "${choice}" == "All" ] || [ "${choice}" == "Done" ]; do
         select choice in $options_list; do
             if [ $choice == "All" ]; then
@@ -84,7 +90,7 @@ function select_sites() {
                 unset remaining_sites_menu_options[${array_index_of_site}]
                 # Re-index array
                 remaining_sites_menu_options=( "${remaining_sites_menu_options[@]}" )
-                options_list="Done ${remaining_sites_menu_options[@]} All"
+                options_list=$(get_menu_options_list "${remaining_sites_menu_options[*]}")
 
                 break
             fi
