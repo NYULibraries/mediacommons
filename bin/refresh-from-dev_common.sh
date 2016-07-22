@@ -69,6 +69,12 @@ function select_sites() {
                 selected_sites=("${ALL_SITES[@]}")
                 break
             elif [ $choice == "Done" ]; then
+                # Exit if user didn't select any sites.
+                if [ ${#selected_sites[@]} -eq 0 ]; then
+                    echo >&2 'You have not selected any sites to refresh.'gd
+                    unset choice
+                fi
+
                 break
             else
                 selected_sites+=($choice)
