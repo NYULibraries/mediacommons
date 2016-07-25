@@ -7,6 +7,23 @@ REFRESH_SCRIPT=${MEDIACOMMONS}/bin/$(basename $0 _expect.sh).sh
 
 source $MEDIACOMMONS/bin/$(basename $REFRESH_SCRIPT .sh)_common.sh
 
+if [ -z $(which expect) ]
+then
+    cat >&2 <<EOF
+
+Expect does not appear to be installed.  You will need to install it or put the
+executable in your PATH in order to run this script.
+
+Expect: http://expect.sourceforge.net/
+
+Alternatively, you can run the refresh script without expect support:
+
+    ${REFRESH_SCRIPT} ${DATABASE_DUMPS} ${MC_FILES} ${DEV_SERVER_USERNAME}
+EOF
+
+    exit 1
+fi
+
 function usage() {
     script_name=$(basename $0)
 
@@ -55,10 +72,10 @@ echo
 RSYNC_COUNT=8
 
 # Originally had heredoc:
-# /usr/local/bin/expect<<EOF
+# expect<<EOF
 # ...but when added `interact` command it didn't work right.  Nothing was being
 # echoed from the spawned process, and everything just seemed to hang.
-/usr/local/bin/expect -c "
+expect -c "
 set timeout -1
 
 set return_signal \"${EXPECT_SIGNAL_SELECT_SITES_COMPLETED}(\\\\d+)\"
