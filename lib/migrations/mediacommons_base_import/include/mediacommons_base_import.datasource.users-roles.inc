@@ -3,34 +3,22 @@
 /**
  *  Find out if user is already in the system by its Drupal 6 user id
  */
-function user_exists_by_ouid ( $ouid ) {
-
-	if ( $ouid == 1 ) return 1 ;
-
-	$author_exist = db_query('SELECT uid FROM mediacommons_base_import_user_map u WHERE ouid = :ouid', array( ':ouid' => (int) $ouid) ) ;
-
-	if ( $author_exist->rowCount() > 0) {
-
+function user_exists_by_ouid($ouid) {
+	if ($ouid == 1) return 1;
+	$author_exist = db_query('SELECT uid FROM {mediacommons_base_import_user_map} u WHERE ouid = :ouid', array( ':ouid' => (int) $ouid) ) ;
+	if ($author_exist->rowCount() > 0) {
 		$author = $author_exist->fetchObject() ;
-
 		return $author->uid;
-
 	}
-
 	return FALSE;
-
 }
 
-function d6_user_one ( ) {
-
+function d6_user_one() {
 	$users = array();
-
 	/** Create a database connection to the source (d6) database */
 	$query = Database::getConnection('default', 'drupal6')
-
-	->select('users', 'u')
-
-	->fields('u', array(
+    ->select('users', 'u')
+ 	  ->fields('u', array(
 			'uid',
 			'name',
 			'pass',
@@ -46,7 +34,7 @@ function d6_user_one ( ) {
 			'picture',
 			'init',
 			'timezone_name'
-	)
+   	)
 	)
 	->condition('u.uid', 1);
 
@@ -149,7 +137,7 @@ function mediacommons_base_import_find_d6_user_roles ( $uid ) {
 
 function mediacommons_base_import_d7_vid_by_d6_name ( $name ) {
 
-	$vocabulary = db_query("SELECT vid FROM taxonomy_vocabulary WHERE name = :name", array ( ':name' => $name ) ) ;
+	$vocabulary = db_query("SELECT vid FROM {taxonomy_vocabulary} WHERE name = :name", array ( ':name' => $name ) ) ;
 
 	if ( $vocabulary->rowCount() ) return $vocabulary->fetchObject()->vid ;
 
@@ -174,7 +162,7 @@ function d6_users_realname ( $ouid ) {
 
 function vid_by_ovid ( $ovid ) {
 
-	$vocabulary = db_query("SELECT vid FROM mediacommons_base_import_vocabulary_map WHERE vuid = :vuid", array ( ':vuid' => $ovid ) ) ;
+	$vocabulary = db_query("SELECT vid FROM {mediacommons_base_import_vocabulary_map} WHERE vuid = :vuid", array ( ':vuid' => $ovid ) ) ;
 
 	if ( $vocabulary->rowCount() ) return  $vocabulary->fetchObject()->vid ;
 

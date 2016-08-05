@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# i don't think we are using this anymore. Check and remove
+
 echo ${0}
 
 die () {

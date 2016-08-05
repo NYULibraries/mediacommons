@@ -4,7 +4,7 @@ echo ${0}
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${TEMP_DIR}/autobuild.pid
+  rm -f ${TEMP_DIR}/autobuild.pid
   exit 1;
 }
 
@@ -26,8 +26,10 @@ MAKE_FILE=${DIR}/../mediacommons.make
 [ -f ${MAKE_FILE} ] || die ${LINENO} "test" "Unable to find ${MAKE_FILE}"
 
 # make sure the most recent changes to *.make file are in place
-rm ${MAKE_FILE}
+rm -f ${MAKE_FILE}
 
 wget https://raw.githubusercontent.com/NYULibraries/mediacommons/master/mediacommons.make -P ${DIR}/../
+
+chmod 2777 ${DIR}/../mediacommons.make
 
 exit 0

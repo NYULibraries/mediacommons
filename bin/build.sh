@@ -2,7 +2,7 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}" ;
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ;
+  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ;
   exit 1 ;
 }
 
@@ -17,7 +17,7 @@ is_drupal_online () {
     --user=1"
 
   DRUPAL_DATABASE_CONNECTION_OK="Successfully connected to the Drupal database"
-  DRUPAL_BOOTSTRAP_OK="Drupal bootstrap                :  Successful"
+  DRUPAL_BOOTSTRAP_OK="Drupal bootstrap *: *Successful"
 
   # Using $(echo $DRUSH_STATUS_COMMAND) to remove extra whitespace
   tell ${LINENO} 'is_drupal_online()' "$(echo $DRUSH_STATUS_COMMAND)"
@@ -99,7 +99,7 @@ while getopts ":e:c:m:hdlsikt" opt; do
   esac
 done
 
- # https://jira.nyu.edu/browse/DLTSVIEWER-16
+# https://jira.nyu.edu/browse/DLTSVIEWER-16
 # Our web server php is lower than version 5.4, which causes bin/drush to break.
 if [ $LEGACY_DRUSH ]
 then
@@ -118,7 +118,7 @@ fi
 # Here I need to test if the build is running and kill this process
 # or remove the pid file and keep going
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
+  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
 fi
 
 echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
@@ -159,7 +159,7 @@ if [ ! $SIMULATE ] ; then
     # build base name its a link?
     if [[ -h $BUILD_DIR/$BUILD_BASE_NAME ]]; then
       cd $BUILD_DIR
-      rm $BUILD_DIR/$BUILD_BASE_NAME
+      rm -f $BUILD_DIR/$BUILD_BASE_NAME
       ln -s $BUILD_NAME $BUILD_BASE_NAME
       cd -
     fi
@@ -274,7 +274,7 @@ if [ ! $SIMULATE ] ;
 fi ;
 
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
+  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
 fi
 
 exit 0

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# I dont think we are using this anymore
+
 die () {
   echo $1
   exit 1

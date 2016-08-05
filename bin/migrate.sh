@@ -2,7 +2,7 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${DIR}/../temp/${BUILD_BASE_NAME}.migrate.pid ;
+  rm -f ${DIR}/../temp/${BUILD_BASE_NAME}.migrate.pid;
   exit 1;
 }
 
@@ -57,7 +57,7 @@ done
 # Here I need to test if the migration is running and kill this process
 # or remove the pid file and keep going
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid ]]; then
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid;
+  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid;
 fi
 
 echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid
@@ -69,6 +69,8 @@ PROD_SHARED_DB_BASENAME=`basename $PROD_SHARED_DB_URL`
 D6_DATABASE=`echo $BUILD_BASE_NAME | sed 's/[^a-zA-Z]//g'`_d6_content
 
 D6_SHARED=`echo $BUILD_BASE_NAME | sed 's/[^a-zA-Z]//g'`_d6_shared
+
+MEDIACOMMONS_SHARED=mediacommons
 
 [ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}" ;
 
@@ -98,64 +100,26 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     DBSTRING+="'profile_values' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
     DBSTRING+="'sequences' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
     DBSTRING+="'users' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
-    DBSTRING+="'vocabulary' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
-    DBSTRING+="'term_data' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
+    # JIRA: MC-156
+    if [[ $BUILD_BASE_NAME != *"intransition"* ]] && [[ $BUILD_BASE_NAME != *"imr"* ]]
+      then
+      DBSTRING+="'vocabulary' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
+      DBSTRING+="'term_data' => '"$D6_SHARED"."$D6_SHARED_DB_PREFIX"',"
+    fi
+
     DBSTRING+="),"
     DBSTRING+="),"
     DBSTRING+=");"
-
-    # Our multisites have a shared database
-
-    # Look for Drupal 6 content database
-    if [[ -f ${PROD_CONTENT_DB_URL} ]];
-      then
-        echo "Found ${PROD_CONTENT_DB_URL}" ;
-        cp ${PROD_CONTENT_DB_URL} ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql
-      else
-        echo "${PROD_CONTENT_DB_URL} not found"
-        if [[ $PROD_CONTENT_DB_URL =~ "http" ]] ;
-          then
-            echo "CULR: ${PROD_CONTENT_DB_URL} > ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql"
-            curl -u ${CURL_USER}:${CURL_PASS} $PROD_CONTENT_DB_URL > ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql
-        fi;
-    fi;
-    # Look for Drupal 6 shared database
-    if [[ -f ${PROD_SHARED_DB_URL} ]] ;
-      then
-        echo "Found ${PROD_SHARED_DB_URL}" ;
-        cp ${PROD_SHARED_DB_URL} ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql
-      else
-        echo "${PROD_SHARED_DB_URL} not found"
-        if [[ $PROD_SHARED_DB_URL =~ "http" ]];
-          then
-            echo "CULR: ${PROD_SHARED_DB_URL} > ${TEMP_DIR}/${BUILD_BASE_NAME}.share.sql" ;
-            curl -u ${CURL_USER}:${CURL_PASS} $PROD_SHARED_DB_URL > ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql
-        fi;
-    fi;
-
-    # DB in disk; check if we can read
-    [ -r ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql ] || die ${LINENO} "test" "Not found ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql" ;
-    [ -r ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql ] || die ${LINENO} "test" "Not found ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql" ;
-
-    # do we want to force .my.cnf
-    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS -e "DROP DATABASE IF EXISTS ${D6_DATABASE}; CREATE DATABASE ${D6_DATABASE}; DROP DATABASE IF EXISTS ${D6_SHARED}; CREATE DATABASE ${D6_SHARED};"
-    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_DATABASE < ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql
-    mysql --user=$DRUPAL_SITE_DB_USER --password=$DRUPAL_SITE_DB_PASS $D6_SHARED < ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql
-
-    # Remove database files from temporary directory
-    rm ${TEMP_DIR}/$BUILD_BASE_NAME.content.sql
-
-    rm ${TEMP_DIR}/$BUILD_BASE_NAME.share.sql
-
     # make a copy of the settings file
     cp $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.${BUILD_DATE}.off
-
-    # owner or sudo can read
-    chmod 700 $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.${BUILD_DATE}.off
-
     # Append database set-up to settings.php file
     echo $DBSTRING >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
-
+    # While migrating we share databases to speed-up the migration process
+    cp  $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/unshare.settings.php
+    # note the dot after ${MEDIACOMMONS_SHARED}, this is needed to allow Drupal to
+    # get access to the share database
+    echo "define('MEDIACOMMONS_SHARED', '${MEDIACOMMONS_SHARED}.');" >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
+    cat ${DIR}/shared_fields.txt >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
     # we have what it looks like a Drupal site
     # test if we can connect to the database and login as user 1
     # `drush -d -v core-status` should return:
@@ -165,6 +129,17 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     if [[ $SITE_ONLINE =~ "Connected" ]] && [[ $SITE_ONLINE =~ "Successful" ]] ;
       then
         drush $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --environment=${ENVIRONMENT} --strict=0 --task="${MIGRATION_TASK}"
+        # Stop sharing databases
+        mv $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.shared.off
+        # Leave behind a copy of the ready-to-share settings.php file to be used 
+        # if the developer want to share databases
+        mv $BUILD_DIR/$BUILD_BASE_NAME/sites/default/unshare.settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
+        # tables we share
+        TABLES="mediacommons_base_import_vocabulary_map mediacommons_base_import_term_map taxonomy_vocabulary taxonomy_term_data taxonomy_term_hierarchy mediacommons_base_import_user_map mediacommons_base_import_role_map field_revision_field_url field_revision_field_twitter field_revision_field_title field_revision_field_subtitle field_revision_field_state field_revision_field_skype field_revision_field_profile_name field_revision_field_plan field_revision_field_phone field_revision_field_organization field_revision_field_last_name field_revision_field_first_name field_revision_field_email field_revision_field_bio field_revision_field_aim field_data_field_url field_data_field_twitter field_data_field_title field_data_field_subtitle field_data_field_state field_data_field_skype field_data_field_profile_name field_data_field_plan field_data_field_phone field_data_field_organization field_data_field_last_name field_data_field_first_name field_data_field_email field_data_field_bio field_data_field_aim cache_gravatar block_role blocked_ips shortcut_set_users realname users users_roles sessions role role_permission authmap"
+        # dump the tables
+        mysqldump ${MEDIACOMMONS_SHARED} ${TABLES} > ${TEMP_DIR}/shared.sql
+        # import data
+        mysql ${DRUPAL_DB_NAME} < ${TEMP_DIR}/shared.sql
       else
         die ${LINENO} "test" "Drupal: Unable to connect. URI: ${BASE_URL} ROOT: ${BUILD_DIR}/${BUILD_BASE_NAME}"
     fi
@@ -174,7 +149,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
 fi
 
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid ]]; then
-  rm ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid;
+  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.migrate.pid;
 fi
 
 exit 0

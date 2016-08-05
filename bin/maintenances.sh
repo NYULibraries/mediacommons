@@ -1,8 +1,9 @@
 #!/bin/bash
 
 die () {
-  echo $1
-  exit 1
+  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
+  rm -f ${TEMP_DIR}/autobuild.pid
+  exit 1;
 }
 
 containsElement () {
@@ -23,7 +24,7 @@ remove_if_symlink_does_not_link () {
   declare -a LINKS=();
   BASE=`pwd`
   # before going crazy, make sure the given path looks like a Drupal install directory
-  MATCH=`grep -c 'DRUPAL_ROOT' $1/index.php` 
+  MATCH=`grep -c 'DRUPAL_ROOT' $1/index.php`
   if [ $MATCH -gt 0 ]
     then
       # find link dir
@@ -32,22 +33,15 @@ remove_if_symlink_does_not_link () {
           LINKS=("${LINKS[@]}" "$BASE/$BUILD_NAME")
         done
         if [ $(containsElement "${LINKS[@]}" "$1") != "y" ]; then
-          rm -rf $1
+          if  [[ -O $1 ]]; 
+            then
+              echo "Removing directory ${1}"
+              rm -rf ${1}
+          else 
+            echo "Not owner. Will not try to remove directory ${1}"          
+          fi
         fi
   fi
-}
-
-disable_drupal_clean_url () {
-  if [ -d $1 ]
-    then
-      MATCH=`grep -c 'DRUPAL_ROOT' $1/index.php`   
-      if [ $MATCH -gt 0 ]
-        then
-          echo Disable clean URL for $1
-          drush vset clean_url 0 --yes --root=$1
-    fi
-  fi
-  return 1
 }
 
 export -f remove_if_symlink_does_not_link
@@ -67,26 +61,37 @@ done
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-TODAY=`date +%Y-%m-%d`
-
-CONF_FILE=$DIR/../build.conf
-
-CONF_PERM=`ls -l $CONF_FILE | awk '{print $1}'`
-
-. $CONF_FILE
-
-[ -d $BUILD_DIR ] || die "Build directory ${BUILD_DIR} does not exist"
-
-cd $BUILD_DIR
-
-# find link dir
-for BUILD_NAME in `ls -1 | xargs -l readlink`
-  do
-    disable_drupal_clean_url $BUILD_DIR/$BUILD_NAME
+while getopts ":c:e:hm" opt; do
+ case $opt in
+  c)
+    [ -f $OPTARG ] || die "Configuration file does not exist."
+    CONF_FILE=$OPTARG
+    ;;
+  h)
+   echo " "
+   echo " Usage: ./maintenances.sh"
+   echo " "
+   echo " Options:"
+   echo "   -h           Show brief help"
+   echo "   -c           Configuration file"
+   echo " "
+   exit 0
+   ;;
+  esac
 done
 
+[ $CONF_FILE ] || die ${LINENO} "test" "No configuration file provided."
+
+# load configuration file
+. $CONF_FILE
+ 
+[ -d $ROOT/builds ] || die ${LINENO} "test" "Builds directory ${ROOT}/builds does not exist"
+
+cd ${ROOT}/builds
+
 # Find and remove 1 days old directories
-find $BUILD_DIR/* -maxdepth 0 -type d -mtime +1 -exec bash -c 'remove_if_symlink_does_not_link $0' {} \;
+find ${ROOT}/builds/* -maxdepth 0 -type d -mtime +1 -exec bash -c 'remove_if_symlink_does_not_link $0' {} \;
+
+cd -
 
 exit 0
-

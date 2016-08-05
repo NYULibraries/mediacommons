@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo ${0}
-
 # Don't use me! ... well, do it if you know what you are doing.
 #
 # In theory I should work; but in practice I'm almost certain that I will
@@ -11,13 +9,13 @@ echo ${0}
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm ${TEMP_DIR}/autobuild.pid
+  rm -f ${TEMP_DIR}/autobuild.pid
   exit 1;
 }
 
 SOURCE="${BASH_SOURCE[0]}"
 
-ENVIRONMENT="local"
+ENVIRONMENT="development"
 
 # resolve $SOURCE until the file is no longer a symlink
 while [ -h "$SOURCE" ]; do
@@ -30,7 +28,7 @@ done
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-while getopts ":c:e:hum" opt; do
+while getopts ":c:e:hm" opt; do
  case $opt in
   c)
     [ -f $OPTARG ] || die "Configuration file does not exist."
@@ -51,7 +49,6 @@ while getopts ":c:e:hum" opt; do
    echo " "
    echo " Options:"
    echo "   -h           Show brief help"
-   echo "   -u           Get the latest make file and do any other task before running jobs."
    echo "   -m           Run some house cleaning before running job."
    echo " "
    exit 0
@@ -69,22 +66,28 @@ ROOT=${DIR}/..
 # Here I need to test if the autobuild is running and kill this process
 # or remove the pid file and keep going
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
-  rm ${TEMP_DIR}/autobuild.pid;
+  rm -f ${TEMP_DIR}/autobuild.pid;
 fi
 
 echo $$ > ${TEMP_DIR}/autobuild.pid
 
 # Get the latest make file and do any other task before running jobs
-if [ $UPDATE ]; then $DIR/update.sh; fi;
+$DIR/update.sh
 
 # Do some house cleaning before running job
-# if [ $MAINTENANCES ] ; then $DIR/maintenances.sh -c ${CONF_FILE} ; fi;
+$DIR/maintenances.sh -c ${ROOT}/configs/build.conf;
+
+# Build and migrate Umbrella before anything else
+$DIR/umbrella.sh -c ${ROOT}/configs/build.conf;
 
 projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
-    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -l -e ${ENVIRONMENT};
+    # -l run in legacy mode
+    # -e environment we are building
+    # -k use cookies to share databases
+    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -l -e ${ENVIRONMENT} -k;
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
@@ -94,16 +97,18 @@ for project in ${projects[*]}
         # Migrate the content
         echo "Migrate the content";
         $DIR/migrate.sh -c ${ROOT}/configs/${project}.conf;
-        # Step 1: Export database
+        # Step: Export database
         echo "Export database";
         $DIR/utilities/export_db.sh -c ${ROOT}/configs/${project}.conf;
+        echo "Set-up and clean-up others";
+        $DIR/utilities/postprocess.sh -c ${ROOT}/configs/${project}.conf;
       else
         echo ${LINENO} "build" "Fail: Build ${project}";
     fi;
 done;
 
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
-  rm ${TEMP_DIR}/autobuild.pid;
+  rm -f ${TEMP_DIR}/autobuild.pid;
 fi
 
 exit 0;

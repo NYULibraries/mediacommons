@@ -76,10 +76,35 @@ function create_spoke($old_node) {
     }
   }
 
+  // hardcoded here until I find a better solutions
+  // aof
+
+  // See: https://jira.nyu.edu/browse/MC-156
+  // this is the string that match most of the terms in
+  // the table mediacommons_base_import_term_map
+  // ALT-AC and TNE share the taxonomy so they will
+  // match 'drupal6' as the project
+  // IMR and [in]transition don't share this taxonomy_get_vocabularies
+  // and we need to map the toid using the project so that the
+  // taxonomy don't get mixed up
+  $code = 'drupal6';
+
+  $project_code = $settings['mediacommons']['project'];
+
+  if ($project_code == 'imr') {
+    $code = 'imr6';
+  }
+  else if ($project_code == 'intransition') {
+    $code = 'int6';
+  }
+
+  // end hack
+
   /** Tags */
   if (isset($old_node->field_tags)) {
     foreach ($old_node->field_tags as $tag_id) {
-      $tag = mediacommons_base_import_find_term_id($tag_id);
+      // See: https://jira.nyu.edu/browse/MC-156
+      $tag = mediacommons_base_import_find_term_id($tag_id, $code);
       if ($tag) {
         $new_node->field_taxonomy[$new_node->language][] = array('tid' => $tag);
       }

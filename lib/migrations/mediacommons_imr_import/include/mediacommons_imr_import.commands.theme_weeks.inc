@@ -70,21 +70,21 @@ function migrate_theme_week ( $old_node ) {
    * and add it to the D7 contributors field
    */
   foreach ( $node['field_spokes'] as $onid ) $node['field_contributors'][] = ouid_by_onid ( $onid ) ;
-  
+
   $dates = theme_week_dates ( $old_node->title ) ;
-  
+
   /**
    * Subtract the dates from the title of the Theme Week
    * If $dates is set proceed, no good comes from setting dates with wrong values
    */
   if ( $dates ) {
-  	
+
   	if ( isset ( $dates['start'] ) && $start = strtotime ( $dates['start'] ) ) $node['field_period_1'] = $start ;
-  	
+
     if ( isset ( $dates['end'] ) && $end = strtotime ( $dates['end'] ) ) $node['field_period_2'] = $end ;
 
   }
-  
+
   return create_hub ( $node ) ;
 
 }

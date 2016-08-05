@@ -2,7 +2,7 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.44"
+projects[drupal][version] = "7.50"
 
 ; Modules
 
@@ -22,7 +22,7 @@ projects[menu_token][version] = "1.0-beta7"
 projects[references][version] = "2.1"
 projects[nodequeue][version] = "2.1"
 projects[pathauto][version] = "1.3"
-projects[realname][version] = "1.2"
+projects[realname][version] = "1.3"
 projects[strongarm][version] = "2.0"
 projects[token][version] = "1.6"
 projects[views][version] = "3.14"
@@ -38,8 +38,6 @@ projects[manualcrop][version] = "1.x-dev"
 projects[uuid][version] = "1.0-beta1"
 projects[better_exposed_filters][version] = "3.2"
 projects[viewfield][version] = "2.0"
-projects[node_export][version] = "3.x-dev"
-projects[multiblock][version] = "1.4"
 
 ; in-house modules
 projects[mediacommons_modules][type] = "module"
@@ -73,7 +71,7 @@ projects[mediacommons_admin][type] = "theme"
 ; Libraries
 
 libraries[simplehtmldom][download][type] = "get"
-libraries[simplehtmldom][download][url] = "http://downloads.sourceforge.net/project/simplehtmldom/simplehtmldom/1.5/simplehtmldom_1_5.zip"
+libraries[simplehtmldom][download][url] = "http://dlib.nyu.edu/files/simplehtmldom.zip"
 libraries[simplehtmldom][directory_name] = "simplehtmldom"
 libraries[simplehtmldom][type] = "library"
 
