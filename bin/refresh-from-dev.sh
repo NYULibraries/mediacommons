@@ -69,6 +69,8 @@ function copy_drupal_code() {
         old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
         settings_file=$( find . -name settings.php )
         sed -i.old_db_password.bak "s/${old_db_password}/${new_db_password}/" $settings_file
+
+        cd ../..
     done
 }
 
