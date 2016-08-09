@@ -31,6 +31,21 @@ declare -a selected_sites=("${ALL_SITES[@]}")
 # Sites that have not yet been selected to display in the selection menu.
 declare -a remaining_sites_menu_options=("${ALL_SITES[@]}")
 
+# We need a SHA checksum program for password creation.
+# Mac OS X and Centos 6 and 7 all appear to have one installed by default.
+SHASUM=$(which sha256sum)
+
+if [ -z $SHASUM ]
+then
+    SHASUM=$(which shasum)
+fi
+
+if [ -z $SHASUM ]
+then
+    echo >&2 'You must have either `sha256sum` or `shasum` in your PATH.'
+    exit 1
+fi
+
 function validate_args() {
 
     if [ ! -d "${DATABASE_DUMPS}" ]

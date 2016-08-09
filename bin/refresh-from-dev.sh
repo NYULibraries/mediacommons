@@ -38,6 +38,13 @@ examples:
 EOF
 }
 
+function generate_new_password() {
+    # Source: "10 Ways to Generate a Random Password from the Command Line"
+    #     http://www.howtogeek.com/howto/30184/10-ways-to-generate-a-random-password-from-the-command-line/
+    # Adding some non-alphanumeric characters at the end for extra safety.
+    echo "$( date +%s | $SHASUM | base64 | head -c 32 ),,,"
+}
+
 function copy_drupal_code() {
     cd $MEDIACOMMONS
 
