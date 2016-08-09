@@ -88,7 +88,7 @@ function fix_symlinks() {
 
 function change_tne_database_name() {
     cd $MEDIACOMMONS/builds/
-    sed -i.bak 's/d7_tne/tne/' tne/sites/default/settings.php 
+    sed -i.tne_database_name.bak 's/d7_tne/tne/' tne/sites/default/settings.php
 }
 
 function copy_files() {
