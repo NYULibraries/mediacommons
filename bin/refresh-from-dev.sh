@@ -38,6 +38,12 @@ examples:
 EOF
 }
 
+function generate_new_password() {
+    # Source: "10 Ways to Generate a Random Password from the Command Line"
+    #     http://www.howtogeek.com/howto/30184/10-ways-to-generate-a-random-password-from-the-command-line/
+    echo "$( date +%s | $SHASUM | base64 | head -c 32 )"
+}
+
 function copy_drupal_code() {
     cd $MEDIACOMMONS
 
@@ -55,6 +61,18 @@ function copy_drupal_code() {
         #       echo >&2 "rsync of ${site} failed."
         #       exit 1
         #   fi
+    done
+}
+
+function change_database_password_in_all_drupal_settings_files() {
+    local new_db_password=$1
+
+    for site in "${ALL_SITES[@]}"; do
+        cd $MEDIACOMMONS/builds/${site}/
+
+        old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
+        settings_file=$( find . -name settings.php )
+        sed -i.old_db_password.bak "s/${old_db_password}/${new_db_password}/" $settings_file
     done
 }
 
@@ -81,7 +99,7 @@ function fix_symlinks() {
 
 function change_tne_database_name() {
     cd $MEDIACOMMONS/builds/
-    sed -i.bak 's/d7_tne/tne/' tne/sites/default/settings.php 
+    sed -i.tne_database_name.bak 's/d7_tne/tne/' tne/sites/default/settings.php
 }
 
 function copy_files() {
@@ -202,6 +220,12 @@ select_sites
 set -x
 
 copy_drupal_code
+
+# Generate a new password to replace the one from dev.  At the moment, all sites
+# use the same database credentials.  If we refresh one, all sites `settings.php`
+# files need the new password, even if they were not chosen for the refresh.
+# That's why we don't do this in `copy_drupal_code`.
+change_database_password_in_all_drupal_settings_files "$(generate_new_password)"
 
 fix_symlinks
 
