@@ -46,6 +46,8 @@ function generate_new_password() {
 }
 
 function copy_drupal_code() {
+    local new_db_password=$1
+
     cd $MEDIACOMMONS
 
     for site in "${selected_sites[@]}"; do
@@ -62,6 +64,12 @@ function copy_drupal_code() {
         #       echo >&2 "rsync of ${site} failed."
         #       exit 1
         #   fi
+
+        # Replace existing db password in settings.php
+        cd builds/${site}/
+        old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
+        settings_file=$( find . -name settings.php )
+        sed -i.old_db_password.bak "s/${old_db_password}/${new_db_password}/" $settings_file
     done
 }
 
@@ -208,7 +216,9 @@ select_sites
 
 set -x
 
-copy_drupal_code
+new_db_password="$(generate_new_password)"
+
+copy_drupal_code "${new_db_password}"
 
 fix_symlinks
 
