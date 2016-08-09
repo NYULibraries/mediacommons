@@ -45,8 +45,6 @@ function generate_new_password() {
 }
 
 function copy_drupal_code() {
-    local new_db_password=$1
-
     cd $MEDIACOMMONS
 
     for site in "${selected_sites[@]}"; do
@@ -63,14 +61,18 @@ function copy_drupal_code() {
         #       echo >&2 "rsync of ${site} failed."
         #       exit 1
         #   fi
+    done
+}
 
-        # Replace existing db password in settings.php
-        cd builds/${site}/
+function change_database_password_in_all_drupal_settings_files() {
+    local new_db_password=$1
+
+    for site in "${ALL_SITES[@]}"; do
+        cd $MEDIACOMMONS/builds/${site}/
+
         old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
         settings_file=$( find . -name settings.php )
         sed -i.old_db_password.bak "s/${old_db_password}/${new_db_password}/" $settings_file
-
-        cd ../..
     done
 }
 
@@ -217,9 +219,13 @@ select_sites
 
 set -x
 
-new_db_password="$(generate_new_password)"
+copy_drupal_code
 
-copy_drupal_code "${new_db_password}"
+# Generate a new password to replace the one from dev.  At the moment, all sites
+# use the same database credentials.  If we refresh one, all sites `settings.php`
+# files need the new password, even if they were not chosen for the refresh.
+# That's why we don't do this in `copy_drupal_code`.
+change_database_password_in_all_drupal_settings_files "$(generate_new_password)"
 
 fix_symlinks
 
