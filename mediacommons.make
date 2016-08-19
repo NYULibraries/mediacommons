@@ -38,6 +38,8 @@ projects[manualcrop][version] = "1.x-dev"
 projects[uuid][version] = "1.0-beta1"
 projects[better_exposed_filters][version] = "3.2"
 projects[viewfield][version] = "2.0"
+projects[admin_views][version] = "1.6"
+projects[views_bulk_operations][version] = "3.3"
 
 ; in-house modules
 projects[mediacommons_modules][type] = "module"
