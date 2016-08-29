@@ -46,12 +46,13 @@ projects[views_bulk_operations][version] = "3.3"
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
 projects[mediacommons_modules][download][url] = "https://github.com/NYULibraries/mediacommons_modules.git"
-
+projects[mediacommons_modules][download][branch] = "develop"
 ; Profiles
 
 projects[mediacommons_profile][type] = "profile"
 projects[mediacommons_profile][download][type] = "git"
 projects[mediacommons_profile][download][url] = "https://github.com/NYULibraries/mediacommons_profile.git"
+projects[mediacommons_profile][download][branch] = "develop"
 
 projects[mcumb_profile][type] = "profile"
 projects[mcumb_profile][download][type] = "git"
@@ -66,6 +67,7 @@ projects[zen][version] = "5.6"
 projects[mediacommons][download][type] = "git"
 projects[mediacommons][download][url] = "https://github.com/NYULibraries/mediacommons_theme"
 projects[mediacommons][type] = "theme"
+projects[mediacommons][download][branch] = "develop"
 
 projects[mediacommons_admin][download][type] = "git"
 projects[mediacommons_admin][download][url] = "https://github.com/NYULibraries/mediacommons_admin.git"
