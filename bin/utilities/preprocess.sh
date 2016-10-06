@@ -72,6 +72,10 @@ else
   chmod 777 ${DRUPAL_FILES_DIR}
   rm -rf ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
   ln -s ${DRUPAL_FILES_DIR} ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
+  if [ ! -d ${DRUPAL_FILES_DIR}/pictures ]; then
+    mkdir ${DRUPAL_FILES_DIR}/pictures;
+  fi
+
 fi
 
 exit 0
