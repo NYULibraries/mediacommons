@@ -70,6 +70,7 @@ D6_DATABASE=`echo $BUILD_BASE_NAME | sed 's/[^a-zA-Z]//g'`_d6_content
 
 D6_SHARED=`echo $BUILD_BASE_NAME | sed 's/[^a-zA-Z]//g'`_d6_shared
 
+# not sure about this
 MEDIACOMMONS_SHARED=mediacommons
 
 [ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}" ;
@@ -125,13 +126,13 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     # `drush -d -v core-status` should return:
     #   - Successfully connected to the Drupal database
     #   - Successfully logged into Drupal
-    SITE_ONLINE=`drush -d -v core-status --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1`
-    if [[ $SITE_ONLINE =~ "Connected" ]] && [[ $SITE_ONLINE =~ "Successful" ]] ;
+    drush -d -v core-status --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1
+    if [ $? -eq 0 ];
       then
         drush $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --environment=${ENVIRONMENT} --strict=0 --task="${MIGRATION_TASK}"
         # Stop sharing databases
         mv $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.shared.off
-        # Leave behind a copy of the ready-to-share settings.php file to be used 
+        # Leave behind a copy of the ready-to-share settings.php file to be used
         # if the developer want to share databases
         mv $BUILD_DIR/$BUILD_BASE_NAME/sites/default/unshare.settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
         # tables we share

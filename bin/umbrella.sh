@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# if anything in this script fail; FAIL big! WE MUST STOP any other 
+# if anything in this script fail; FAIL big! WE MUST STOP any other
 # process related to autobuild.sh.
 
 die () {
@@ -33,53 +33,53 @@ if [ ! $SKIP ];
       then
         # MediaCommons share tables (user tables and others)
         # we use the same database for each site later on
-        # to solve some issues with colliding ids (IMR and 
+        # to solve some issues with colliding ids (IMR and
         # [in]T taxonomy) we map them by requesting MediaCommons
         # Umbrela to be the first migrated
         echo "Import shared database"
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} altac_d6_shared < ${DBS}/mcshared.sql
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} fieldguide_d6_shared < ${DBS}/mcshared.sql
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} imr_d6_shared < ${DBS}/mcshared.sql
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} intransition_d6_shared < ${DBS}/mcshared.sql
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} mediacommons_d6_shared < ${DBS}/mcshared.sql
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} tne_d6_shared < ${DBS}/mcshared.sql
+        mysql altac_d6_shared < ${DBS}/mcshared.sql
+        mysql fieldguide_d6_shared < ${DBS}/mcshared.sql
+        mysql imr_d6_shared < ${DBS}/mcshared.sql
+        mysql intransition_d6_shared < ${DBS}/mcshared.sql
+        mysql mediacommons_d6_shared < ${DBS}/mcshared.sql
+        mysql tne_d6_shared < ${DBS}/mcshared.sql
       else
         die ${LINENO} "test" "Unable to read shared database"
     fi
     if [ -r ${DBS}/mediacommons.sql ]
       then
         echo "Import Fieldguide database"
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} fieldguide_d6_content < ${DBS}/mediacommons.sql
-        echo "Import MediaCommons database"        
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} mediacommons_d6_content < ${DBS}/mediacommons.sql
+        mysql fieldguide_d6_content < ${DBS}/mediacommons.sql
+        echo "Import MediaCommons database"
+        mysql mediacommons_d6_content < ${DBS}/mediacommons.sql
       else
         die ${LINENO} "test" "Unable to read Mediacommons content database"
     fi
     if [ -r ${DBS}/alt-ac.sql ]
       then
         echo "Import ALT-AC database"
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} altac_d6_content < ${DBS}/alt-ac.sql
+        mysql altac_d6_content < ${DBS}/alt-ac.sql
       else
         die ${LINENO} "test" "Unable to read ALT-AC database"
     fi
     if [ -r ${DBS}/imr.sql ]
       then
         echo "Import In Media Res database"
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} imr_d6_content < ${DBS}/imr.sql
+        mysql imr_d6_content < ${DBS}/imr.sql
       else
         die ${LINENO} "test" "Unable to read In Media Res database"
     fi
     if [ -r ${DBS}/intransition.sql ]
       then
         echo "Import [in]Transition database"
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} intransition_d6_content <${DBS}/intransition.sql
+        mysql intransition_d6_content <${DBS}/intransition.sql
       else
         die ${LINENO} "test" "Unable to read [in]Transition database"
     fi
     if [ -r ${DBS}/intransition.sql ]
       then
         echo "Import The New Everyday database"
-        mysql -u ${SITE_DB_USER} -p${DB_PASS} tne_d6_content < ${DBS}/tne.sql
+        mysql tne_d6_content < ${DBS}/tne.sql
       else
         die ${LINENO} "test" "Unable to read [in]Transition database"
     fi
@@ -92,6 +92,7 @@ fi
 . ${ROOT}/configs/mediacommons.conf
 
 ${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${ROOT}/mediacommons.make  -k -l -e ${ENVIRONMENT};
+
 if [ $? -eq 0 ];
   then
     echo "Successful: Build MediaCommons Umbrella";
@@ -112,8 +113,8 @@ if [ $? -eq 0 ];
     ${ROOT}/bin/migrate.sh -c ${ROOT}/configs/mediacommons.conf;
     # Export database
     ${ROOT}/bin/utilities/export_db.sh -c ${ROOT}/configs/mediacommons.conf;
-    echo "Set-up and clean-up others";        
-    ${ROOT}/bin/utilities/postprocess.sh -c ${ROOT}/configs/mediacommons.conf;         
+    echo "Set-up and clean-up others";
+    ${ROOT}/bin/utilities/postprocess.sh -c ${ROOT}/configs/mediacommons.conf;
   else
    die ${LINENO} "test" "build" "Fail: Unable to build";
 fi;

@@ -4,21 +4,9 @@ function init() {
   $commands = array (
     array(
       'label' => t('Migrate site'),
-      'callback' => array (
-        /**
-         * We no longer locally run the tasks:
-         *   - mediacommons_base_import_generate_vocabulary
-         *   - mediacommons_base_import_generate_terms
-         *         
-         * Terms are migrated and dealt with at the Umbrealla site
-         *
-         * @TODO: add a task to test if we can reach Umbrella?
-         *
-         */
-      	'mediacommons_base_import_map_roles',
-      	'mediacommons_base_import_prepare_taxonomy_fields',
-      	'mediacommons_base_import_download_files', // download files that are managed by Drupal
-      	//'mediacommons_base_import_generate_all_users',
+      'callback' => array(
+        'register_users_images',
+      	'download_files', // download files that are managed by Drupal
       	'migrate_pages',
         'mediacommons_imr_import_MC151', // See: https://jira.nyu.edu/browse/MC-151
         'migrate_posts',

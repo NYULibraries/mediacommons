@@ -1,9 +1,7 @@
 <?php
 
-mediacommons_base_import_d6_configured () ;
-
 /** Return configured production URL */
-function umbrella_production_url ( ) {
+function umbrella_production_url() {
 
 	global $settings ;
 
@@ -18,12 +16,12 @@ function umbrella_production_url ( ) {
 
 }
 
-function mediacommons_base_import_get_umbrella_production_url ( ) {
-	return umbrella_production_url ( ) ;
+function mediacommons_base_import_get_umbrella_production_url() {
+	return umbrella_production_url();
 }
 
 /** Return configured production URL */
-function mediacommons_base_import_get_production_url ( ) {
+function mediacommons_base_import_get_production_url() {
 
   global $settings ;
 

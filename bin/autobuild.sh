@@ -13,20 +13,7 @@ die () {
   exit 1;
 }
 
-SOURCE="${BASH_SOURCE[0]}"
-
 ENVIRONMENT="development"
-
-# resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve it relative to the path where
-  # the symlink file was located
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 while getopts ":c:e:hm" opt; do
  case $opt in
@@ -56,8 +43,6 @@ while getopts ":c:e:hm" opt; do
   esac
 done
 
-ROOT=${DIR}/..
-
 [ $CONF_FILE ] || die ${LINENO} "test" "No configuration file provided."
 
 # load configuration file
@@ -72,13 +57,13 @@ fi
 echo $$ > ${TEMP_DIR}/autobuild.pid
 
 # Get the latest make file and do any other task before running jobs
-$DIR/update.sh
+${BUILD_APP_ROOT}/bin/update.sh
 
 # Do some house cleaning before running job
-$DIR/maintenances.sh -c ${ROOT}/configs/build.conf;
+# ${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 # Build and migrate Umbrella before anything else
-$DIR/umbrella.sh -c ${ROOT}/configs/build.conf;
+# ${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 projects=(${PROJECTS})
 
@@ -87,21 +72,26 @@ for project in ${projects[*]}
     # -l run in legacy mode
     # -e environment we are building
     # -k use cookies to share databases
-    $DIR/build.sh -c ${ROOT}/configs/${project}.conf -m ${ROOT}/mediacommons.make -l -e ${ENVIRONMENT} -k;
+    ${BUILD_APP_ROOT}/bin/build.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf -m ${BUILD_APP_ROOT}/mediacommons.make -l -e ${ENVIRONMENT} -k;
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
+        # copy users images directory
+        if [ -d "$BUILD_APP_ROOT/lib/files/$project/pictures" ]; then
+          rm -f ${BUILD_APP_ROOT}/lib/files/${project}/pictures;
+        fi
+        cp -r ${BUILD_APP_ROOT}/lib/files/mediacommons/pictures ${BUILD_APP_ROOT}/lib/files/${project}/pictures
         # Run preprocess task
         echo "Run preprocess task";
-        $DIR/utilities/preprocess.sh -c ${ROOT}/configs/${project}.conf;
+        ${BUILD_APP_ROOT}/bin/utilities/preprocess.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
         # Migrate the content
         echo "Migrate the content";
-        $DIR/migrate.sh -c ${ROOT}/configs/${project}.conf;
+        ${BUILD_APP_ROOT}/bin/migrate.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
         # Step: Export database
         echo "Export database";
-        $DIR/utilities/export_db.sh -c ${ROOT}/configs/${project}.conf;
+        ${BUILD_APP_ROOT}/bin/utilities/export_db.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
         echo "Set-up and clean-up others";
-        $DIR/utilities/postprocess.sh -c ${ROOT}/configs/${project}.conf;
+        ${BUILD_APP_ROOT}/bin/utilities/postprocess.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
       else
         echo ${LINENO} "build" "Fail: Build ${project}";
     fi;

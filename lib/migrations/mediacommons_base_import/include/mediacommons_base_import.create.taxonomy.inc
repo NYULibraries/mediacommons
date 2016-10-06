@@ -1,8 +1,7 @@
 <?php
 
-function mediacommons_base_import_generate_vocabulary () {
-
-  foreach ( mediacommons_base_import_d6_vocabulary_list () as $record ) {
+function import_vocabulary() {
+  foreach (mediacommons_base_import_d6_vocabulary_list() as $record) {
   	$vid = vid_by_ovid ( $record->vid ) ;
   	/** vocabulary has mapping ? */
   	if ( ! $vid ) {
@@ -19,23 +18,18 @@ function mediacommons_base_import_generate_vocabulary () {
   	  }
     }
   }
+
 }
 
-function mediacommons_base_import_generate_terms() {
-
+function import_terms() {
   /** Just in case */
-  mediacommons_base_import_generate_vocabulary();
-
+  import_vocabulary();
   $vocabulary_map = db_query("SELECT * FROM {mediacommons_base_import_vocabulary_map}");
-
   $terms_d6 = mediacommons_base_import_d6_term_list();
-
   $vocabularies = array();
-
   foreach ($vocabulary_map as $vocabulary) {
     $vocabularies[$vocabulary->vuid] = $vocabulary->vid;
   }
-
   foreach ($terms_d6 as $term) {
     if (isset($vocabularies[$term->vid])) {
       $tid = db_query("SELECT tid FROM {mediacommons_base_import_term_map} WHERE toid = :toid", array('toid' => $term->tid));
@@ -45,7 +39,7 @@ function mediacommons_base_import_generate_terms() {
 }
 
 /** Create a taxonomy term and return the tid */
-function mediacommons_base_import_create_taxonomy_term ( $term ) {
+function mediacommons_base_import_create_taxonomy_term($term) {
   $new = new stdClass();
   $vocabulary = mediacommons_base_import_find_vocabulary($term->vid);
   $new->vid = $vocabulary->vid;
@@ -53,20 +47,15 @@ function mediacommons_base_import_create_taxonomy_term ( $term ) {
   $new->description = $term->description;
   $new->weight = $term->weight;
   $new->parent = (int)$term->parent;
-
-  if ( taxonomy_term_save($new) ) {
-
+  if (taxonomy_term_save($new)) {
     db_insert('mediacommons_base_import_term_map')
       ->fields(array(
         'toid' => $term->tid,
         'tid' => $new->tid,
       )
     )->execute();
-
-    drush_log ( dt('Term @term saved!', array ( '@term' => $new->name ) ) , 'ok' ) ;
-
+    drush_log(dt('Term @term saved!', array('@term' => $new->name)), 'ok');
     return $new;
-
   }
 }
 

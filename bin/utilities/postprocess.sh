@@ -11,7 +11,7 @@ die () {
 while getopts ":c:h" opt; do
  case $opt in
   c)
-   [ -f $OPTARG ] || die "Configuration file does not exist." 
+   [ -f $OPTARG ] || die "Configuration file does not exist."
    CONF_FILE=$OPTARG
    ;;
   h)
@@ -21,7 +21,7 @@ while getopts ":c:h" opt; do
    echo " Options:"
    echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
    echo "   -h           Show brief help"
-   echo " "  
+   echo " "
    exit 0
    ;;
   esac
@@ -33,16 +33,12 @@ done
 # load configuration file
 . $CONF_FILE
 
-DIR=`dirname $0`
-
-CURRENT_PATH=`readlink -f ${DIR}`
-
 if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php ]]; then
   # check if this directory looks like Drupal 7
   MATCH=`grep -c 'DRUPAL_ROOT' ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php`
   if [ $MATCH -gt 0 ]; then
     # share cookie
-    cat ${CURRENT_PATH}/no_cookies.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+    cat ${BUILD_APP_ROOT}/bin/utilities/no_cookies.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
   fi
 fi
 

@@ -1,31 +1,43 @@
 <?php
 
-function mediacommons_base_import_download_file ( $url ) {
+function download_user_picture($url) {
+	$wrapper = file_stream_wrapper_get_instance_by_uri('public://');
+	$file_data = drupal_http_request($url);
+	$filepath = pathinfo($url);
+	$destination_file = 'public://pictures/' . $filepath['basename'];
+	if ($file_data) {
+		if ($file_data->code == 200) {
+			return file_save_data($file_data->data, $destination_file, FILE_EXISTS_REPLACE);
+		}
+	}
+}
 
-	if ( $wrapper = file_stream_wrapper_get_instance_by_uri( 'public://' ) ) $destination_dir = $wrapper->realpath() ;
+function mediacommons_base_import_download_file($url) {
 
-	else return drush_log ( 'Unable to find destination directory.', 'error' ) ;
+	$wrapper = file_stream_wrapper_get_instance_by_uri('public://');
 
-	$file_data = drupal_http_request ( $url ) ;
+	if ($wrapper) {
+		$destination_dir = $wrapper->realpath();
+	}
+	else {
+		return drush_log('Unable to find destination directory.', 'error');
+	}
 
-	$filepath = pathinfo ( $url ) ;
+	$file_data = drupal_http_request($url);
 
-	if ( $pathinfo['extension'] ) $filename = $file->filename ;
+	$filepath = pathinfo($url);
 
-	/** because of some idiot */
-	else $filename = basename ( $file->filepath ) ;
+	$destination_file = 'public://' . $filepath['basename'];
 
-	$destination_file = $destination_dir . '/' . $filename ;
-
-	if ( $file_data ) {
-		if ( $file_data->code == 200 ) {
-			return file_save_data ( $file_data->data, 'public://' . $filepath['basename'] ) ;
+	if ($file_data) {
+		if ($file_data->code == 200) {
+			return file_save_data($file_data->data, $destination_file, FILE_EXISTS_REPLACE);
 		}
 	}
 
 }
 
-function mediacommons_base_import_download_files ( ) {
+function download_files() {
 
 	global $settings;
 
@@ -213,4 +225,3 @@ function download_image_attach_files ( ) {
 	}
 
 }
-

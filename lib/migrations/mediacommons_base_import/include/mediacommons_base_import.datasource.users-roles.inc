@@ -55,15 +55,11 @@ function d6_user_one() {
 }
 
 function d6_users () {
-
 	$users = array () ;
-
 	/** Create a database connection to the source (d6) database */
 	$query = Database::getConnection('default', 'drupal6')
-
-	->select('users', 'u')
-
-	->fields('u', array (
+	  ->select('users', 'u')
+	  ->fields('u', array (
 			'uid',
 			'name',
 			'pass',
@@ -82,19 +78,14 @@ function d6_users () {
 	  )
 	)
 	->condition('u.uid', 1, '>');
-
 	$query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
-
-	$query->groupBy('uid') ;
-
+	$query->groupBy('uid');
 	$query->addExpression("GROUP_CONCAT(DISTINCT ur.rid SEPARATOR ',')", 'roles');
-
 	$results = $query->execute();
-
-	foreach ( $results as $result ) $users[$result->uid] = $result ;
-
+	foreach ($results as $result) {
+	  $users[$result->uid] = $result;
+	}
 	return $users;
-
 }
 
 /** Roles */

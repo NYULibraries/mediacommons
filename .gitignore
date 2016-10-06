@@ -13,12 +13,15 @@ settings.json
 !default.project.conf
 !default.migrations.conf
 !default.build.conf
-.out
+
+*.out
+*.log
 
 lib/modules/*
 lib/themes/*
 lib/profiles/*
 lib/scripts/*
+lib/files/*
 
 !lib/modules/README
 !lib/themes/README

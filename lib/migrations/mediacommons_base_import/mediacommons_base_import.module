@@ -37,11 +37,6 @@
  *  ),
  * );
  */
-function mediacommons_base_import_d6_configured () {
-  global $databases;
-  if ( isset ( $databases['drupal6'] ) ) return TRUE ;
-  die ( drush_set_error ( dt ( 'Unable to find Drupal 6 database.' ) ) ) ;
-}
 
 function mediacommons_base_import_get_content ( $URL ) {
    $ch = curl_init();
@@ -82,11 +77,13 @@ function mediacommons_base_import_prepare ( $caller ) {
 
   include_once __DIR__ . '/mediacommons_base_import.install';
 
-  foreach ( file_scan_directory ( __DIR__ . '/include/', '/.*\.inc$/' ) as $include ) include_once ( $include->uri ) ;
+  foreach (file_scan_directory(__DIR__ . '/include/', '/.*\.inc$/') as $include) {
+    include_once($include->uri);
+  }
 
-  $schemas = mediacommons_base_import_schema () ;
+  $schemas = mediacommons_base_import_schema();
 
-  $settings = mediacommons_base_import_settings ( $caller );
+  $settings = mediacommons_base_import_settings($caller);
 
   if ( isset ( $settings['dependencies']) ) {
     foreach ( $settings['dependencies'] as $dependency ) {
@@ -213,12 +210,20 @@ function mediacommons_base_import_show_options ( array $commands = array() ) {
   mediacommons_base_import_run(trim($line), $commands);
 }
 
-function mediacommons_base_import_init ( array $options = array() ) {
+function mediacommons_base_import_init(array $options = array()) {
 
   // We need extra memory for GD
-  ini_set("memory_limit", "512MM");
+  // ini_set("memory_limit", "512MM");
 
-  mediacommons_base_import_d6_configured () ;
+  // http://docs.drush.org/en/master/bootstrap/
+  // http://api.drush.org/api/drush/includes%21bootstrap.inc/constant/DRUSH_BOOTSTRAP_DRUPAL_FULL/7.x
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+
+  global $databases;
+
+  if (!isset($databases['drupal6'])) {
+    die(drush_set_error(dt('Unable to find Drupal 6 database.')));
+  }
 
   $trace = debug_backtrace();
 
@@ -233,13 +238,13 @@ function mediacommons_base_import_init ( array $options = array() ) {
   // Add exit command to end of the commands options
   $commands[] = array( 'label' => t('Exit'), 'callback' => array( 'drush_exit' ) ) ;
 
-  mediacommons_base_import_prepare ( $caller ) ;
+  mediacommons_base_import_prepare($caller);
 
   $mediacommons_migration_ran = variable_get('mediacommons_migration_ran', NULL) ;
 
-  if ( ! $mediacommons_migration_ran ) variable_set('mediacommons_migration_ran', 1) ;
+  if (!$mediacommons_migration_ran) variable_set('mediacommons_migration_ran', 1);
 
-  if ( $task ) {
+  if ($task) {
 
     foreach ( $commands as $key => $command ) if ( $commands[$key]['label'] == $task ) $action = $key ;
 
@@ -252,11 +257,9 @@ function mediacommons_base_import_init ( array $options = array() ) {
 
 }
 
-$trace = debug_backtrace ( ) ;
+$trace = debug_backtrace();
 
-$caller = ( isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__ ) ;
+$caller = (isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__);
 
-/**
- * This script is meant to be "extended", not to be used by itself.
- */
-if ( preg_match('/core.drush.inc/', $caller) ) drush_log( "Mama told me never talk to strangers!", 'error' );
+/** This script is meant to be "extended", not to be used by itself. */
+if (preg_match('/core.drush.inc/', $caller)) drush_log('Mama told me never talk to strangers', 'error');

@@ -33,12 +33,12 @@ remove_if_symlink_does_not_link () {
           LINKS=("${LINKS[@]}" "$BASE/$BUILD_NAME")
         done
         if [ $(containsElement "${LINKS[@]}" "$1") != "y" ]; then
-          if  [[ -O $1 ]]; 
+          if  [[ -O $1 ]];
             then
               echo "Removing directory ${1}"
               rm -rf ${1}
-          else 
-            echo "Not owner. Will not try to remove directory ${1}"          
+          else
+            echo "Not owner. Will not try to remove directory ${1}"
           fi
         fi
   fi
@@ -51,7 +51,7 @@ export -f containsElement
 SOURCE="${BASH_SOURCE[0]}"
 
 # resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do 
+while [ -h "$SOURCE" ]; do
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
   # if $SOURCE was a relative symlink, we need to resolve it relative to the path where
@@ -84,7 +84,7 @@ done
 
 # load configuration file
 . $CONF_FILE
- 
+
 [ -d $ROOT/builds ] || die ${LINENO} "test" "Builds directory ${ROOT}/builds does not exist"
 
 cd ${ROOT}/builds

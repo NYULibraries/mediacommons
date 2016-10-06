@@ -39,7 +39,6 @@ function mediacommons_imr_import_MC151() {
       'mlid'       => 0,
     ),
   );
-
   // Validate and transform the item, so it conforms with Drupal standards.
   menu_edit_item_validate(array(), $form_state);
   // Save the item to database.

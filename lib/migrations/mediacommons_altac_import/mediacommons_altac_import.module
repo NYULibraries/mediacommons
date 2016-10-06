@@ -4,9 +4,9 @@ function init () {
   $commands = array (
     array (
       'label' => t('Migrate site'),
-      'callback' => array (
-      	'mediacommons_base_import_prepare_taxonomy_fields',
-      	'mediacommons_base_import_download_files', // download files that are managed by Drupal
+      'callback' => array(
+        'register_users_images',
+      	'download_files', // download files that are managed by Drupal
       	'download_image_attach_files', // download all image attach files that are managed by Drupal
       	'migrate_pages',
       	'migrate_contributed_pieces',

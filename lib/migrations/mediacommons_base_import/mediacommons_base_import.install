@@ -2,32 +2,40 @@
 
 /** Implements hook_schema(). */
 function mediacommons_base_import_schema() {
-
   $schema = array();
-
   $schema['mediacommons_base_import_user_map'] = array(
-      'description' => 'Stores a record of node imports.',
-      'fields' => array(
-          'ouid' => array(
-              'description' => 'The primary identifier for the Drupal 6 node',
-              'type' => 'serial',
-              'unsigned' => TRUE,
-              'not null' => TRUE,
-          ),
-          'uid' => array(
-              'description' => 'The primary identifier for the node.',
-              'type' => 'int',
-              'unsigned' => TRUE,
-              'not null' => TRUE,
-              'default' => 0,
-          ),
+    'description' => 'Stores a record of node imports.',
+    'fields' => array(
+      'ouid' => array(
+        'description' => 'The primary identifier for the Drupal 6 node',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
       ),
-      'indexes' => array(
-          'uid' => array('uid'),
+      'uid' => array(
+        'description' => 'The primary identifier for the node.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
       ),
-      'primary key' => array('ouid'),
+      'fid' => array(
+        'description' => 'The primary identifier for the file.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'filename' => array(
+        'type' => 'varchar',
+        'length' => 255
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+    'primary key' => array('ouid'),
   );
-
   $schema['mediacommons_base_import_comments_map'] = array(
       'description' => 'Stores a record of imported comments.',
       'fields' => array(
@@ -50,7 +58,6 @@ function mediacommons_base_import_schema() {
       ),
       'primary key' => array('ocid'),
   );
-
   $schema['mediacommons_base_import_role_map'] = array(
       'description' => 'Stores a record of role imports.',
       'fields' => array(
@@ -73,7 +80,6 @@ function mediacommons_base_import_schema() {
       ),
       'primary key' => array('orid'),
   );
-
   $schema['mediacommons_base_import_vocabulary_map'] = array(
       'description' => 'Stores a record of imported vocabularies.',
       'fields' => array(
@@ -96,7 +102,6 @@ function mediacommons_base_import_schema() {
       ),
       'primary key' => array('vuid'),
   );
-
   $schema['mediacommons_base_import_term_map'] = array(
       'description' => 'Stores a record of imported vocabularies.',
       'fields' => array(
@@ -132,7 +137,6 @@ function mediacommons_base_import_schema() {
         'id' => array('id'),
       ),
   );
-
   $schema['mediacommons_base_import_node_map'] = array(
       'description' => 'Stores a record of node imports.',
       'fields' => array(
@@ -155,7 +159,6 @@ function mediacommons_base_import_schema() {
       ),
       'primary key' => array('onid'),
   );
-
   $schema['mediacommons_base_import_files_map'] = array(
     'description' => 'Stores a record of files imports.',
   	'fields' => array(
@@ -176,6 +179,5 @@ function mediacommons_base_import_schema() {
   	'indexes' => array( 'fid' => array('fid') ),
   	'primary key' => array('ofid'),
   );
-
   return $schema;
 }

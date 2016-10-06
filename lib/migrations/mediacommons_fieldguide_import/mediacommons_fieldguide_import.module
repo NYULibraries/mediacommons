@@ -5,8 +5,8 @@ function init() {
     array(
   	  'label' => t('Migrate site'),
   		'callback' => array(
-      	'mediacommons_base_import_prepare_taxonomy_fields',
-      	'mediacommons_base_import_download_files',
+        'register_users_images',
+        'download_files',
         'migrate_survey_questions',
         'migrate_survey_responses',
         'response_arrange_order',
