@@ -29,6 +29,7 @@ done
 # Take care of importing databasaes
 if [ ! $SKIP ];
   then
+    echo ${DBS}/mcshared.sql
     if [ -r ${DBS}/mcshared.sql ]
       then
         # MediaCommons share tables (user tables and others)

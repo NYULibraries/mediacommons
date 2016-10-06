@@ -212,8 +212,8 @@ function mediacommons_base_import_show_options ( array $commands = array() ) {
 
 function mediacommons_base_import_init(array $options = array()) {
 
-  // We need extra memory for GD
-  // ini_set("memory_limit", "512MM");
+  // We need extra memory
+  ini_set("memory_limit", "512MM");
 
   // http://docs.drush.org/en/master/bootstrap/
   // http://api.drush.org/api/drush/includes%21bootstrap.inc/constant/DRUSH_BOOTSTRAP_DRUPAL_FULL/7.x
