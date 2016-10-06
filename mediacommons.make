@@ -2,16 +2,16 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.50"
+projects[drupal][version] = "7.51"
 
 ; Modules
 
-projects[ctools][version] = "1.9"
+projects[ctools][version] = "1.10"
 projects[cnr][version] = "4.22"
 projects[date][version] = "2.9"
 projects[diff][version] = "3.2"
 projects[ds][version] = "2.14"
-projects[entity][version] = "1.7"
+projects[entity][version] = "1.8"
 projects[features_extra][version] = "1.0"
 projects[features][version] = "2.10"
 projects[imagefield_crop][version] = "1.1"
@@ -35,9 +35,11 @@ projects[telephone][version] = "1.0-alpha1"
 projects[gravatar][version] = "1.1"
 projects[ckeditor][version] = "1.16"
 projects[manualcrop][version] = "1.x-dev"
-projects[uuid][version] = "1.0-beta1"
+projects[uuid][version] = "1.0-beta2"
 projects[better_exposed_filters][version] = "3.2"
 projects[viewfield][version] = "2.0"
+projects[reroute_email][version] = "1.2"
+
 ; admin modules
 projects[admin_views][version] = "1.6"
 projects[views_bulk_operations][version] = "3.3"
