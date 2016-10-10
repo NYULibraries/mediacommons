@@ -73,10 +73,13 @@ function migrate_user($user) {
 	  }
 
 		if ($account) {
-      /** we drop users emails while in DEV */
-      if (!in_array($user->mail, $super_users)) {
-				db_update('users')->fields( array( 'mail' => uniqid('dlts.pa.', true) . '@nyu.edu')) ->condition('mail', $user->mail, '=')->execute();
-			}
+			// While developing we are using Reroute Email module to aviod sending
+			// emails to our users
+			// see: https://www.drupal.org/project/reroute_email
+			// no longer in use
+      //if (!in_array($user->mail, $super_users)) {
+				//db_update('users')->fields( array( 'mail' => uniqid('dlts.pa.', true) . '@nyu.edu')) ->condition('mail', $user->mail, '=')->execute();
+			//}
       /** User profile picture */
       if ($user->picture) {
 				$user_picture = download_user_picture(url($production_url . $user->picture, array('absolute' => TRUE)));

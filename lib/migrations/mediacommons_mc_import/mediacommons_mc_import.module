@@ -13,6 +13,7 @@ function init () {
 				'download_files',
 				'migrate_pages',
 				'migrate_frontpages',
+        'enable_admin_views_module',
 			),
 		),
 	);

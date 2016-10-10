@@ -85,8 +85,8 @@ function mediacommons_base_import_prepare ( $caller ) {
 
   $settings = mediacommons_base_import_settings($caller);
 
-  if ( isset ( $settings['dependencies']) ) {
-    foreach ( $settings['dependencies'] as $dependency ) {
+  if (isset($settings['dependencies'])) {
+    foreach ($settings['dependencies'] as $dependency) {
       if ( ! module_exists ( $dependency ) ) die ( drush_set_error ( t('About to die like a coward. Dependency @dependency not met.', array( '@dependency' => $dependency) ) ) );
     }
   }
