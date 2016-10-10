@@ -1,19 +1,15 @@
 <?php
 
 function migrate_all_users() {
-	$users = d6_users();
-	foreach ($users as $user) {
+	foreach (d6_users() as $user) {
 		migrate_user($user);
 	}
 }
 
 function migrate_user($user) {
 
-  // don't waste time migrating blocked users
-	if ($user->status == 0) {
-		drush_log(dt('Will not migrate user @user. Account blocked.', array ('@user' => $user->name)), 'ok');
-		return;
-	}
+  /** don't waste time migrating blocked users */
+	if ($user->status == 0) return;
 
 	require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
 
@@ -21,96 +17,82 @@ function migrate_user($user) {
 
 	$super_users = array('aortiz@nyu.edu', 'lh435@nyu.edu');
 
-  /**
-   * URL to be used as the production URL; we need to hard-code this
-   */
+  /** URL to be used as the production URL; we need to hard-code this */
   $production_url = umbrella_production_url();
 
-  /**
-   * Files folder real path
-   */
-  $dupal_file_path = drupal_realpath('public://') ;
+  /** Files folder real path */
+  $dupal_file_path = drupal_realpath('public://');
 
   $user_exists = user_exists_by_ouid($user->uid);
 
 	$hash_count_log2 = 11;
 
-  if (!$user_exists) {
-    $new_user = array (
-      'name' => $user->name,
-      'pass' => 'U' . user_hash_password($user->pass, $hash_count_log2),
-      'mail' => $user->mail,
-      'init' => $user->init,
-      'status' => $user->status,
-      'access' => $user->access,
-      'theme' => $user->theme,
-      'signature' => $user->signature,
-      'signature_format' => $user->signature_format,
-      'created' => $user->created,
-      'login' => $user->login,
-      'language' => $user->language,
-      'timezone_name' => $user->timezone_name,
-    );
+  // User already exist in database.
+  if ($user_exists) return;
 
-    /** if roles availble; map roles to the new rid */
-    if (isset($user->roles)) {
-		  foreach (explode(',', $user->roles) as $orid) {
-				$new_user['roles'][rid_by_orid($orid)] = TRUE;
-			}
+	$new_user = array(
+    'name' => $user->name,
+    'pass' => 'U' . user_hash_password($user->pass, $hash_count_log2),
+    'mail' => $user->mail,
+    'init' => $user->init,
+    'status' => $user->status,
+    'access' => $user->access,
+    'theme' => $user->theme,
+    'signature' => $user->signature,
+    'signature_format' => $user->signature_format,
+    'created' => $user->created,
+    'login' => $user->login,
+    'language' => $user->language,
+    'timezone_name' => $user->timezone_name,
+  );
+  /** if roles availble; map roles to the new rid */
+  if (isset($user->roles)) {
+		foreach (explode(',', $user->roles) as $orid) {
+			$new_user['roles'][rid_by_orid($orid)] = TRUE;
 		}
-    try {
-			// https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
-			$account = user_save(null, $new_user);
-			if ($account) {
-				drush_log(dt('User @user created', array ('@user' => $user->name)), 'ok');
-        db_insert('mediacommons_base_import_user_map')->fields(array('ouid' => $user->uid, 'uid' => $account->uid))->execute();
-			}
-		}
-		catch (Exception $e) {
-			drush_log(dt('Caught exception: @exception' , array('@exception' => $e->getMessage())), 'error');
-			drush_log(dt('Error migrating user @user', array ('@user' => $user->name)), 'error');
-			return;
-	  }
-
+	}
+  try {
+		// https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
+		$account = user_save(null, $new_user);
 		if ($account) {
-			// While developing we are using Reroute Email module to aviod sending
-			// emails to our users
-			// see: https://www.drupal.org/project/reroute_email
-			// no longer in use
-      //if (!in_array($user->mail, $super_users)) {
-				//db_update('users')->fields( array( 'mail' => uniqid('dlts.pa.', true) . '@nyu.edu')) ->condition('mail', $user->mail, '=')->execute();
-			//}
-      /** User profile picture */
-      if ($user->picture) {
-				$user_picture = download_user_picture(url($production_url . $user->picture, array('absolute' => TRUE)));
-				// picture saved and managed by Drupal (see: file_managed)
-      	if ($user_picture) {
-					db_update('users')->fields(array('picture' => $user_picture->fid))->condition('uid', $account->uid)->execute();
-					db_update('mediacommons_base_import_user_map')->fields(
-					  array(
-							'fid' => $user_picture->fid,
-							'filename' => $user_picture->filename,
-						)
-					)->condition('uid', $account->uid)->execute();
-					$account->picture = $user_picture->fid;
-      	}
+			drush_log(dt('User @user created', array ('@user' => $user->name)), 'ok');
+      db_insert('mediacommons_base_import_user_map')->fields(array('ouid' => $user->uid, 'uid' => $account->uid))->execute();
+		}
+	}
+	catch (Exception $e) {
+		drush_log(dt('Caught exception: @exception' , array('@exception' => $e->getMessage())), 'error');
+		drush_log(dt('Error migrating user @user', array ('@user' => $user->name)), 'error');
+		return;
+	}
+
+	if ($account) {
+		// While developing we are using Reroute Email module to aviod sending
+		// emails to our users
+		// see: https://www.drupal.org/project/reroute_email
+    /** User profile picture */
+    if ($user->picture) {
+			$user_picture = download_user_picture(url($production_url . $user->picture, array('absolute' => TRUE)));
+			// picture saved and managed by Drupal (see: file_managed)
+      if ($user_picture) {
+				db_update('users')->fields(array('picture' => $user_picture->fid))->condition('uid', $account->uid)->execute();
+				db_update('mediacommons_base_import_user_map')->fields(array('fid' => $user_picture->fid, 'filename' => $user_picture->filename))->condition('uid', $account->uid)->execute();
+				$account->picture = $user_picture->fid;
       }
-      /** Update realname module */
-      $realname = d6_users_realname($user->uid);
-      if ( $realname ) {
-      	$realname_account = realname_load_multiple(array($account));
-      	if ( empty ( $realname_account[0] ) ) {
-      		// Save to the database and the static cache.
-      		db_merge('realname')->key ( array ( 'uid' => $account->uid ) )->fields( array ( 'realname' => $realname, 'created' => REQUEST_TIME ) )->execute() ;
-      		// Allow modules to react to the realname being updated.
-      		module_invoke_all('realname_update', $realname, $account) ;
-      	}
-      }
-      /** Update profile fields */
-      mediacommons_base_import_migrate_profile_fields($user->uid);
     }
+    /** Update realname module */
+    $realname = d6_users_realname($user->uid);
+    if ($realname) {
+      $realname_account = realname_load_multiple(array($account));
+      if (empty($realname_account[0])) {
+      	// Save to the database and the static cache.
+      	db_merge('realname')->key(array('uid' => $account->uid))->fields(array('realname' => $realname, 'created' => REQUEST_TIME))->execute();
+      	// Allow modules to react to the realname being updated.
+      	module_invoke_all('realname_update', $realname, $account);
+      }
+    }
+    /** Update profile fields */
+    mediacommons_base_import_migrate_profile_fields($user->uid);
   }
-  else drush_log(dt('User @user already exist in database.', array('@user' => $user->name)), 'ok');
 }
 
 /** Given a Drupal 6 UID; load D7 user and migrate the profile fields */
