@@ -87,9 +87,9 @@ while getopts ":e:c:m:hdlsikt" opt; do
    echo " Options:"
    echo "   -h           Show brief help"
    echo "   -e           Set the environment variable (default to local) if not set."
-   echo "   -k           Allow site to share cookies accross domain"   
+   echo "   -k           Allow site to share cookies accross domain"
    echo "   -l           Use legacy drush (whatever is in your path) instead of repo drush"
-   echo "   -s           Find SASS based themes and compile"   
+   echo "   -s           Find SASS based themes and compile"
    echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
    echo "   -m <file>    Specify the make file to use (e.g., -m example.make)."
    echo "   -t           Tell all relevant actions (don't actually change the system)."
@@ -247,9 +247,9 @@ STEP_8="${DIR}/utilities/theme_variable.sh -c ${CONF_FILE}"
 
 if [ ! $SIMULATE ] ;
   then
-    eval $STEP_8 ; 
+    eval $STEP_8 ;
     if [ $? ] ; then echo "Successful: Adding theme class." ; else die ${LINENO} 8 "Fail: Adding theme class." ; fi ;
-  else 
+  else
     tell ${LINENO} 8 "${STEP_8}" ;
 fi ;
 

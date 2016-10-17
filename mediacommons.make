@@ -57,7 +57,7 @@ projects[mediacommons_profile][download][url] = "https://github.com/NYULibraries
 
 projects[mcumb_profile][type] = "profile"
 projects[mcumb_profile][download][type] = "git"
-projects[mcumb_profile][download][url] = "https://github.com/lhenze/mcumb_profile.git"
+projects[mcumb_profile][download][url] = "https://github.com/NYULibraries/mcumb_profile.git"
 
 ; Themes
 

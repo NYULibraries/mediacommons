@@ -63,7 +63,7 @@ ${BUILD_APP_ROOT}/bin/update.sh
 # ${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 # Build and migrate Umbrella before anything else
-# ${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
+${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 projects=(${PROJECTS})
 
