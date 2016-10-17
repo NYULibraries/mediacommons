@@ -96,10 +96,7 @@ fi
 # Load configuration file
 . ${ROOT}/configs/mediacommons.conf
 
-if [ !$MAKE_FILE ];
-  then
-    MAKE_FILE=${ROOT}/mediacommons.make
-fi
+[ $MAKE_FILE ]  || MAKE_FILE=${ROOT}/mediacommons.make
 
 ${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${MAKE_FILE}  -k -l -e ${ENVIRONMENT};
 
