@@ -57,10 +57,6 @@ projects[mediacommons_profile][download][type] = "git"
 projects[mediacommons_profile][download][url] = "https://github.com/NYULibraries/mediacommons_profile.git"
 projects[mediacommons_profile][download][branch] = "develop"
 
-projects[mcumb_profile][type] = "profile"
-projects[mcumb_profile][download][type] = "git"
-projects[mcumb_profile][download][url] = "https://github.com/NYULibraries/mcumb_profile.git"
-
 ; Themes
 
 projects[rubik][version] = "4.4"
