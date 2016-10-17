@@ -101,7 +101,7 @@ if [ !$MAKE_FILE ];
     MAKE_FILE=${ROOT}/mediacommons.make
 fi
 
-${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${MAKE_FILE}/mediacommons.make  -k -l -e ${ENVIRONMENT};
+${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${MAKE_FILE} -k -l -e ${ENVIRONMENT};
 
 if [ $? -eq 0 ];
   then
