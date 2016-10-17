@@ -49,6 +49,7 @@ projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
 projects[mediacommons_modules][download][url] = "https://github.com/NYULibraries/mediacommons_modules.git"
 projects[mediacommons_modules][download][branch] = "develop"
+
 ; Profiles
 
 projects[mediacommons_profile][type] = "profile"
@@ -58,7 +59,7 @@ projects[mediacommons_profile][download][branch] = "develop"
 
 projects[mcumb_profile][type] = "profile"
 projects[mcumb_profile][download][type] = "git"
-projects[mcumb_profile][download][url] = "https://github.com/lhenze/mcumb_profile.git"
+projects[mcumb_profile][download][url] = "https://github.com/NYULibraries/mcumb_profile.git"
 
 ; Themes
 
