@@ -52,10 +52,15 @@ projects[mediacommons_modules][download][branch] = "develop"
 
 ; Profiles
 
-projects[mediacommons_profile][type] = "profile"
-projects[mediacommons_profile][download][type] = "git"
-projects[mediacommons_profile][download][url] = "https://github.com/NYULibraries/mediacommons_profile.git"
-projects[mediacommons_profile][download][branch] = "develop"
+projects[mediacommons_projects][type] = "profile"
+projects[mediacommons_projects][download][type] = "git"
+projects[mediacommons_projects][download][url] = "https://github.com/NYULibraries/mediacommons_projects.git"
+projects[mediacommons_projects][download][branch] = "develop"
+
+projects[mediacommons_umbrella][type] = "profile"
+projects[mediacommons_umbrella][download][type] = "git"
+projects[mediacommons_umbrella][download][url] = "https://github.com/NYULibraries/mediacommons_umbrella.git"
+projects[mediacommons_umbrella][download][branch] = "develop"
 
 ; Themes
 
