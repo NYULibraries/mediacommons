@@ -9,7 +9,7 @@ die () {
   exit 1;
 }
 
-while getopts ":c:s" opt; do
+while getopts ":m:c:s" opt; do
   case $opt in
     c)
       [ -f $OPTARG ] || die "Configuration file does not exist."
@@ -17,6 +17,10 @@ while getopts ":c:s" opt; do
       ;;
     s)
       SKIP=true
+      ;;
+    m)
+      [ -f $OPTARG ] || die "Make file does not exist."
+      MAKE_FILE=$OPTARG
       ;;
   esac
 done
@@ -92,7 +96,12 @@ fi
 # Load configuration file
 . ${ROOT}/configs/mediacommons.conf
 
-${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${ROOT}/mediacommons.make  -k -l -e ${ENVIRONMENT};
+if [ !$MAKE_FILE ];
+  then
+    MAKE_FILE=${ROOT}/mediacommons.make
+fi
+
+${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${MAKE_FILE}/mediacommons.make  -k -l -e ${ENVIRONMENT};
 
 if [ $? -eq 0 ];
   then
