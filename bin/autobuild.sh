@@ -15,7 +15,9 @@ die () {
 
 ENVIRONMENT="development"
 
-while getopts ":c:e:hm" opt; do
+MAKE_FILE=`pwd`"/mediacommons.make"
+
+while getopts ":m:c:e:h" opt; do
  case $opt in
   c)
     [ -f $OPTARG ] || die "Configuration file does not exist."
@@ -25,7 +27,8 @@ while getopts ":c:e:hm" opt; do
     UPDATE=true
     ;;
   m)
-    MAINTENANCES=true
+    [ -f $OPTARG ] || die "Make file does not exist."
+    MAKE_FILE=$OPTARG
     ;;
   e)
     ENVIRONMENT=$OPTARG
@@ -57,7 +60,7 @@ fi
 echo $$ > ${TEMP_DIR}/autobuild.pid
 
 # Get the latest make file and do any other task before running jobs
-${BUILD_APP_ROOT}/bin/update.sh
+# ${BUILD_APP_ROOT}/bin/update.sh
 
 # Do some house cleaning before running job
 # ${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
@@ -72,7 +75,7 @@ for project in ${projects[*]}
     # -l run in legacy mode
     # -e environment we are building
     # -k use cookies to share databases
-    ${BUILD_APP_ROOT}/bin/build.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf -m ${BUILD_APP_ROOT}/mediacommons.make -l -e ${ENVIRONMENT} -k;
+    ${BUILD_APP_ROOT}/bin/build.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf -m ${MAKE_FILE} -l -e ${ENVIRONMENT} -k;
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
