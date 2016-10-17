@@ -6,7 +6,7 @@ projects[drupal][version] = "7.51"
 
 ; Modules
 
-projects[ctools][version] = "1.10"
+projects[ctools][version] = "1.11"
 projects[cnr][version] = "4.22"
 projects[date][version] = "2.9"
 projects[diff][version] = "3.2"
@@ -69,7 +69,7 @@ projects[tao][version] = "3.1"
 projects[zen][version] = "5.6"
 
 projects[mediacommons][download][type] = "git"
-projects[mediacommons][download][url] = "https://github.com/NYULibraries/mediacommons_theme"
+projects[mediacommons][download][url] = "https://github.com/NYULibraries/mediacommons_theme.git"
 projects[mediacommons][type] = "theme"
 projects[mediacommons][download][branch] = "develop"
 
