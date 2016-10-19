@@ -14,7 +14,7 @@ function migrate_theme_week ( $old_node ) {
 
   $node = array ( ) ;
 
-  $node['title'] =  theme_weeks_title (  $old_node->title ) ;
+  $node['title'] =  theme_weeks_title($old_node->title);
 
   $node['ouid'] = $old_node->uid ;
 

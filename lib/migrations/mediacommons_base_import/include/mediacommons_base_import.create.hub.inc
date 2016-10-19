@@ -97,7 +97,7 @@ function create_hub ( array $old_node ) {
   if ( isset ( $old_node->field_representative_image ) ) {
   	if ( isset ( $old_node->field_representative_image->fid ) ) {
   	  $fid = mediacommons_base_import_get_file_fid_by_ofid ( $old_node->field_representative_image->fid ) ;
-  	  $field_representative_image_object = file_load ( (int) $fid ) ;
+  	  $field_representative_image_object = file_load((int) $fid);
       if ( $field_representative_image_object ) {
       	$new_node->field_representative_image[$old_node->language][] = (array) file_load ( $fid ) ;
       }

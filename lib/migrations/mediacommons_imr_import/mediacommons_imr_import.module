@@ -1,7 +1,7 @@
 <?php
 
 function init() {
-  $commands = array (
+  $commands = array(
     array(
       'label' => t('Migrate site'),
       'callback' => array(
