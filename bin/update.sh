@@ -23,13 +23,22 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 MAKE_FILE=${DIR}/../mediacommons.make
 
+MAKE_FILE_DEV=${DIR}/../mediacommons.develop.make
+
 [ -f ${MAKE_FILE} ] || die ${LINENO} "test" "Unable to find ${MAKE_FILE}"
 
-# make sure the most recent changes to *.make file are in place
+[ -f ${MAKE_FILE_DEV} ] || die ${LINENO} "test" "Unable to find ${MAKE_FILE_DEV}"
+
 rm -f ${MAKE_FILE}
 
 wget https://raw.githubusercontent.com/NYULibraries/mediacommons/master/mediacommons.make -P ${DIR}/../
 
 chmod 2777 ${DIR}/../mediacommons.make
+
+rm -f ${MAKE_FILE_DEV}
+
+wget https://raw.githubusercontent.com/NYULibraries/mediacommons/master/mediacommons.develop.make -P ${DIR}/../
+
+chmod 2777 ${DIR}/../mediacommons.develop.make
 
 exit 0

@@ -33,6 +33,8 @@ done
 # load configuration file
 . $CONF_FILE
 
+echo "Called ${0} with argument -c ${CONF_FILE}"
+
 if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php ]]; then
   # check if this directory looks like Drupal 7
   MATCH=`grep -c 'DRUPAL_ROOT' ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php`
@@ -41,5 +43,12 @@ if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php ]]; then
     cat ${BUILD_APP_ROOT}/bin/utilities/no_cookies.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
   fi
 fi
+
+if [ -d ${DRUPAL_6_FILES_DIR} ]; then
+  rsync -vrh ${DRUPAL_6_FILES_DIR}/* ${DRUPAL_FILES_DIR}
+fi
+
+# hack for transparent.png
+wget https://github.com/NYULibraries/mediacommons_theme/raw/master/images/transparent.png -O ${DRUPAL_FILES_DIR}/transparent.png
 
 exit 0

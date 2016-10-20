@@ -75,7 +75,9 @@ else
   if [ ! -d ${DRUPAL_FILES_DIR}/pictures ]; then
     mkdir ${DRUPAL_FILES_DIR}/pictures;
   fi
-
 fi
+
+# copy users images directory
+rsync -vrh ${BUILD_APP_ROOT}/lib/files/mediacommons/pictures/* ${DRUPAL_FILES_DIR}/pictures
 
 exit 0

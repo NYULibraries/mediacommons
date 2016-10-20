@@ -98,6 +98,8 @@ fi
 
 [ $MAKE_FILE ]  || MAKE_FILE=${ROOT}/mediacommons.make
 
+echo "Build script will use ${MAKE_FILE} to build the project"
+
 ${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${MAKE_FILE}  -k -l -e ${ENVIRONMENT};
 
 if [ $? -eq 0 ];

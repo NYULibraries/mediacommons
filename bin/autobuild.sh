@@ -66,7 +66,7 @@ echo $$ > ${TEMP_DIR}/autobuild.pid
 # ${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 # Build and migrate Umbrella before anything else
-${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
+# ${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 projects=(${PROJECTS})
 
@@ -79,11 +79,6 @@ for project in ${projects[*]}
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
-        # copy users images directory
-        if [ -d "$BUILD_APP_ROOT/lib/files/$project/pictures" ]; then
-          rm -f ${BUILD_APP_ROOT}/lib/files/${project}/pictures;
-        fi
-        cp -r ${BUILD_APP_ROOT}/lib/files/mediacommons/pictures ${BUILD_APP_ROOT}/lib/files/${project}/pictures
         # Run preprocess task
         echo "Run preprocess task";
         ${BUILD_APP_ROOT}/bin/utilities/preprocess.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
