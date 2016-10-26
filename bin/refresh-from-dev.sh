@@ -97,9 +97,26 @@ function fix_symlinks() {
     done
 }
 
-function change_tne_database_name() {
-    cd $MEDIACOMMONS/builds/
-    sed -i.tne_database_name.bak 's/d7_tne/tne/' tne/sites/default/settings.php
+function change_database_names() {
+# declare -a ALL_SITES=( alt-ac fieldguide imr intransition mediacommons tne )
+    for site in "${selected_sites[@]}"
+    do
+        old_database_name="dev$(sed s'/-//' ${site})"
+
+        # Deal with the two exceptions to the name scheme.
+        if [ "${site}" == "mediacommons" ]
+        then
+            # No need to change the database name.
+            break
+        else if [ "${site}" == 'tne' ]
+        then
+            old_database_name="devtnedb"
+        fi
+
+        cd $MEDIACOMMONS/builds/
+        sed -i.${site}_database_name.bak "s//${site}/" ${site}/sites/default/settings.php
+    done
+
 }
 
 function copy_files() {
@@ -229,7 +246,7 @@ change_database_password_in_all_drupal_settings_files "$(generate_new_password)"
 
 fix_symlinks
 
-change_tne_database_name
+change_database_names
 
 copy_files
 
