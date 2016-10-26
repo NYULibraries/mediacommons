@@ -104,13 +104,13 @@ function change_database_names() {
         old_database_name="dev$(sed s'/-//' ${site})"
 
         # Deal with the two exceptions to the name scheme.
-        if [ "${site}" == "mediacommons" ]
+        if [ "${site}" == 'mediacommons' ]
         then
             # No need to change the database name.
             break
         elif [ "${site}" == 'tne' ]
         then
-            old_database_name="devtnedb"
+            old_database_name='devtnedb'
         fi
 
         cd $MEDIACOMMONS/builds/
