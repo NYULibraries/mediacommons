@@ -108,7 +108,7 @@ function change_database_names() {
         then
             # No need to change the database name.
             break
-        else if [ "${site}" == 'tne' ]
+        elif [ "${site}" == 'tne' ]
         then
             old_database_name="devtnedb"
         fi
