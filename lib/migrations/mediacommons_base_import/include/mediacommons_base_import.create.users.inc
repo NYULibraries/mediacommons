@@ -10,10 +10,10 @@ function migrate_user($user) {
 
   /** don't waste time migrating blocked users */
 	if ($user->status == 0) return;
+	
+	drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);	
 
 	require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
-
-	drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
 
 	$super_users = array('aortiz@nyu.edu', 'lh435@nyu.edu');
 

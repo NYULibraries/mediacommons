@@ -70,7 +70,9 @@ function download_files() {
 
 		$destination_file = $destination_dir . '/' . str_replace('files/', '', $file->filepath);
 		
-		$dirname = pathinfo($destination_file)['dirname'];
+		$dirname_pathinfo = pathinfo($destination_file);
+		
+		$dirname = $dirname_pathinfo['dirname'];
 		
     if (!file_exists($dirname)) mkdir($dirname, 0777, true);		
 		
