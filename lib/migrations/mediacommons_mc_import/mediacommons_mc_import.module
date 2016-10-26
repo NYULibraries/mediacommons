@@ -5,8 +5,8 @@ function init () {
     array(
       'label' => t('Migrate site'),
       'callback' => array(
-        'mediacommons_base_import_delete_files',
-        'purge_terms',
+        //'mediacommons_base_import_delete_files',
+        //'purge_terms',
         'download_files',
         'import_vocabulary',
         'import_terms',

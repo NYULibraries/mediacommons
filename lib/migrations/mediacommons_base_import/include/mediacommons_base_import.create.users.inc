@@ -1,9 +1,15 @@
 <?php
 
 function migrate_all_users() {
-	foreach (d6_users() as $user) {
-		migrate_user($user);
-	}
+	
+	$users = d6_users();
+	
+	migrate_user($users[14082]);
+	
+	//foreach (d6_users() as $user) {
+		//migrate_user($user);
+	//}
+	
 }
 
 function migrate_user($user) {
@@ -14,8 +20,6 @@ function migrate_user($user) {
 	drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);	
 
 	require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
-
-	$super_users = array('aortiz@nyu.edu', 'lh435@nyu.edu');
 
   /** URL to be used as the production URL; we need to hard-code this */
   $production_url = umbrella_production_url();
@@ -51,7 +55,17 @@ function migrate_user($user) {
 			$new_user['roles'][rid_by_orid($orid)] = TRUE;
 		}
 	}
+	
+  if ($user->picture) {
+		$user_picture = download_user_picture(url($production_url . $user->picture, array('absolute' => TRUE)));
+		// picture saved and managed by Drupal (see: file_managed)
+    if ($user_picture) {
+			$new_user['picture'] = $user_picture->fid;
+    }
+  }
+	
   try {
+  
 		// https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
 		$account = user_save(null, $new_user);
 		if ($account) {
@@ -70,15 +84,7 @@ function migrate_user($user) {
 		// emails to our users
 		// see: https://www.drupal.org/project/reroute_email
     /** User profile picture */
-    if ($user->picture) {
-			$user_picture = download_user_picture(url($production_url . $user->picture, array('absolute' => TRUE)));
-			// picture saved and managed by Drupal (see: file_managed)
-      if ($user_picture) {
-				db_update('users')->fields(array('picture' => $user_picture->fid))->condition('uid', $account->uid)->execute();
-				db_update('mediacommons_base_import_user_map')->fields(array('fid' => $user_picture->fid, 'filename' => $user_picture->filename))->condition('uid', $account->uid)->execute();
-				$account->picture = $user_picture->fid;
-      }
-    }
+    
     /** Update realname module */
     $realname = d6_users_realname($user->uid);
     if ($realname) {
