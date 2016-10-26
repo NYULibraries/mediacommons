@@ -6,8 +6,8 @@ EXPECT_SIGNAL_SELECT_SITES_COMPLETED="EXPECT: NUMBER OF SITES SELECTED = "
 
 DEV_SERVER=devmc.dlib.nyu.edu
 DEV_SERVER_MC_BUILDS=/www/sites/drupal/scripts/mediacommons/builds
-DEV_SERVER_DATABASE_DUMPS=/www/sites/drupal/scripts/mediacommons/builds/dbs/7
-DEV_SERVER_FILES=/content/dev/pa/drupal/mediacommons/7
+DEV_SERVER_DATABASE_DUMPS=/www/sites/mediacommons/lib/dumps
+DEV_SERVER_FILES=/www/sites/mediacommons/lib/files
 
 # Directory where storing local copies of devmc database dumps
 DATABASE_DUMPS=
