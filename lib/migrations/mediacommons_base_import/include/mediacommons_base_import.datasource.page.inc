@@ -1,7 +1,6 @@
 <?php
 
 function pages () {
-
   $query = "
     SELECT
       n.nid,
@@ -25,8 +24,6 @@ function pages () {
     WHERE n.type = :type
     GROUP BY n.nid
     ORDER BY n.nid";
-
   /** Create and return a database connection to the source (d6) database */
-  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => 'page'), array()) ;
-
+  return Database::getConnection('default', 'drupal6')->query($query, array(':type' => 'page'), array());
 }

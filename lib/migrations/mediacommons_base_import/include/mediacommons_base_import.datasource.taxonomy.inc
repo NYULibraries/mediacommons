@@ -98,7 +98,7 @@ function mediacommons_base_import_find_vocabulary( $vid ) {
 
 	$vocabulary = array();
 
-	$vocabulary_d7_vid = db_query("SELECT vid FROM {mediacommons_base_import_vocabulary_map} WHERE vuid = :vuid", array(':vuid' => $vid));
+	$vocabulary_d7_vid = db_query("SELECT vid FROM {mediacommons_base_import_vocabulary_map} WHERE vuid = :vuid;", array(':vuid' => $vid));
 
 	if ( ! $vocabulary_d7_vid->rowCount() ) {
 		$query = '
@@ -143,14 +143,13 @@ function mediacommons_base_import_d7_term_list() {
 }
 
 function mediacommons_base_import_d6_term_list() {
-
-	$query = 'SELECT term.tid, term.vid, term.name, term.description, term.weight FROM {term_data} term ';
-
+	$query = 'SELECT term.tid, term.vid, term.name, term.description, term.weight FROM {term_data} term;';
 	/** Create a database connection to the source (d6) database */
 	return Database::getConnection('default', 'drupal6')->query($query, array(), array()) ;
 
 }
 
 function mediacommons_base_import_d6_vocabulary_list() {
-	return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {vocabulary}', array(), array());
+	$query = 'SELECT * FROM {vocabulary};';
+	return Database::getConnection('default', 'drupal6')->query($query, array(), array()) ;
 }

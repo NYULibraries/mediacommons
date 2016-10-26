@@ -1,12 +1,12 @@
 <?php
 
 function migrate_clusters () {
-  foreach ( clusters () as $entity ) migrate_cluster ( $entity ) ;
+  foreach (clusters() as $entity) migrate_cluster($entity);
 }
 
-function migrate_cluster ( $entity ) {
+function migrate_cluster ($entity) {
 
-  $node = array ( ) ;
+  $node = array();
 
   $node['title'] =  $entity->title ;
 
@@ -81,7 +81,7 @@ function migrate_cluster ( $entity ) {
       if (!empty($tid)) $node['field_tags'][] = $tid;
     }
   }
-  
+
   /**
    * Dates
    * If $dates is set proceed, no good comes from setting dates with wrong values

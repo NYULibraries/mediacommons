@@ -44,10 +44,6 @@ if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php ]]; then
   fi
 fi
 
-if [ -d ${DRUPAL_6_FILES_DIR} ]; then
-  rsync -vrh ${DRUPAL_6_FILES_DIR}/* ${DRUPAL_FILES_DIR}
-fi
-
 # hack for transparent.png
 wget https://github.com/NYULibraries/mediacommons_theme/raw/master/images/transparent.png -O ${DRUPAL_FILES_DIR}/transparent.png
 

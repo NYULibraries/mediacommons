@@ -93,8 +93,8 @@ function d6_users () {
 /**
  *  Drupal 6 roles
  */
-function mediacommons_base_import_d6_roles () {
-	return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {role}', array(), array());
+function mediacommons_base_import_d6_roles() {
+	return Database::getConnection('default', 'drupal6')->query('SELECT * FROM {role}');
 }
 
 /**

@@ -3,17 +3,19 @@
 /**
  * Migrate page nodes.
  */
-function migrate_pages ( ) {
-	foreach ( pages () as $key => $old_node ) migrate_page ( $old_node ) ;
+function migrate_pages () {
+	foreach (pages() as $old_node) migrate_page($old_node);
 }
 
 /**
  * Migrate pages.
  */
-function migrate_page ( $old_node ) {
+function migrate_page ($old_node) {
+
+	extract_iframe_sources ( $old_node->body ) ;
 
 	/** prepare node */
-	$node = array () ;
+	$node = array();
 
 	$node['title'] = $old_node->title ;
 
@@ -34,8 +36,6 @@ function migrate_page ( $old_node ) {
 	$node['sticky'] = $old_node->sticky ;
 
 	$node['field_pubstat'] = $old_node->status ;
-
-	extract_iframe_sources ( $old_node->body ) ;
 
 	$node['field_body'] = $old_node->body ;
 

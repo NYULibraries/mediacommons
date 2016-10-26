@@ -1,23 +1,24 @@
 <?php
 
 function init () {
-  $commands = array (
-	  array (
-		  'label' => t('Migrate site'),
-			'callback' => array(
+  $commands = array(
+    array(
+      'label' => t('Migrate site'),
+      'callback' => array(
+        'mediacommons_base_import_delete_files',
+        'purge_terms',
+        'download_files',
         'import_vocabulary',
         'import_terms',
-				'prepare_taxonomy_fields',
-				'map_roles',
-				'migrate_all_users',
-				'download_files',
-				'migrate_pages',
-				'migrate_frontpages',
-        'enable_admin_views_module',
-			),
-		),
-	);
-	mediacommons_base_import_init (array('commands' => $commands));
+        'prepare_taxonomy_fields',
+        'map_roles',
+        'migrate_all_users',        
+        'migrate_pages',
+        'migrate_frontpages',
+      ),
+    ),
+  );
+  mediacommons_base_import_init(array('commands' => $commands));
 }
 
 $base_file = __DIR__ . '/../mediacommons_base_import/mediacommons_base_import.module';

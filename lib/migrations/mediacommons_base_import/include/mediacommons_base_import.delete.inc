@@ -9,15 +9,12 @@ function mediacommons_base_import_delete_alias ( ) {
 
 /** I'm going Megaupload on you */
 function mediacommons_base_import_delete_files () {
+
   db_delete('file_managed')
     ->condition('uri', 'kill em all', '<>')
     ->execute();
 
   db_delete('mediacommons_base_import_files_map')
-    ->condition('fid', 'kill em all', '<>')
-    ->execute();
-
-    db_delete('mediacommons_base_import_files_map')
     ->condition('fid', 0, '=')
     ->execute();
 

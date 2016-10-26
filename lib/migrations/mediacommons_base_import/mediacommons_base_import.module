@@ -71,16 +71,14 @@ function mediacommons_base_import_default_commands ( ) {
   );
 }
 
-function mediacommons_base_import_prepare ( $caller ) {
+function mediacommons_base_import_prepare($caller) {
 
   global $settings;
-
-  include_once __DIR__ . '/mediacommons_base_import.install';
-
-  foreach (file_scan_directory(__DIR__ . '/include/', '/.*\.inc$/') as $include) {
-    include_once($include->uri);
-  }
-
+  
+  include_once __DIR__ . '/mediacommons_base_import.install';  
+  
+  foreach (file_scan_directory(__DIR__ . '/include/', '/.*\.inc$/') as $include) include_once $include->uri;
+  
   $schemas = mediacommons_base_import_schema();
 
   $settings = mediacommons_base_import_settings($caller);
@@ -90,25 +88,25 @@ function mediacommons_base_import_prepare ( $caller ) {
       if ( ! module_exists ( $dependency ) ) die ( drush_set_error ( t('About to die like a coward. Dependency @dependency not met.', array( '@dependency' => $dependency) ) ) );
     }
   }
-
+  
   $install_file = $settings['script_path']['dirname'] . '/' . $settings['script_path']['filename'] . '.install';
-
+  
   $info_file = $settings['script_path']['dirname'] . '/' . $settings['script_path']['filename'] . '.info';
-
+  
   $includes = file_scan_directory( $settings['script_path']['dirname'], '/.*\.inc$/' );
-
-  foreach ( $includes as $include ) include_once ( $include->uri );
-
+  
+  foreach ($includes as $include) include_once $include->uri;
+  
   if ( file_exists ( $install_file ) ) {
     include_once($install_file);
     $call = $settings['script_path']['filename'] . '_schema';
     if ( function_exists( $call ) ) $schemas += $call() ;
   }
-
+  
   mediacommons_base_import_initialize_schema ( $settigs['script_path']['filename'], $schemas ) ;
-
+  
   foreach ( $schemas as $name => $schema ) if ( ! db_table_exists ( $name ) ) db_create_table( $name, $schema ) ;
-
+  
 }
 
 function mediacommons_base_import_settings ( $caller ) {
@@ -212,13 +210,6 @@ function mediacommons_base_import_show_options ( array $commands = array() ) {
 
 function mediacommons_base_import_init(array $options = array()) {
 
-  // We need extra memory
-  ini_set("memory_limit", "512MM");
-
-  // http://docs.drush.org/en/master/bootstrap/
-  // http://api.drush.org/api/drush/includes%21bootstrap.inc/constant/DRUSH_BOOTSTRAP_DRUPAL_FULL/7.x
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-
   global $databases;
 
   if (!isset($databases['drupal6'])) {
@@ -260,6 +251,13 @@ function mediacommons_base_import_init(array $options = array()) {
 $trace = debug_backtrace();
 
 $caller = (isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__);
+
+// We need extra memory
+ini_set("memory_limit", "512MM");
+
+// http://docs.drush.org/en/master/bootstrap/
+// http://api.drush.org/api/drush/includes%21bootstrap.inc/constant/DRUSH_BOOTSTRAP_DRUPAL_FULL/7.x
+drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
 
 /** This script is meant to be "extended", not to be used by itself. */
 if (preg_match('/core.drush.inc/', $caller)) drush_log('Mama told me never talk to strangers', 'error');

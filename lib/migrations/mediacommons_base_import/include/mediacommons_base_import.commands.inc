@@ -7,7 +7,6 @@ function clean_images_paths ( $text ) {
   foreach ( $html->find('img') as $element ) {
     $parse_url = parse_url ( $element->src ) ;
     $match = preg_match ( '/mediacommons.futureofthebook.org/i' , $parse_url['host'] ) ;
-
     if ( isset ( $parse_url['host'] ) && ! $match ) { } // nothing to do
 
     else if ( isset ( $parse_url['host'] ) && $match ) { } // nothing to do
@@ -367,58 +366,6 @@ function mediacommons_base_import_body_field () {
 
 }
 
-function mc_file_save(stdClass $file) {
-
-  $file->timestamp = REQUEST_TIME;
-
-  $file->filesize = filesize($file->uri);
-
-  module_invoke_all('file_presave', $file);
-
-  module_invoke_all('entity_presave', $file, 'file');
-
-  if (empty($file->fid)) {
-    drupal_write_record('file_managed', $file);
-    // Inform modules about the newly added file.
-    module_invoke_all('file_insert', $file);
-    module_invoke_all('entity_insert', $file, 'file');
-  }
-  else {
-    drupal_write_record('file_managed', $file, 'fid');
-    // Inform modules that the file has been updated.
-    module_invoke_all('file_update', $file);
-    module_invoke_all('entity_update', $file, 'file');
-  }
-
-  // Clear internal properties.
-  unset($file->original);
-  // Clear the static loading cache.
-  entity_get_controller('file')->resetCache(array($file->fid));
-
-  return $file;
-}
-
-function mc_user_file_save_data($object) {
-  $destination = file_default_scheme() . '://pictures/' . $object['filename'];
-  $replace = FILE_EXISTS_REPLACE;
-  $data = file_get_contents($destination);
-  if ($data) {
-    if ($uri = file_unmanaged_save_data($data, $destination, $replace)) {
-      // Create a file object.
-      $file = new stdClass();
-      $file->fid = $object['fid'];
-      $file->fid = NULL;
-      $file->uri = $uri;
-      $file->filename = $object['filename'];
-      $file->filemime = file_get_mimetype($file->uri);
-      $file->uid = $object['uid'];
-      $file->status = FILE_STATUS_PERMANENT;
-      return mc_file_save($file);
-    }
-  }
-  return FALSE;
-}
-
 function register_users_images() {
   /** find all */
 	$query = db_query("SELECT uid, picture FROM {users} WHERE picture <> 0");
@@ -430,7 +377,6 @@ function register_users_images() {
                 ->condition('uid', $user->uid)
                 ->execute()
                 ->fetchAssoc();
-
     $data = mc_user_file_save_data($result);
   }
 }

@@ -44,12 +44,6 @@ done
 # load configuration file
 . $CONF_FILE
 
-# Copy sites files
-#if [ -d "$BACKUP_FILES_DIR" ]; then
-  # rsync -vrh --exclude '.htaccess' ${BACKUP_FILES_DIR}/ ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
-  # rsync -vrh --exclude '.htaccess' ${BACKUP_FILES_DIR}/ ${FILES_DIR}
-#fi
-
 # make sure there is a link to the default folder using our Drupal 6 convention
 ln -s ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/mediacommons.futureofthebook.org.${BUILD_BASE_NAME}
 
@@ -62,22 +56,32 @@ if [ ! -d ${DRUPAL_FILES_DIR} ];
     if [ $? -eq 0 ];
       then
         echo "Success: Creating directory ${DRUPAL_FILES_DIR}. Link it.";
-        chmod 777 ${DRUPAL_FILES_DIR}
+        chmod -R 2777 ${DRUPAL_FILES_DIR}
         rm -rf ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
         ln -s ${DRUPAL_FILES_DIR} ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
       else
         die ${LINENO} "build" "Fail: Creating directory ${DRUPAL_FILES_DIR}";
     fi;
 else
-  chmod 777 ${DRUPAL_FILES_DIR}
+  chmod -R 2777 ${DRUPAL_FILES_DIR}
   rm -rf ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
   ln -s ${DRUPAL_FILES_DIR} ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/files
-  if [ ! -d ${DRUPAL_FILES_DIR}/pictures ]; then
-    mkdir ${DRUPAL_FILES_DIR}/pictures;
-  fi
+fi
+
+if [ ! -d ${DRUPAL_FILES_DIR}/pictures ];
+  then
+    mkdir -p ${DRUPAL_FILES_DIR}/pictures
+    chmod -R 2777 ${DRUPAL_FILES_DIR}/pictures
 fi
 
 # copy users images directory
-rsync -vrh ${BUILD_APP_ROOT}/lib/files/mediacommons/pictures/* ${DRUPAL_FILES_DIR}/pictures
+rsync -vrh --exclude '.htaccess' ${BUILD_APP_ROOT}/lib/files/mediacommons/pictures/* ${DRUPAL_FILES_DIR}/pictures
+
+# copy sites files
+if [ -d ${DRUPAL_6_FILES_DIR} ]; then
+  rsync -vrh --exclude '.htaccess' ${DRUPAL_6_FILES_DIR}/* ${DRUPAL_FILES_DIR}
+fi
+
+drush vset file_temporary_path "${TEMP_DIR}" --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1
 
 exit 0

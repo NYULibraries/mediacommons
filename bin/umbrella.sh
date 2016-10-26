@@ -96,7 +96,7 @@ fi
 # Load configuration file
 . ${ROOT}/configs/mediacommons.conf
 
-[ $MAKE_FILE ]  || MAKE_FILE=${ROOT}/mediacommons.make
+[ $MAKE_FILE ] || MAKE_FILE=${ROOT}/mediacommons.make
 
 echo "Build script will use ${MAKE_FILE} to build the project"
 
