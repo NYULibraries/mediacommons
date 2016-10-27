@@ -72,6 +72,10 @@ function change_database_password_in_all_drupal_settings_files() {
     local new_db_password=$1
 
     for site in "${ALL_SITES[@]}"; do
+        # If user didn't choose all sites for this run, and doesn't have an
+        # existing instance of the site, don't continue.
+        if [ ! -d $MEDIACOMMONS/builds/${site}/ ]; then continue; fi
+
         cd $MEDIACOMMONS/builds/${site}/
 
         old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
@@ -102,7 +106,6 @@ function fix_symlinks() {
 }
 
 function change_database_names() {
-# declare -a ALL_SITES=( alt-ac fieldguide imr intransition mediacommons tne )
     for site in "${selected_sites[@]}"
     do
         old_database_name="dev$(sed s'/-//' ${site})"
@@ -200,6 +203,10 @@ function do_database_grants() {
     # Ideally we would run the GRANT in `recreate_user()`, but initial attempts
     # to do that failed.  See comments in `recreate_user()` for the details.
     for site in "${ALL_SITES[@]}"; do
+        # If user didn't choose all sites for this run, and doesn't have an
+        # existing instance of the site, don't continue.
+        if [ ! -d $site ]; then continue; fi
+
         cd $site
 
         database=$( echo $site | sed 's/-//' )
