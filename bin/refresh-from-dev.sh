@@ -116,7 +116,7 @@ function change_database_names() {
         if [ "${site}" == 'mediacommons' ]
         then
             # No need to change the database name.
-            break
+            continue
         elif [ "${site}" == 'tne' ]
         then
             old_database_name='devtnedb'
