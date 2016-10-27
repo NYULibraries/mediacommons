@@ -114,7 +114,7 @@ function change_database_names() {
         fi
 
         cd $MEDIACOMMONS/builds/
-        sed -i.${site}_database_name.bak "s//${site}/" ${site}/sites/default/settings.php
+        sed -i.${site}_database_name.bak "s/${old_database_name}/${site}/" ${site}/sites/default/settings.php
     done
 }
 
