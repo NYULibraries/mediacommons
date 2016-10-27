@@ -64,6 +64,10 @@ function copy_drupal_code() {
     done
 }
 
+# Generate a new password to replace the one from dev.  At the moment, all the
+# sites except for mediacommons use the same database credentials.  If we refresh
+# one, all sites `settings.php` files need the new password, even if they were
+# not chosen for the refresh.  That's why we don't do this in `copy_drupal_code`.
 function change_database_password_in_all_drupal_settings_files() {
     local new_db_password=$1
 
