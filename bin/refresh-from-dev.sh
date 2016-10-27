@@ -130,7 +130,8 @@ function change_database_names() {
 function copy_files() {
     for site in "${selected_sites[@]}"
     do
-        rsync -azvh --delete ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${site} ${MC_FILES}/${site}
+        remote_directory=$( echo $site | sed 's/-//' )
+        rsync -azvh --delete ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${remote_directory} ${MC_FILES}/${site}
     done
 }
 
