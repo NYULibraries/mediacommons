@@ -5,7 +5,7 @@ SCRIPT_RUN_COMPLETE='Mediacommons refresh run completed.'
 EXPECT_SIGNAL_SELECT_SITES_COMPLETED="EXPECT: NUMBER OF SITES SELECTED = "
 
 DEV_SERVER=devmc.dlib.nyu.edu
-DEV_SERVER_MC_BUILDS=/www/sites/drupal/scripts/mediacommons/builds
+DEV_SERVER_MC_BUILDS=/www/sites/mediacommons/builds
 DEV_SERVER_DATABASE_DUMPS=/www/sites/mediacommons/lib/dumps
 DEV_SERVER_FILES=/www/sites/mediacommons/lib/files
 
