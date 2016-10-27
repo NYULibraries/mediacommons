@@ -108,7 +108,9 @@ function fix_symlinks() {
 function change_database_names() {
     for site in "${selected_sites[@]}"
     do
-        old_database_name="dev$(sed s'/-//' ${site})"
+        site_name_without_hyphens=$( echo ${site} | sed s'/-//' )
+
+        old_database_name="dev${site_name_without_hyphens}"
 
         # Deal with the two exceptions to the name scheme.
         if [ "${site}" == 'mediacommons' ]
@@ -121,7 +123,7 @@ function change_database_names() {
         fi
 
         cd $MEDIACOMMONS/builds/
-        sed -i.${site}_database_name.bak "s/${old_database_name}/${site}/" ${site}/sites/default/settings.php
+        sed -i.${site}_database_name.bak "s/${old_database_name}/${site_name_without_hyphens}/" ${site}/sites/default/settings.php
     done
 }
 
