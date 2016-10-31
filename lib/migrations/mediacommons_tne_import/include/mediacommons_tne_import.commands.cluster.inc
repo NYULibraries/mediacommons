@@ -1,39 +1,36 @@
 <?php
 
-function migrate_clusters () {
+function migrate_clusters() {
   foreach (clusters() as $entity) migrate_cluster($entity);
 }
 
-function migrate_cluster ($entity) {
+function migrate_cluster($entity) {
 
   $node = array();
 
-  $node['title'] =  $entity->title ;
+  $node['title'] =  $entity->title;
 
-  $node['ouid'] = $entity->uid ;
+  $node['ouid'] = $entity->uid;
 
-  $node['onid'] = $entity->nid ;
+  $node['onid'] = $entity->nid;
 
-  $node['language'] = LANGUAGE_NONE ;
+  $node['language'] = LANGUAGE_NONE;
 
-  $node['date'] = date ( 'Y-m-j H:i:s' , $entity->created ) ;
+  $node['date'] = date('Y-m-j H:i:s' , $entity->created);
 
-  $node['status'] = $entity->status ;
+  $node['status'] = $entity->status;
 
-  $node['field_pubstat'] = $entity->status ;
+  $node['field_pubstat'] = $entity->status;
 
-  $node['promote'] = $entity->promote ;
+  $node['promote'] = $entity->promote;
 
-  $node['moderate'] = $entity->moderate ;
+  $node['moderate'] = $entity->moderate;
 
-  $node['sticky'] = $entity->sticky ;
+  $node['sticky'] = $entity->sticky;
 
-  if ( isset ( $entity->field_description_value ) ) {
-
-  	extract_iframe_sources ( $entity->field_description_value ) ;
-
-    $node['field_body'] = $entity->field_description_value ;
-
+  if (isset($entity->field_description_value)) {
+  	extract_iframe_sources($entity->field_description_value);
+    $node['field_body'] = $entity->field_description_value;
   }
 
   /**
@@ -43,32 +40,35 @@ function migrate_cluster ($entity) {
    * 1 | Image
    */
   switch ( $entity->field_cluster_type_value ) {
-
   	case 1:
-
-    // field_image_fid
-    if ( isset ( $entity->field_image_fid ) ) $node['field_representative_image'] = (object) array ( 'fid' => $entity->field_image_fid ) ;
-
-    break  ;
-
-    default :
-
       // field_image_fid
-      if ( isset ( $entity->field_tease_image_fid ) ) $node['field_representative_image'] = (object) array( 'fid' => $entity->field_tease_image_fid ) ;
-
+      if (isset($entity->field_image_fid)) {
+        $node['field_representative_image'] = (object) array('fid' => $entity->field_image_fid);
+      }
+      break;
+    default:
+      // field_image_fid
+      if (isset($entity->field_tease_image_fid)) {
+        $node['field_representative_image'] = (object) array('fid' => $entity->field_tease_image_fid);
+      }
       else {
     	  // if youtube find image using the API
-    	  if ( isset ( $entity->field_video_embed_link_provider ) && $entity->field_video_embed_link_provider == 'youtube' ) {
-    		  $node['field_representative_image'] = (object) array( 'source' => 'http://img.youtube.com/vi/' . $entity->field_video_embed_link_value  .'/0.jpg', );
+    	  if (
+          isset($entity->field_video_embed_link_provider) &&
+          $entity->field_video_embed_link_provider == 'youtube'
+        ) {
+    		  $node['field_representative_image'] = (object) array('source' => 'http://img.youtube.com/vi/' . $entity->field_video_embed_link_value  .'/0.jpg');
     	  }
       }
-
-      if ( isset ( $entity->field_video_embed_link_embed ) ) {
-
+      if (isset($entity->field_video_embed_link_embed)) {
         $temp = $node['field_body'];
-
-        $node['field_body'] = '<div class="embed">' . $entity->field_video_embed_link_embed . '</div>' . '<div class="body_content">' . $temp . '</div>';
-
+        $node['field_body']  =  '<div class="embed">';
+        $node['field_body'] .=  '<iframe src="' . $entity->field_video_embed_link_embed . '" frameborder="0" allowfullscreen>';
+        $node['field_body'] .=  '<p>Your browser does not support iframes.</p>';
+        $node['field_body'] .=  '</iframe>';
+        $node['field_body'] .=  '</div>';
+        $node['field_body'] .=  '<div class="body_content">' . $temp . '</div>';
+        unset($temp);
       }
   }
 
