@@ -86,7 +86,6 @@ interact {
     }
 }
 
-
 # number of Drupal directories + number of files/ directories + database dumps directory
 #     number of Drupal directories = number of sites
 #     number of files/ directories = number of sites
