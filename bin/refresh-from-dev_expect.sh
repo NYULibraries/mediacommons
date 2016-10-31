@@ -68,9 +68,6 @@ echo -n "Password for web server: "
 read -s password
 echo
 
-# Number of sites + files/ + database dumps = 6 + 1 + 1 = 8
-RSYNC_COUNT=8
-
 # Originally had heredoc:
 # expect<<EOF
 # ...but when added `interact` command it didn't work right.  Nothing was being
