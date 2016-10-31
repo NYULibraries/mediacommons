@@ -49,7 +49,7 @@ function copy_drupal_code() {
 
     for site in "${selected_sites[@]}"; do
         rm -fr builds/${site}
-        rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_MC_BUILDS}/${site}/ builds/${site}/
+        rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/ builds/${site}/
  
         # Turning this off because certain files have all perms turned off, which causes rsync
         # to return with non-zero status.
