@@ -144,6 +144,13 @@ function copy_files() {
     done
 }
 
+function refresh_database_dumps_on_server() {
+    for site in "${selected_sites[@]}"
+    do
+        ssh ${DEV_SERVER_USERNAME}@${DEV_SERVER} ${DEV_SERVER_EXPORT_DB_SCRIPT} -c ${DEV_SERVER_CONFIGS}/${site}.conf
+    done
+}
+
 function copy_database_dumps() {
     # To keep things simple, copy all the database dumps regardless of which sites
     # were selected for refresh.  Faster, simpler.  Safe because only databases
@@ -257,6 +264,10 @@ validate_args
 select_sites
 
 set -x
+
+# This needs to always run before any rsyncs because the `expect` script expects
+# remote script execution calls to happen before the rsyncs.
+refresh_database_dumps_on_server
 
 copy_drupal_code
 
