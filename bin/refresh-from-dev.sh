@@ -78,7 +78,16 @@ function change_database_password_in_all_drupal_settings_files() {
 
         cd $MEDIACOMMONS/builds/${site}/
 
-        old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
+        # Note the sed commands at the end to strip enclosing single quotes.
+        # Originally tried:
+        #     sed 's/^\x27//'
+        # and
+        #     sed 's/\x27$//'
+        # but Mac OS X sed apparently does not do \xXX escapes.
+        # Using solution posted by Gordon Davisson on stackoverflow:
+        # http://stackoverflow.com/questions/14889005/hex-codes-in-sed-not-behaving-as-expected-on-osx
+        # "Hex codes in sed - not behaving as expected on OSX"
+        old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' | sed $'s/^\x27//' | sed $'s/\x27$//' )"
         settings_file=$( find . -name settings.php )
         sed -i.old_db_password.bak "s/${old_db_password}/${new_db_password}/" $settings_file
     done
