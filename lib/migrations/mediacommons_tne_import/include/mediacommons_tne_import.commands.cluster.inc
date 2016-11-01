@@ -61,20 +61,28 @@ function migrate_cluster($entity) {
     	  }
       }
       if (isset($entity->field_video_embed_link_embed)) {
+        // YouTube Player API Reference for iframe Embeds
+        // https://developers.google.com/youtube/iframe_api_reference
+        // if YouTube we need to test for string "watch?" and change it to "embed?"
+        $string = $entity->field_video_embed_link_embed;
         $temp = $node['field_body'];
+        if (strpos($string, 'youtube') !== false && strpos($string, 'watch?') !== false) {
+          $string = str_replace('watch?', 'embed?', $string);
+        }          
         $node['field_body']  =  '<div class="embed">';
-        $node['field_body'] .=  '<iframe src="' . $entity->field_video_embed_link_embed . '" frameborder="0" allowfullscreen>';
-        $node['field_body'] .=  '<p>Your browser does not support iframes.</p>';
+        $node['field_body'] .=  '<iframe id="player" src="' . $string . '" width="640" height="390" frameborder="0" type="text/html" allowfullscreen>';
+        $node['field_body'] .=  '<p>' . t('Your browser does not support iframes.') . '</p>';
         $node['field_body'] .=  '</iframe>';
         $node['field_body'] .=  '</div>';
         $node['field_body'] .=  '<div class="body_content">' . $temp . '</div>';
-        unset($temp);
+        unset($string);
+        unset($temp);        
       }
   }
 
-  if ( isset ( $entity->pieces ) ) $node['field_spokes'] = explode( ',', $entity->pieces ) ;
+  if (isset($entity->pieces)) $node['field_spokes'] = explode(',', $entity->pieces);
 
-  if ( isset ( $entity->contributors ) ) $node['field_contributors'] = explode ( ',', $entity->contributors ) ;
+  if (isset($entity->contributors)) $node['field_contributors'] = explode(',', $entity->contributors);
 
   if (isset ($entity->terms)) {
     foreach (explode (', ', $entity->terms ) as $tid) {
@@ -90,6 +98,6 @@ function migrate_cluster($entity) {
 
   if ( isset($entity->field_period_value2) ) $node['field_period_2'] = strtotime ( $entity->field_period_value2 ) ;
 
-  create_hub ( $node ) ;
+  create_hub($node);
 
 }

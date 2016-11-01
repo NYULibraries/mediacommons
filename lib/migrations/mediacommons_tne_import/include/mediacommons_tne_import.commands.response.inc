@@ -1,7 +1,7 @@
 <?php
 
 function migrate_responses () {
-  foreach ( responses () as $key => $entity ) migrate_response ( $entity ) ;
+  foreach (responses () as $key => $entity) migrate_response($entity);
 }
 
 function migrate_response ( $entity ) {

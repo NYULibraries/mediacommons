@@ -46,13 +46,10 @@ function migrate_contributed_piece($spoke) {
   foreach ( explode (',', $spoke->terms) as $tid ) $node['field_tags'][] = (int) trim ( $tid ) ;
 
   /** Additional authors */
-  if ( $spoke->additonal_authors ) {
-
+  if ($spoke->additonal_authors) {
     $node['field_contributors'] = array () ;
-
     /** Contributors */
     $spoke_contributors = explode (',', $spoke->additonal_authors ) ;
-
     /** Contributor order */
     foreach ( $spoke_contributors as $key => $contributor ) {
       $node['field_contributors'][] = array ( 'uid' => $contributor, '_weight' => $key ) ;
