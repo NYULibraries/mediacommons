@@ -64,13 +64,30 @@ function copy_drupal_code() {
     done
 }
 
+# Generate a new password to replace the one from dev.  At the moment, all the
+# sites except for mediacommons use the same database credentials.  If we refresh
+# one, all sites `settings.php` files need the new password, even if they were
+# not chosen for the refresh.  That's why we don't do this in `copy_drupal_code`.
 function change_database_password_in_all_drupal_settings_files() {
     local new_db_password=$1
 
     for site in "${ALL_SITES[@]}"; do
+        # If user didn't choose all sites for this run, and doesn't have an
+        # existing instance of the site, don't continue.
+        if [ ! -d $MEDIACOMMONS/builds/${site}/ ]; then continue; fi
+
         cd $MEDIACOMMONS/builds/${site}/
 
-        old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
+        # Note the sed commands at the end to strip enclosing single quotes.
+        # Originally tried:
+        #     sed 's/^\x27//'
+        # and
+        #     sed 's/\x27$//'
+        # but Mac OS X sed apparently does not do \xXX escapes.
+        # Using solution posted by Gordon Davisson on stackoverflow:
+        # http://stackoverflow.com/questions/14889005/hex-codes-in-sed-not-behaving-as-expected-on-osx
+        # "Hex codes in sed - not behaving as expected on OSX"
+        old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' | sed $'s/^\x27//' | sed $'s/\x27$//' )"
         settings_file=$( find . -name settings.php )
         sed -i.old_db_password.bak "s/${old_db_password}/${new_db_password}/" $settings_file
     done
@@ -97,15 +114,33 @@ function fix_symlinks() {
     done
 }
 
-function change_tne_database_name() {
-    cd $MEDIACOMMONS/builds/
-    sed -i.tne_database_name.bak 's/d7_tne/tne/' tne/sites/default/settings.php
+function change_database_names() {
+    for site in "${selected_sites[@]}"
+    do
+        site_name_without_hyphens=$( echo ${site} | sed s'/-//' )
+
+        old_database_name="dev${site_name_without_hyphens}"
+
+        # Deal with the two exceptions to the name scheme.
+        if [ "${site}" == 'mediacommons' ]
+        then
+            # No need to change the database name.
+            continue
+        elif [ "${site}" == 'tne' ]
+        then
+            old_database_name='devtnedb'
+        fi
+
+        cd $MEDIACOMMONS/builds/
+        sed -i.${site}_database_name.bak "s/${old_database_name}/${site_name_without_hyphens}/" ${site}/sites/default/settings.php
+    done
 }
 
 function copy_files() {
     for site in "${selected_sites[@]}"
     do
-        rsync -azvh --delete ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${site} ${MC_FILES}/${site}
+        remote_directory=$( echo $site | sed 's/-//' )
+        rsync -azvh --delete ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${remote_directory}/ ${MC_FILES}/${site}/
     done
 }
 
@@ -180,6 +215,10 @@ function do_database_grants() {
     # Ideally we would run the GRANT in `recreate_user()`, but initial attempts
     # to do that failed.  See comments in `recreate_user()` for the details.
     for site in "${ALL_SITES[@]}"; do
+        # If user didn't choose all sites for this run, and doesn't have an
+        # existing instance of the site, don't continue.
+        if [ ! -d $site ]; then continue; fi
+
         cd $site
 
         database=$( echo $site | sed 's/-//' )
@@ -221,15 +260,15 @@ set -x
 
 copy_drupal_code
 
-# Generate a new password to replace the one from dev.  At the moment, all sites
-# use the same database credentials.  If we refresh one, all sites `settings.php`
-# files need the new password, even if they were not chosen for the refresh.
-# That's why we don't do this in `copy_drupal_code`.
+# Generate a new password to replace the one from dev.  At the moment, all the
+# sites except for mediacommons use the same database credentials.  If we refresh
+# one, all sites `settings.php` files need the new password, even if they were
+# not chosen for the refresh.  That's why we don't do this in `copy_drupal_code`.
 change_database_password_in_all_drupal_settings_files "$(generate_new_password)"
 
 fix_symlinks
 
-change_tne_database_name
+change_database_names
 
 copy_files
 
