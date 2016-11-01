@@ -365,18 +365,3 @@ function mediacommons_base_import_body_field () {
   }
 
 }
-
-function register_users_images() {
-  /** find all */
-	$query = db_query("SELECT uid, picture FROM {users} WHERE picture <> 0");
-	/** return nids */
-	foreach ($query->fetchAll() as $user) {
-    $result = db_select('mediacommons_base_import_user_map', 'u')
-                ->fields('u')
-                ->condition('fid', $user->picture)
-                ->condition('uid', $user->uid)
-                ->execute()
-                ->fetchAssoc();
-    $data = mc_user_file_save_data($result);
-  }
-}

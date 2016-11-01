@@ -268,23 +268,3 @@ function mc_file_save(stdClass $file) {
 
   return $file;
 }
-
-function mc_user_file_save_data($object) {
-  $destination = file_default_scheme() . '://pictures/' . $object['filename'];
-  $data = file_get_contents($destination);
-  if ($data) {
-    $uri = file_unmanaged_save_data($data, $destination, FILE_EXISTS_REPLACE);
-    if ($uri) {
-      $file = new stdClass();
-      $file->fid = $object['fid'];
-      $file->fid = NULL;
-      $file->uri = $uri;
-      $file->filename = $object['filename'];
-      $file->filemime = file_get_mimetype($file->uri);
-      $file->uid = $object['uid'];
-      $file->status = FILE_STATUS_PERMANENT;
-      return mc_file_save($file);
-    }
-  }
-  return FALSE;
-}

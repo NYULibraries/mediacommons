@@ -1,13 +1,42 @@
 <?php
 
+function mc_user_file_save_data($object) {
+  $destination = file_default_scheme() . '://pictures/' . $object['filename'];
+  $data = file_get_contents($destination);
+  if ($data) {
+    $uri = file_unmanaged_save_data($data, $destination, FILE_EXISTS_REPLACE);
+    if ($uri) {
+      $file = new stdClass();
+      $file->fid = $object['fid'];
+      $file->fid = NULL;
+      $file->uri = $uri;
+      $file->filename = $object['filename'];
+      $file->filemime = file_get_mimetype($file->uri);
+      $file->uid = $object['uid'];
+      $file->status = FILE_STATUS_PERMANENT;
+      return mc_file_save($file);
+    }
+  }
+  return FALSE;
+}
+
+function register_users_images() {
+  /** find all */
+	$query = db_query("SELECT uid, picture FROM {users} WHERE picture <> 0");
+	/** return nids */
+	foreach ($query->fetchAll() as $user) {
+    $result = db_select('mediacommons_base_import_user_map', 'u')
+                ->fields('u')
+                ->condition('fid', $user->picture)
+                ->condition('uid', $user->uid)
+                ->execute()
+                ->fetchAssoc();
+    $data = mc_user_file_save_data($result);
+  }
+}
+
 function migrate_all_users() {
-  
   $users = d6_users();
-	
-  //migrate_user($users[13889]);
-	
-  //migrate_user($users[12]);
-	
   foreach ($users as $user) {
     migrate_user($user);
   }
@@ -70,8 +99,17 @@ function migrate_user($user) {
     // https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
     $account = user_save(null, $new_user);
     if ($account) {
+      $ufp = 0;
+      $fid = ($user_picture->fid) ? $user_picture->fid : 0;
+      if ($fid) {
+        $pathinfo = pathinfo($user->picture);
+        $ufp = $pathinfo['basename'];
+      }
       drush_log(dt('User @user created', array ('@user' => $user->name)), 'ok');
-      db_insert('mediacommons_base_import_user_map')->fields(array('ouid' => $user->uid, 'uid' => $account->uid))->execute();
+      db_insert('mediacommons_base_import_user_map')->fields(array('ouid' => $user->uid, 'uid' => $account->uid, 'fid'=> $fid, 'filename' => $ufp))->execute();
+      unset($fid);
+      unset($ufp);
+      unset($pathinfo);
     }
   }
   catch (Exception $e) {
