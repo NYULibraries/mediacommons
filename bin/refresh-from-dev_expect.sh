@@ -68,9 +68,6 @@ echo -n "Password for web server: "
 read -s password
 echo
 
-# Number of sites + files/ + database dumps = 6 + 1 + 1 = 8
-RSYNC_COUNT=8
-
 # Originally had heredoc:
 # expect<<EOF
 # ...but when added `interact` command it didn't work right.  Nothing was being
@@ -89,6 +86,31 @@ interact {
     }
 }
 
+set num_ssh_export_db_script_calls_to_perform \"\$num_selected_sites\"
+
+puts \"\\nNumber of ssh export_db.sh calls to perform: \$num_ssh_export_db_script_calls_to_perform\"
+
+set export_db_script \"${DEV_SERVER_EXPORT_DB_SCRIPT}\"
+
+for {set i 1} {\$i <= \$num_ssh_export_db_script_calls_to_perform} {incr i 1} {
+    expect \"${DEV_SERVER_USERNAME}@${DEV_SERVER}'s password:\"
+
+    send \"$password\r\";
+
+    expect {
+        \"Success: See dump database\" { puts \"\nexport_db.sh #\$i completed successfully.\" }
+
+        \"file: \$export_db_script | line:\" {
+             puts \"\nexport_db.sh #\$i failed with error.\"
+             exit 1
+        }
+
+        \"Permission denied, please try again.\" {
+             puts \"\nYou will need to run this script again and re-type your password.\"
+             exit 1
+        }
+    }
+}
 
 # number of Drupal directories + number of files/ directories + database dumps directory
 #     number of Drupal directories = number of sites

@@ -49,7 +49,7 @@ function copy_drupal_code() {
 
     for site in "${selected_sites[@]}"; do
         rm -fr builds/${site}
-        rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_MC_BUILDS}/${site}/ builds/${site}/
+        rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/ builds/${site}/
  
         # Turning this off because certain files have all perms turned off, which causes rsync
         # to return with non-zero status.
@@ -141,6 +141,13 @@ function copy_files() {
     do
         remote_directory=$( echo $site | sed 's/-//' )
         rsync -azvh --delete ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${remote_directory}/ ${MC_FILES}/${site}/
+    done
+}
+
+function refresh_database_dumps_on_server() {
+    for site in "${selected_sites[@]}"
+    do
+        ssh ${DEV_SERVER_USERNAME}@${DEV_SERVER} ${DEV_SERVER_EXPORT_DB_SCRIPT} -c ${DEV_SERVER_CONFIGS}/${site}.conf
     done
 }
 
@@ -257,6 +264,10 @@ validate_args
 select_sites
 
 set -x
+
+# This needs to always run before any rsyncs because the `expect` script expects
+# remote script execution calls to happen before the rsyncs.
+refresh_database_dumps_on_server
 
 copy_drupal_code
 

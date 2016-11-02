@@ -5,9 +5,12 @@ SCRIPT_RUN_COMPLETE='Mediacommons refresh run completed.'
 EXPECT_SIGNAL_SELECT_SITES_COMPLETED="EXPECT: NUMBER OF SITES SELECTED = "
 
 DEV_SERVER=devmc.dlib.nyu.edu
-DEV_SERVER_MC_BUILDS=/www/sites/mediacommons/builds
-DEV_SERVER_DATABASE_DUMPS=/www/sites/mediacommons/lib/dumps
-DEV_SERVER_FILES=/www/sites/mediacommons/lib/files
+DEV_SERVER_MC=/www/sites/mediacommons
+DEV_SERVER_BUILDS=${DEV_SERVER_MC}/builds
+DEV_SERVER_CONFIGS=${DEV_SERVER_MC}/configs
+DEV_SERVER_DATABASE_DUMPS=${DEV_SERVER_MC}/lib/dumps
+DEV_SERVER_EXPORT_DB_SCRIPT=${DEV_SERVER_MC}/bin/utilities/export_db.sh
+DEV_SERVER_FILES=${DEV_SERVER_MC}/lib/files
 
 # Directory where storing local copies of devmc database dumps
 DATABASE_DUMPS=

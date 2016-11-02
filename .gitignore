@@ -45,6 +45,3 @@ builds/*
 temp/*
 !temp/.commit-empty-dir
 
-temp/.commit-empty-dir
-
-bin/fix-bad-html-in-tne-node-135.sql

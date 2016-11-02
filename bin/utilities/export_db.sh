@@ -79,7 +79,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
               echo "/* end: Umbrella dump */;" >> ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}                            
           fi          
         else
-          echo "Error: Unable to dump database ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}"
+          die ${LINENO} "test" "Unable to dump database ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}"
         fi
       else
         die ${LINENO} "test" "Unable to connect URI: ${BASE_URL} ROOT: ${BUILD_DIR}/${BUILD_BASE_NAME}"
