@@ -133,7 +133,7 @@ function create_hub ( array $old_node ) {
       }
     }
   }
-
+  
   /**
    * Prepare node for saving
    */

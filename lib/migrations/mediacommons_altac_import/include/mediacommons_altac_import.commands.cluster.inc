@@ -44,12 +44,19 @@ function migrate_cluster($entity) {
 		case 1 :
 			// field_image_fid
 			if (isset($entity->field_image_fid)) {
-        $node['field_representative_image'] = (object) array ( 'fid' => $entity->field_image_fid );
+        $node['field_representative_image'] = (object) array ('fid' => $entity->field_image_fid);
       }
 			break ;
+
 		default :
+
 			// field_image_fid
-			if ( isset ( $entity->field_tease_image_fid ) ) $node['field_representative_image'] = (object) array( 'fid' => $entity->field_tease_image_fid ) ;
+			if (isset($entity->field_tease_image_fid)) {
+			  $node['field_representative_image'] = (object) array('fid' => $entity->field_tease_image_fid);
+			}
+			elseif (isset($entity->field_image_fid)) {
+			  $node['field_representative_image'] = (object) array('fid' => $entity->field_image_fid);
+			}
 			// if youtube find image using the API
 			else {
 				if ( isset ( $entity->field_video_embed_link_provider )
@@ -59,6 +66,7 @@ function migrate_cluster($entity) {
 					$node['field_representative_image'] = (object) array ( 'source' => 'http://img.youtube.com/vi/' . $entity->field_video_embed_link_value  .'/0.jpg', );
 				}
 			}
+			
 			if ( isset($entity->field_video_embed_link_embed)) {
 				$node['field_body'] = '<div class="embed">' . $entity->field_video_embed_link_embed . '</div>' . '<div class="body_content">' . $node['field_body'] . '</div>' ;
 			}
