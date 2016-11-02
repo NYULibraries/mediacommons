@@ -60,13 +60,13 @@ fi
 echo $$ > ${TEMP_DIR}/autobuild.pid
 
 # Get the latest make file and do any other task before running jobs
-# ${BUILD_APP_ROOT}/bin/update.sh
+${BUILD_APP_ROOT}/bin/update.sh
 
 # Do some house cleaning before running job
 # ${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 # Build and migrate Umbrella before anything else
-# ${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
+${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf -m ${MAKE_FILE};
 
 projects=(${PROJECTS})
 

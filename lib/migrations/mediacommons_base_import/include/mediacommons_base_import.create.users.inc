@@ -1,5 +1,58 @@
 <?php
 
+function users_file_save($file, $object) {
+
+  $user = user_load($object['uid']);
+
+  $file->timestamp = REQUEST_TIME;
+
+  $file->filesize = filesize($file->uri);
+
+  module_invoke_all('file_presave', $file);
+
+  module_invoke_all('entity_presave', $file, 'file');
+
+  if (empty($file->fid)) {
+  
+    drupal_write_record('file_managed', $file);
+    
+    // Inform modules about the newly added file.
+    module_invoke_all('file_insert', $file);
+    
+    module_invoke_all('entity_insert', $file, 'file');
+    
+    $query = 'SELECT fid FROM {files} WHERE filename = :filename';
+    
+    $fid = db_query('SELECT fid FROM {files} WHERE uri = :uri', array(':uri' => $file->uri))->fetchField();  
+
+  }
+  else {
+    
+    drupal_write_record('file_managed', $file, 'fid');
+    
+    // Inform modules that the file has been updated.
+    module_invoke_all('file_update', $file);
+    
+    module_invoke_all('entity_update', $file, 'file'); // true
+    
+    $fid = $file->fid;
+
+  }
+      
+  $user->picture = $fid;
+
+  user_save($user);
+
+  // Clear internal properties.
+  unset($file->original);
+
+  // Clear the static loading cache.
+  entity_get_controller('file')->resetCache(array($file->fid));
+  
+  return array($file, $user);
+  
+}
+
 function mc_user_file_save_data($object) {
   $destination = file_default_scheme() . '://pictures/' . $object['filename'];
   $data = file_get_contents($destination);
@@ -14,15 +67,17 @@ function mc_user_file_save_data($object) {
       $file->filemime = file_get_mimetype($file->uri);
       $file->uid = $object['uid'];
       $file->status = FILE_STATUS_PERMANENT;
-      return mc_file_save($file);
+      return users_file_save($file, $object);
     }
   }
   return FALSE;
 }
 
 function register_users_images() {
+
   /** find all */
 	$query = db_query("SELECT uid, picture FROM {users} WHERE picture <> 0");
+
 	/** return nids */
 	foreach ($query->fetchAll() as $user) {
     $result = db_select('mediacommons_base_import_user_map', 'u')
@@ -31,16 +86,17 @@ function register_users_images() {
                 ->condition('uid', $user->uid)
                 ->execute()
                 ->fetchAssoc();
-    $data = mc_user_file_save_data($result);
+    
+    $done = mc_user_file_save_data($result);
+
   }
+  
 }
 
 function migrate_all_users() {
-  $users = d6_users();
-  foreach ($users as $user) {
+  foreach (d6_users() as $user) {
     migrate_user($user);
   }
-	
 }
 
 function migrate_user($user) {
@@ -59,11 +115,11 @@ function migrate_user($user) {
   $dupal_file_path = drupal_realpath('public://');
 
   $user_exists = user_exists_by_ouid($user->uid);
-
+  
   $hash_count_log2 = 11;
 
   /** User already exist in database. */
-  if ($user_exists) return;
+  // if ($user_exists) return; leave out for now while I find this bug
   
   $new_user = array(
     'name' => $user->name,
@@ -94,7 +150,7 @@ function migrate_user($user) {
       $new_user['picture'] = $user_picture->fid;
     }
   }
-	
+
   try {
     // https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
     $account = user_save(null, $new_user);
@@ -106,10 +162,19 @@ function migrate_user($user) {
         $ufp = $pathinfo['basename'];
       }
       drush_log(dt('User @user created', array ('@user' => $user->name)), 'ok');
-      db_insert('mediacommons_base_import_user_map')->fields(array('ouid' => $user->uid, 'uid' => $account->uid, 'fid'=> $fid, 'filename' => $ufp))->execute();
+      db_insert('mediacommons_base_import_user_map')->fields(
+        array('ouid' => $user->uid, 
+              'uid' => $account->uid, 
+              'fid'=> $fid, 
+              'filename' => $ufp)
+         )->execute();
+
       unset($fid);
+      
       unset($ufp);
+      
       unset($pathinfo);
+      
     }
   }
   catch (Exception $e) {

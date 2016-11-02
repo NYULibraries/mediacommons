@@ -43,9 +43,7 @@ function imr_term_list() {
 	return Database::getConnection('default', 'imr6')->query($query, array(), array()) ;
 }
 
-function purge_terms() {
-
-}
+function purge_terms() {}
 
 //function imr_term_list() {
 //	$query = 'SELECT term.tid, term.vid, term.name, term.description, term.weight FROM {term_data} term';
