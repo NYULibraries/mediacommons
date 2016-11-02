@@ -33,7 +33,6 @@ function responses () {
 }
 
 function clusters () {
-
   $query = "
     SELECT
       n.nid,
@@ -169,7 +168,6 @@ function contributed_pieces () {
 }
 
 function contributed_pieces_by_onid ( $onid ) {
-
   $query = "
     SELECT
       n.nid,

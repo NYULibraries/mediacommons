@@ -1,8 +1,8 @@
 <?php
 
 function init () {
-  $commands = array (
-    array (
+  $commands = array(
+    array(
       'label' => t('Migrate site'),
       'callback' => array(
         'register_users_images',
@@ -14,7 +14,7 @@ function init () {
         'migrate_responses',
       ),
     ),
-  ) ;
+  );
   mediacommons_base_import_init(array('commands' => $commands));
 }
 

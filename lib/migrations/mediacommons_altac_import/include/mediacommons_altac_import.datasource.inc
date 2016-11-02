@@ -127,13 +127,18 @@ function contributed_pieces($nid = NULL) {
 
 }
 
-function find_iframe_sources ( $body ) {
+function find_iframe_sources($body) {
 
-	include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
+	include_once (libraries_get_path('simplehtmldom') . '/simple_html_dom.php');
 
-	$hosts = array ( 'iframe' => array ( ) , 'embed' => array ( ) , 'img' =>  array ( ) , 'sources' ) ;
+	$hosts = array(
+    'iframe' => array(),
+    'embed' => array(),
+    'img' =>  array(),
+    'sources'
+  );
 
-  $html = str_get_html( $body ) ;
+  $html = str_get_html($body);
 
 	// Find all iframe
 	foreach ( $html->find('iframe') as $element) {

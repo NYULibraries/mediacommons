@@ -32,42 +32,35 @@ function migrate_cluster($entity) {
 
 	if (isset($entity->field_description_value)) $node['field_body'] = $entity->field_description_value;
 
+  $cluster_type_value = $entity->field_cluster_type_value;
+
 	/**
 	 * Representative image
 	 * Use media type to find image source:
 	 * 0 | Embedded video
 	 * 1 | Image
 	 */
-	switch ( $entity->field_cluster_type_value ) {
-
+	switch ($cluster_type_value) {
 		case 1 :
-
 			// field_image_fid
-			if ( isset ( $entity->field_image_fid ) ) $node['field_representative_image'] = (object) array ( 'fid' => $entity->field_image_fid ) ;
-
+			if (isset($entity->field_image_fid)) {
+        $node['field_representative_image'] = (object) array ( 'fid' => $entity->field_image_fid );
+      }
 			break ;
-
 		default :
-
 			// field_image_fid
 			if ( isset ( $entity->field_tease_image_fid ) ) $node['field_representative_image'] = (object) array( 'fid' => $entity->field_tease_image_fid ) ;
-
 			// if youtube find image using the API
 			else {
-
 				if ( isset ( $entity->field_video_embed_link_provider )
 						&&
 						$entity->field_video_embed_link_provider == 'youtube'
 				) {
 					$node['field_representative_image'] = (object) array ( 'source' => 'http://img.youtube.com/vi/' . $entity->field_video_embed_link_value  .'/0.jpg', );
 				}
-
 			}
-
-			if ( isset ( $entity->field_video_embed_link_embed ) ) {
-
+			if ( isset($entity->field_video_embed_link_embed)) {
 				$node['field_body'] = '<div class="embed">' . $entity->field_video_embed_link_embed . '</div>' . '<div class="body_content">' . $node['field_body'] . '</div>' ;
-
 			}
 	}
 
