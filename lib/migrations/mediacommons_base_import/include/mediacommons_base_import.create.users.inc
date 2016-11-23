@@ -23,7 +23,7 @@ function users_file_save($file, $object) {
     
     $query = 'SELECT fid FROM {files} WHERE filename = :filename';
     
-    $fid = db_query('SELECT fid FROM {files} WHERE uri = :uri', array(':uri' => $file->uri))->fetchField();  
+    $fid = db_query('SELECT fid FROM {file_managed} WHERE uri = :uri', array(':uri' => $file->uri))->fetchField();  
 
   }
   else {

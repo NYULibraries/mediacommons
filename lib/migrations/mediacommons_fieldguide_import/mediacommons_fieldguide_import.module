@@ -5,8 +5,8 @@ function init() {
     array(
   	  'label' => t('Migrate site'),
   		'callback' => array(
-     		'download_files',
         'register_users_images',
+     		'download_files',
         'migrate_survey_questions',
         'migrate_survey_responses',
         'response_arrange_order',
