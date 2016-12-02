@@ -61,13 +61,29 @@ function migrate_cluster($entity) {
     	  }
       }
       if (isset($entity->field_video_embed_link_embed)) {
-        $temp = $node['field_body'];
+         // we need to find watch?v= and replace for embed/
+         // /watch?v=
+         
+        // https://www.youtube.com/watch?v=WH5m8c-tQNI
+        // should be
+        // https://www.youtube.com/embed/WH5m8c-tQNI
+      
+        $temp = str_replace('watch?v=', 'embed/', $entity->field_video_embed_link_embed);
+        // http://stackoverflow.com/questions/1252693/using-str-replace-so-that-it-only-acts-on-the-first-match#1252710
+        $pos = strpos($temp, '&');
+        if ($pos !== false) {
+          $newstring = substr_replace($temp, '?', $pos, strlen('&'));
+          $temp = $newstring;
+        }
+        
+        $t = $node['field_body'];
+        
         $node['field_body']  =  '<div class="embed">';
-        $node['field_body'] .=  '<iframe src="' . $entity->field_video_embed_link_embed . '" frameborder="0" allowfullscreen>';
+        $node['field_body'] .=  '<iframe src="' . $temp . '" frameborder="0" allowfullscreen>';
         $node['field_body'] .=  '<p>Your browser does not support iframes.</p>';
         $node['field_body'] .=  '</iframe>';
         $node['field_body'] .=  '</div>';
-        $node['field_body'] .=  '<div class="body_content">' . $temp . '</div>';
+        $node['field_body'] .=  '<div class="body_content">' . $t . '</div>';
         unset($temp);
       }
   }
