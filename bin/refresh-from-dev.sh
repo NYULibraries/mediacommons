@@ -238,12 +238,6 @@ function do_database_grants() {
     done
 }
 
-function fix_tne_wbr_problem() {
-    # See https://jira.nyu.edu/browse/MC-183
-    
-    mysql tne < $MEDIACOMMONS/bin/fix-bad-html-in-tne-node-135.sql
-}
-
 while getopts d:ef:u: opt
 do
     case $opt in
@@ -288,10 +282,6 @@ copy_database_dumps
 recreate_databases
 
 do_database_grants
-
-# Run this regardless of whether TNE was selected for refresh.  No harm done if
-# this fix has already been applied before.
-fix_tne_wbr_problem
 
 # This string tells the expect script wrapper that refresh run has completed.
 echo $SCRIPT_RUN_COMPLETE
