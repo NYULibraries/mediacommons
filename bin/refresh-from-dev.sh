@@ -20,8 +20,9 @@ usage: ${script_name} -d DATABASE_DUMPS [-e] -f MC_FILES [-u NETWORK_HOST_USERNA
                                      the expect wrapper script.
         -f MC_FILES              Full path to local directory where Drupal files/
                                      directories will be stored.
-        -u NETWORK_HOST_USERNAME Optional username to use when logging into the dev
-                                     server.  Defaults to \$(whoami).
+        -u NETWORK_HOST_USERNAME Optional username to use when logging into the
+                                     bastion host and dev server.
+                                     Defaults to \$(whoami).
 
 examples:
 

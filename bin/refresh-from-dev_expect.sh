@@ -36,7 +36,7 @@ usage: ${script_name} -d DATABASE_DUMPS -f MC_FILES [-u NETWORK_HOST_USERNAME]
         -f MC_FILES              Full path to local directory where Drupal files/
                                      directories will be stored.
         -u NETWORK_HOST_USERNAME Optional username to use when logging into the
-                                     bastion host and dev  server.
+                                     bastion host and dev server.
                                      Defaults to \$(whoami).
 
 examples:
