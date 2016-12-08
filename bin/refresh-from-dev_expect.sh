@@ -65,7 +65,7 @@ fi
 
 validate_args
 
-echo -n "Password for web server: "
+echo -n "Password for ${BASTION_HOST} and ${DEV_SERVER}: "
 read -s password
 echo
 
