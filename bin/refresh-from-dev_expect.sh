@@ -122,6 +122,10 @@ set num_rsyncs_to_perform \"[expr ( \$num_selected_sites * 2 ) + 1]\"
 puts \"\\nNumber of rsyncs to perform: \$num_rsyncs_to_perform\"
 
 for {set i 1} {\$i <= \$num_rsyncs_to_perform} {incr i 1} {
+    expect \"${NETWORK_HOST_USERNAME}@${BASTION_HOST}'s password:\"
+
+    send \"$password\r\";
+
     expect \"${NETWORK_HOST_USERNAME}@${DEV_SERVER}'s password:\"
 
     send \"$password\r\";

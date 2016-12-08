@@ -50,8 +50,11 @@ function copy_drupal_code() {
 
     for site in "${selected_sites[@]}"; do
         rm -fr builds/${site}
-        rsync -azvh ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/ builds/${site}/
- 
+        rsync -azvh \
+            -e 'ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}"' \
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/             \
+            builds/${site}/
+
         # Turning this off because certain files have all perms turned off, which causes rsync
         # to return with non-zero status.
         # Example:
@@ -141,14 +144,19 @@ function copy_files() {
     for site in "${selected_sites[@]}"
     do
         remote_directory=$( echo $site | sed 's/-//' )
-        rsync -azvh --delete ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${remote_directory}/ ${MC_FILES}/${site}/
+        rsync -azvh --delete \
+            -e 'ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}"' \
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${remote_directory}/  \
+            ${MC_FILES}/${site}/
     done
 }
 
 function refresh_database_dumps_on_server() {
     for site in "${selected_sites[@]}"
     do
-        ssh ${NETWORK_HOST_USERNAME}@${DEV_SERVER} ${DEV_SERVER_EXPORT_DB_SCRIPT} -c ${DEV_SERVER_CONFIGS}/${site}.conf
+        ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}" \
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}                                  \
+            ${DEV_SERVER_EXPORT_DB_SCRIPT} -c ${DEV_SERVER_CONFIGS}/${site}.conf
     done
 }
 
@@ -156,7 +164,10 @@ function copy_database_dumps() {
     # To keep things simple, copy all the database dumps regardless of which sites
     # were selected for refresh.  Faster, simpler.  Safe because only databases
     # for selected sites will actually be recreated.
-    rsync -azvh ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/ $DATABASE_DUMPS/
+    rsync -azvh \
+            -e 'ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}"' \
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/
+            $DATABASE_DUMPS/
 
     mv $DATABASE_DUMPS/alt-ac.sql $DATABASE_DUMPS/altac.sql
 }
