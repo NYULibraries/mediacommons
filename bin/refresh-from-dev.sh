@@ -51,7 +51,7 @@ function copy_drupal_code() {
     for site in "${selected_sites[@]}"; do
         rm -fr builds/${site}
         rsync -azvh \
-            -e 'ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}"' \
+            -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
             ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/             \
             builds/${site}/
 
@@ -145,7 +145,7 @@ function copy_files() {
     do
         remote_directory=$( echo $site | sed 's/-//' )
         rsync -azvh --delete \
-            -e 'ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}"' \
+            -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
             ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${remote_directory}/  \
             ${MC_FILES}/${site}/
     done
@@ -165,7 +165,7 @@ function copy_database_dumps() {
     # were selected for refresh.  Faster, simpler.  Safe because only databases
     # for selected sites will actually be recreated.
     rsync -azvh \
-            -e 'ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}"' \
+            -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
             ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/
             $DATABASE_DUMPS/
 
