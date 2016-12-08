@@ -4,6 +4,8 @@ SCRIPT_RUN_COMPLETE='Mediacommons refresh run completed.'
 # script to know when to return from `interact`
 EXPECT_SIGNAL_SELECT_SITES_COMPLETED="EXPECT: NUMBER OF SITES SELECTED = "
 
+BASTION_HOST=b.dlib.nyu.edu
+
 DEV_SERVER=devmc2.dlib.nyu.edu
 DEV_SERVER_MC=/www/sites/mediacommons
 DEV_SERVER_BUILDS=${DEV_SERVER_MC}/builds
