@@ -18,8 +18,8 @@ DATABASE_DUMPS=
 # Directory where storing local copies of devmc files/
 MC_FILES=
 
-# Username on dev server
-DEV_SERVER_USERNAME=
+# Username on bastion host and dev server
+NETWORK_HOST_USERNAME=
 
 # Running using `expect` script?
 EXPECT_MODE=false
@@ -65,9 +65,9 @@ function validate_args() {
         exit 1
     fi
 
-    if [ -z "${DEV_SERVER_USERNAME}" ]
+    if [ -z "${NETWORK_HOST_USERNAME}" ]
     then
-        echo >&2 "You must provide DEV_SERVER_USERNAME."
+        echo >&2 "You must provide NETWORK_HOST_USERNAME."
         usage
         exit 1
     fi
