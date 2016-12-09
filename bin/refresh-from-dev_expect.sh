@@ -94,6 +94,10 @@ puts \"\\nNumber of ssh export_db.sh calls to perform: \$num_ssh_export_db_scrip
 set export_db_script \"${DEV_SERVER_EXPORT_DB_SCRIPT}\"
 
 for {set i 1} {\$i <= \$num_ssh_export_db_script_calls_to_perform} {incr i 1} {
+    expect \"${NETWORK_HOST_USERNAME}@${BASTION_HOST}'s password:\"
+
+    send \"$password\r\";
+
     expect \"${NETWORK_HOST_USERNAME}@${DEV_SERVER}'s password:\"
 
     send \"$password\r\";
