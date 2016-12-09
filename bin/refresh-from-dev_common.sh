@@ -4,7 +4,9 @@ SCRIPT_RUN_COMPLETE='Mediacommons refresh run completed.'
 # script to know when to return from `interact`
 EXPECT_SIGNAL_SELECT_SITES_COMPLETED="EXPECT: NUMBER OF SITES SELECTED = "
 
-DEV_SERVER=devmc.dlib.nyu.edu
+BASTION_HOST=b.dlib.nyu.edu
+
+DEV_SERVER=devmc2.dlib.nyu.edu
 DEV_SERVER_MC=/www/sites/mediacommons
 DEV_SERVER_BUILDS=${DEV_SERVER_MC}/builds
 DEV_SERVER_CONFIGS=${DEV_SERVER_MC}/configs
@@ -18,8 +20,8 @@ DATABASE_DUMPS=
 # Directory where storing local copies of devmc files/
 MC_FILES=
 
-# Username on dev server
-DEV_SERVER_USERNAME=
+# Username on bastion host and dev server
+NETWORK_HOST_USERNAME=
 
 # Running using `expect` script?
 EXPECT_MODE=false
@@ -65,9 +67,9 @@ function validate_args() {
         exit 1
     fi
 
-    if [ -z "${DEV_SERVER_USERNAME}" ]
+    if [ -z "${NETWORK_HOST_USERNAME}" ]
     then
-        echo >&2 "You must provide DEV_SERVER_USERNAME."
+        echo >&2 "You must provide NETWORK_HOST_USERNAME."
         usage
         exit 1
     fi

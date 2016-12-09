@@ -12,16 +12,17 @@ function usage() {
 
     cat <<EOF
 
-usage: ${script_name} -d DATABASE_DUMPS [-e] -f MC_FILES [-u DEV_SERVER_USERNAME]
+usage: ${script_name} -d DATABASE_DUMPS [-e] -f MC_FILES [-u NETWORK_HOST_USERNAME]
     options:
-        -d DATABASE_DUMPS       Full path to local directory where database dumps
-                                    will be stored.
-        -e                      "expect" mode.  Indicates this script is being run from
-                                    the expect wrapper script.
-        -f MC_FILES             Full path to local directory where Drupal files/
-                                    directories will be stored.
-        -u DEV_SERVER_USERNAME  Optional username to use when logging into the dev
-                                    server.  Defaults to \$(whoami).
+        -d DATABASE_DUMPS        Full path to local directory where database dumps
+                                     will be stored.
+        -e                       "expect" mode.  Indicates this script is being run from
+                                     the expect wrapper script.
+        -f MC_FILES              Full path to local directory where Drupal files/
+                                     directories will be stored.
+        -u NETWORK_HOST_USERNAME Optional username to use when logging into the
+                                     bastion host and dev server.
+                                     Defaults to \$(whoami).
 
 examples:
 
@@ -49,8 +50,11 @@ function copy_drupal_code() {
 
     for site in "${selected_sites[@]}"; do
         rm -fr builds/${site}
-        rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/ builds/${site}/
- 
+        rsync -azvh \
+            -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/             \
+            builds/${site}/
+
         # Turning this off because certain files have all perms turned off, which causes rsync
         # to return with non-zero status.
         # Example:
@@ -140,14 +144,19 @@ function copy_files() {
     for site in "${selected_sites[@]}"
     do
         remote_directory=$( echo $site | sed 's/-//' )
-        rsync -azvh --delete ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${remote_directory}/ ${MC_FILES}/${site}/
+        rsync -azvh --delete \
+            -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_FILES}/${remote_directory}/  \
+            ${MC_FILES}/${site}/
     done
 }
 
 function refresh_database_dumps_on_server() {
     for site in "${selected_sites[@]}"
     do
-        ssh ${DEV_SERVER_USERNAME}@${DEV_SERVER} ${DEV_SERVER_EXPORT_DB_SCRIPT} -c ${DEV_SERVER_CONFIGS}/${site}.conf
+        ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}" \
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}                                  \
+            ${DEV_SERVER_EXPORT_DB_SCRIPT} -c ${DEV_SERVER_CONFIGS}/${site}.conf
     done
 }
 
@@ -155,7 +164,10 @@ function copy_database_dumps() {
     # To keep things simple, copy all the database dumps regardless of which sites
     # were selected for refresh.  Faster, simpler.  Safe because only databases
     # for selected sites will actually be recreated.
-    rsync -azvh ${DEV_SERVER_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/ $DATABASE_DUMPS/
+    rsync -azvh \
+            -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/
+            $DATABASE_DUMPS/
 
     mv $DATABASE_DUMPS/alt-ac.sql $DATABASE_DUMPS/altac.sql
 }
@@ -244,13 +256,13 @@ do
         d) DATABASE_DUMPS=$OPTARG ;;
         e) EXPECT_MODE=true ;;
         f) MC_FILES=$OPTARG ;;
-        u) DEV_SERVER_USERNAME=$OPTARG ;;
+        u) NETWORK_HOST_USERNAME=$OPTARG ;;
         *) echo >&2 "Options not set correctly."; usage; exit 1 ;;
     esac
 done
 
-if [ -z $DEV_SERVER_USERNAME ]; then
-    DEV_SERVER_USERNAME=$(whoami)
+if [ -z $NETWORK_HOST_USERNAME ]; then
+    NETWORK_HOST_USERNAME=$(whoami)
 fi
 
 validate_args

@@ -18,7 +18,7 @@ Expect: http://expect.sourceforge.net/
 
 Alternatively, you can run the refresh script without expect support:
 
-    ${REFRESH_SCRIPT} ${DATABASE_DUMPS} ${MC_FILES} ${DEV_SERVER_USERNAME}
+    ${REFRESH_SCRIPT} ${DATABASE_DUMPS} ${MC_FILES} ${NETWORK_HOST_USERNAME}
 EOF
 
     exit 1
@@ -29,14 +29,15 @@ function usage() {
 
     cat <<EOF
 
-usage: ${script_name} -d DATABASE_DUMPS -f MC_FILES [-u DEV_SERVER_USERNAME]
+usage: ${script_name} -d DATABASE_DUMPS -f MC_FILES [-u NETWORK_HOST_USERNAME]
     options:
-        -d DATABASE_DUMPS       Full path to local directory where database dumps
-                                    will be stored.
-        -f MC_FILES             Full path to local directory where Drupal files/
-                                    directories will be stored.
-        -u DEV_SERVER_USERNAME  Optional username to use when logging into the dev
-                                    server.  Defaults to \$(whoami).
+        -d DATABASE_DUMPS        Full path to local directory where database dumps
+                                     will be stored.
+        -f MC_FILES              Full path to local directory where Drupal files/
+                                     directories will be stored.
+        -u NETWORK_HOST_USERNAME Optional username to use when logging into the
+                                     bastion host and dev server.
+                                     Defaults to \$(whoami).
 
 examples:
 
@@ -53,18 +54,18 @@ do
     case $opt in
         d) DATABASE_DUMPS=$OPTARG ;;
         f) MC_FILES=$OPTARG ;;
-        u) DEV_SERVER_USERNAME=$OPTARG ;;
+        u) NETWORK_HOST_USERNAME=$OPTARG ;;
         *) echo >&2 "Options not set correctly."; usage; exit 1 ;;
     esac
 done
 
-if [ -z $DEV_SERVER_USERNAME ]; then
-    DEV_SERVER_USERNAME=$(whoami)
+if [ -z $NETWORK_HOST_USERNAME ]; then
+    NETWORK_HOST_USERNAME=$(whoami)
 fi
 
 validate_args
 
-echo -n "Password for web server: "
+echo -n "Password for ${BASTION_HOST} and ${DEV_SERVER}: "
 read -s password
 echo
 
@@ -77,7 +78,7 @@ set timeout -1
 
 set return_signal \"${EXPECT_SIGNAL_SELECT_SITES_COMPLETED}(\\\\d+)\"
 
-spawn ${REFRESH_SCRIPT} -e -d ${DATABASE_DUMPS} -f ${MC_FILES} -u ${DEV_SERVER_USERNAME}
+spawn ${REFRESH_SCRIPT} -e -d ${DATABASE_DUMPS} -f ${MC_FILES} -u ${NETWORK_HOST_USERNAME}
 
 interact {
     -o -re \$return_signal {
@@ -93,7 +94,7 @@ puts \"\\nNumber of ssh export_db.sh calls to perform: \$num_ssh_export_db_scrip
 set export_db_script \"${DEV_SERVER_EXPORT_DB_SCRIPT}\"
 
 for {set i 1} {\$i <= \$num_ssh_export_db_script_calls_to_perform} {incr i 1} {
-    expect \"${DEV_SERVER_USERNAME}@${DEV_SERVER}'s password:\"
+    expect \"${NETWORK_HOST_USERNAME}@${DEV_SERVER}'s password:\"
 
     send \"$password\r\";
 
@@ -121,7 +122,11 @@ set num_rsyncs_to_perform \"[expr ( \$num_selected_sites * 2 ) + 1]\"
 puts \"\\nNumber of rsyncs to perform: \$num_rsyncs_to_perform\"
 
 for {set i 1} {\$i <= \$num_rsyncs_to_perform} {incr i 1} {
-    expect \"${DEV_SERVER_USERNAME}@${DEV_SERVER}'s password:\"
+    expect \"${NETWORK_HOST_USERNAME}@${BASTION_HOST}'s password:\"
+
+    send \"$password\r\";
+
+    expect \"${NETWORK_HOST_USERNAME}@${DEV_SERVER}'s password:\"
 
     send \"$password\r\";
 
