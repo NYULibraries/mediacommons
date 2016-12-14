@@ -100,7 +100,7 @@ fi
 
 echo "Build script will use ${MAKE_FILE} to build the project"
 
-${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${MAKE_FILE}  -k -l -e ${ENVIRONMENT};
+${ROOT}/bin/build.sh -c ${ROOT}/configs/mediacommons.conf -m ${MAKE_FILE} -k -e ${ENVIRONMENT};
 
 if [ $? -eq 0 ];
   then

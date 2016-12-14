@@ -63,7 +63,7 @@ echo $$ > ${TEMP_DIR}/autobuild.pid
 ${BUILD_APP_ROOT}/bin/update.sh
 
 # Do some house cleaning before running job
-# ${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
+#${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 # Build and migrate Umbrella before anything else
 ${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf -m ${MAKE_FILE};
@@ -75,7 +75,7 @@ for project in ${projects[*]}
     # -l run in legacy mode
     # -e environment we are building
     # -k use cookies to share databases
-    ${BUILD_APP_ROOT}/bin/build.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf -m ${MAKE_FILE} -l -e ${ENVIRONMENT} -k;
+    ${BUILD_APP_ROOT}/bin/build.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf -m ${MAKE_FILE} -e ${ENVIRONMENT} -k;
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
