@@ -32,6 +32,8 @@ done
 # load configuration file
 . $CONF_FILE
 
+if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
+
 [ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}";
 
 echo $$ > ${PID_FILE}
@@ -41,9 +43,9 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
   curl -u ${CURL_USER}:${CURL_PASS} ${SQL_IMPORT_URL} > ${TEMP_DIR}/$BUILD_BASE_NAME.d7.sql
   # Danger zone
   # Drop database
-  drush sql-drop -y --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1
+  ${DRUSH} sql-drop -y --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1
   # Be afraid and do only if you know what you are doing
-  `drush sql-connect -y --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1` < ${TEMP_DIR}/$BUILD_BASE_NAME.d7.sql
+  `${DRUSH} sql-connect -y --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1` < ${TEMP_DIR}/$BUILD_BASE_NAME.d7.sql
 fi
 
 exit 0

@@ -29,13 +29,15 @@ done
 # load configuration file
 . $CONF_FILE
 
+if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
+
 [ -d ${BUILD_DIR}/${BUILD_BASE_NAME} ] || die "Build directory ${BUILD_DIR}/${BUILD_BASE_NAME} does not exist"
 
 [ ! `grep -q 'DRUPAL_ROOT' ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php` ] || die "${BUILD_DIR}/${BUILD_BASE_NAME} does not look like a Drupal installation folder."
 
 for i in $(echo $MODULES | sed "s/,/ /g")
   do
-    drush en ${i} --root=${BUILD_DIR}/${BUILD_BASE_NAME} -y
+    ${DRUSH} en ${i} --root=${BUILD_DIR}/${BUILD_BASE_NAME} -y
 done
 
 exit 0

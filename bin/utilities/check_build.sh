@@ -28,12 +28,14 @@ done
 # load configuration file
 . $CONF_FILE
 
+if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
+
 STATUS=`curl -s -o /dev/null -w "%{http_code}" $BASE_URL`
 
 echo "Base URL ${BASE_URL} reported status ${STATUS}"
 
-drush status --root=${BUILD_DIR}/${BUILD_BASE_NAME} --uri=${BASE_URL} --user=1
+${DRUSH} status --root=${BUILD_DIR}/${BUILD_BASE_NAME} --uri=${BASE_URL} --user=1
 
-drush features-list --root=${BUILD_DIR}/${BUILD_BASE_NAME} --uri=${BASE_URL} --user=1
+${DRUSH} features-list --root=${BUILD_DIR}/${BUILD_BASE_NAME} --uri=${BASE_URL} --user=1
 
 exit 0

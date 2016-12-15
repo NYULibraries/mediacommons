@@ -44,6 +44,8 @@ done
 # load configuration file
 . $CONF_FILE
 
+if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
+
 # make sure there is a link to the default folder using our Drupal 6 convention
 ln -s ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/mediacommons.futureofthebook.org.${BUILD_BASE_NAME}
 
@@ -82,6 +84,6 @@ if [ -d ${DRUPAL_6_FILES_DIR} ]; then
   rsync -vrh --exclude '.htaccess' ${DRUPAL_6_FILES_DIR}/* ${DRUPAL_FILES_DIR}
 fi
 
-drush vset file_temporary_path "${TEMP_DIR}" --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1
+${DRUSH} vset file_temporary_path "${TEMP_DIR}" --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1
 
 exit 0

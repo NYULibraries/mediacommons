@@ -21,8 +21,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 DEBUG=""
 
-DRUSH=$DIR/../drush
-
 ENVIRONMENT="local"
 
 while getopts ":c:h" opt; do
@@ -48,6 +46,8 @@ done
 
 # load configuration file
 . $CONF_FILE
+
+if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
 
 [ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}";
 

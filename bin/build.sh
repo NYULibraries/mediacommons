@@ -52,7 +52,7 @@ DEBUG=""
 
 ENVIRONMENT="local"
 
-while getopts ":e:c:m:hdlsikt" opt; do
+while getopts ":e:c:m:hdsikt" opt; do
  case $opt in
   c)
    [ -f $OPTARG ] || die "Configuration file does not exist."
@@ -67,9 +67,6 @@ while getopts ":e:c:m:hdlsikt" opt; do
     ;;
   d)
     DEBUG='-d -v'
-    ;;
-  l)
-    LEGACY_DRUSH=true
     ;;
   s)
     SASS=true
@@ -88,7 +85,6 @@ while getopts ":e:c:m:hdlsikt" opt; do
    echo "   -h           Show brief help"
    echo "   -e           Set the environment variable (default to local) if not set."
    echo "   -k           Allow site to share cookies accross domain"
-   echo "   -l           Use legacy drush (whatever is in your path) instead of repo drush"
    echo "   -s           Find SASS based themes and compile"
    echo "   -c <file>    Specify the configuration file to use (e.g., -c example.conf)."
    echo "   -m <file>    Specify the make file to use (e.g., -m example.make)."
@@ -99,21 +95,14 @@ while getopts ":e:c:m:hdlsikt" opt; do
   esac
 done
 
-# https://jira.nyu.edu/browse/DLTSVIEWER-16
-# Our web server php is lower than version 5.4, which causes bin/drush to break.
-if [ $LEGACY_DRUSH ]
-then
-    DRUSH=$(which drush)
-else
-    DRUSH=$DIR/drush
-fi
-
 [ $CONF_FILE ] || die ${LINENO} "fail" "No configuration file provided."
 
 [ $MAKE_FILE ] || die ${LINENO} "fail" "No make file provided."
 
 # load configuration file
 . $CONF_FILE
+
+if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
 
 # Here I need to test if the build is running and kill this process
 # or remove the pid file and keep going
