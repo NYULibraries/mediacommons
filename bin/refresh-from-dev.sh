@@ -166,7 +166,7 @@ function copy_database_dumps() {
     # for selected sites will actually be recreated.
     rsync -azvh \
             -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
-            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/             \
             $DATABASE_DUMPS/
 
     mv $DATABASE_DUMPS/alt-ac.sql $DATABASE_DUMPS/altac.sql
