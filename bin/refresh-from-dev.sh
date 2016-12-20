@@ -164,6 +164,16 @@ function copy_database_dumps() {
     # To keep things simple, copy all the database dumps regardless of which sites
     # were selected for refresh.  Faster, simpler.  Safe because only databases
     # for selected sites will actually be recreated.
+
+    # Clear out old dumps.  If this is not done and the rsync fails for some reason,
+    # the sites will be rebuilt with old databases, and this may or may not be
+    # immediately apparent.
+    for site in "${selected_sites[@]}"
+    do
+        database=$( echo $site | sed 's/-//' )
+        rm $DATABASE_DUMPS/${database}.sql
+    done
+
     rsync -azvh \
             -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
             ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_DATABASE_DUMPS}/             \
