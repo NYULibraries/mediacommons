@@ -51,6 +51,8 @@ done
 # load configuration file
 . $CONF_FILE
 
+if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
+
 # Here I need to test if the autobuild is running and kill this process
 # or remove the pid file and keep going
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
