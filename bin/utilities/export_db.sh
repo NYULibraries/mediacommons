@@ -66,8 +66,8 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     SITE_ONLINE=`$DRUSH -d -v core-status --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1`
     if [[ ${SITE_ONLINE} =~ "Successful" ]] ;
       then
-        $DRUSH -d -v cc all --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1 --strict=0
-        $DRUSH -d -v sql-dump --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1 --environment=${ENVIRONMENT} --strict=0 > ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}
+        $DRUSH $DEBUG cc all --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1 --strict=0
+        $DRUSH $DEBUG sql-dump --uri=${BASE_URL} --root=${BUILD_DIR}/${BUILD_BASE_NAME} --user=1 --environment=${ENVIRONMENT} --strict=0 > ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}
         if [[ -f ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME} ]]; then
           echo "Success: See dump database ${SQL_DUMP_DESTINATION}/${SQL_DUMP_FILENAME}"
           # Add the shared tables from "origin"
