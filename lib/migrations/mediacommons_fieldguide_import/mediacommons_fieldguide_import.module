@@ -11,6 +11,7 @@ function init() {
         'migrate_survey_responses',
         'response_arrange_order',
         'JIRA_MC186',
+        'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
   	  ),
     )
   );

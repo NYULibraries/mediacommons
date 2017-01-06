@@ -12,6 +12,7 @@ function init () {
       	'migrate_contributed_pieces',
         'migrate_clusters',
         'migrate_responses',
+        'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
       ),
     ),
   );

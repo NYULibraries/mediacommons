@@ -11,6 +11,7 @@ function init() {
         'mediacommons_imr_import_MC151', // See: https://jira.nyu.edu/browse/MC-151
         'migrate_posts',
       	'migrate_theme_weeks',
+        'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
       ),
     ),
   );

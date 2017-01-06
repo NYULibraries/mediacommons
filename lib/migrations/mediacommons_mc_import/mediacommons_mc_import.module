@@ -10,9 +10,10 @@ function init () {
         'import_terms',
         'prepare_taxonomy_fields',
         'map_roles',
-        'migrate_all_users',        
+        'migrate_all_users',
         'migrate_pages',
         'migrate_frontpages',
+        'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
       ),
     ),
   );

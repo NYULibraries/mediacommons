@@ -2,16 +2,16 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.51"
+projects[drupal][version] = "7.53"
 
 ; Modules
 
 projects[apachesolr][version] = "1.8"
 projects[apachesolr_multisitesearch][version] = "1.1"
-projects[ctools][version] = "1.11"
+projects[ctools][version] = "1.12"
 projects[cnr][version] = "4.22"
 projects[date][version] = "2.9"
-projects[diff][version] = "3.2"
+projects[diff][version] = "3.3"
 projects[ds][version] = "2.14"
 projects[entity][version] = "1.8"
 projects[features_extra][version] = "1.0"
@@ -36,7 +36,7 @@ projects[email][version] = "1.3"
 projects[telephone][version] = "1.0-alpha1"
 projects[gravatar][version] = "1.1"
 projects[ckeditor][version] = "1.16"
-projects[manualcrop][version] = "1.x-dev"
+projects[manualcrop][version] = "1.6"
 projects[uuid][version] = "1.0-beta2"
 projects[better_exposed_filters][version] = "3.2"
 projects[viewfield][version] = "2.0"
