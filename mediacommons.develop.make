@@ -38,7 +38,7 @@ projects[gravatar][version] = "1.1"
 projects[ckeditor][version] = "1.16"
 projects[manualcrop][version] = "1.6"
 projects[uuid][version] = "1.0-beta2"
-projects[better_exposed_filters][version] = "3.2"
+projects[better_exposed_filters][version] = "3.3"
 projects[viewfield][version] = "2.0"
 projects[reroute_email][version] = "1.2"
 
