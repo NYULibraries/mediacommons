@@ -44,7 +44,7 @@ fi;
 [ ! `grep -q 'DRUPAL_ROOT' ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php` ] || die "${BUILD_DIR}/${BUILD_BASE_NAME} does not look like a Drupal installation folder."
 
 # make sure our drush command is register
-${DRUSH} cache-clear --root=${BUILD_DIR}/${BUILD_BASE_NAME}
+${DRUSH} cache-clear all --root=${BUILD_DIR}/${BUILD_BASE_NAME}
 
 # run command
 ${DRUSH} set-theme-setting-class-name ${DRUPAL_SPECIAL_BODY_CLASS} --root=${BUILD_DIR}/${BUILD_BASE_NAME}

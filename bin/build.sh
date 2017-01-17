@@ -1,9 +1,11 @@
 #!/bin/bash
 
 die () {
-  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}" ;
-  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ;
-  exit 1 ;
+  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
+  if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
+    rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid
+  fi
+  exit 1;
 }
 
 tell () {
@@ -15,13 +17,10 @@ is_drupal_online () {
     --root=${BUILD_DIR}/${BUILD_NAME}              \
     --uri=${BASE_URL}                              \
     --user=1"
-
   DRUPAL_DATABASE_CONNECTION_OK="Successfully connected to the Drupal database"
   DRUPAL_BOOTSTRAP_OK="Drupal bootstrap *: *Successful"
-
   # Using $(echo $DRUSH_STATUS_COMMAND) to remove extra whitespace
   tell ${LINENO} 'is_drupal_online()' "$(echo $DRUSH_STATUS_COMMAND)"
-
   # NOTE: 2>&1 doesn't work when put into DRUSH_STATUS_COMMAND string, so have to
   #   do the redirect here.
   SITE_ONLINE=`${DRUSH_STATUS_COMMAND} 2>&1`
@@ -104,10 +103,14 @@ done
 
 if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
 
-# Here I need to test if the build is running and kill this process
-# or remove the pid file and keep going
+# Check if process it's running
 if [[ -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid ]]; then
-  rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;
+  read pid <${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid
+  if ! kill ${pid} > /dev/null 2>&1; then
+    rm -f ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid
+  else
+    die ${LINENO} "error" "Process ${pid} still running."
+  fi
 fi
 
 echo $$ > ${TEMP_DIR}/${BUILD_BASE_NAME}.build.pid;

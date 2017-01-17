@@ -9,7 +9,9 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm -f ${TEMP_DIR}/autobuild.pid
+  if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
+    rm -f ${TEMP_DIR}/autobuild.pid
+  fi
   exit 1;
 }
 
@@ -53,10 +55,14 @@ done
 
 if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
 
-# Here I need to test if the autobuild is running and kill this process
-# or remove the pid file and keep going
+# Check if process it's running
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
-  rm -f ${TEMP_DIR}/autobuild.pid;
+  read pid <${TEMP_DIR}/autobuild.pid
+  if ! kill ${pid} > /dev/null 2>&1; then
+    rm -f ${TEMP_DIR}/autobuild.pid
+  else
+    die ${LINENO} "error" "Process ${pid} still running."
+  fi
 fi
 
 echo $$ > ${TEMP_DIR}/autobuild.pid
@@ -65,7 +71,7 @@ echo $$ > ${TEMP_DIR}/autobuild.pid
 ${BUILD_APP_ROOT}/bin/update.sh
 
 # Do some house cleaning before running job
-#${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
+# ${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
 
 # Build and migrate Umbrella before anything else
 ${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf -m ${MAKE_FILE};
@@ -81,7 +87,7 @@ for project in ${projects[*]}
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
-        # Run preprocess task
+       # Run preprocess task
         echo "Run preprocess task";
         ${BUILD_APP_ROOT}/bin/utilities/preprocess.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
         # Migrate the content

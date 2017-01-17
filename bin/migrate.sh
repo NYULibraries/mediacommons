@@ -72,10 +72,7 @@ D6_DATABASE=`echo $BUILD_BASE_NAME | sed 's/[^a-zA-Z]//g'`_d6_content
 
 D6_SHARED=`echo $BUILD_BASE_NAME | sed 's/[^a-zA-Z]//g'`_d6_shared
 
-# not sure about this
-MEDIACOMMONS_SHARED=mediacommons
-
-[ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}" ;
+[ -w $TEMP_DIR ] || die ${LINENO} "test" "Unable to write to ${TEMP_DIR}"
 
 if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
 
@@ -132,17 +129,21 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     if [ $? -eq 0 ];
       then
         ${DRUSH} $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --environment=${ENVIRONMENT} --strict=0 --task="${MIGRATION_TASK}"
-        # Stop sharing databases
-        mv $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.shared.off
-        # Leave behind a copy of the ready-to-share settings.php file to be used
-        # if the developer want to share databases
-        mv $BUILD_DIR/$BUILD_BASE_NAME/sites/default/unshare.settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
-        # tables we share
-        TABLES="mediacommons_base_import_vocabulary_map mediacommons_base_import_term_map taxonomy_vocabulary taxonomy_term_data taxonomy_term_hierarchy mediacommons_base_import_user_map mediacommons_base_import_role_map field_revision_field_url field_revision_field_twitter field_revision_field_title field_revision_field_subtitle field_revision_field_state field_revision_field_skype field_revision_field_profile_name field_revision_field_plan field_revision_field_phone field_revision_field_organization field_revision_field_last_name field_revision_field_first_name field_revision_field_email field_revision_field_bio field_revision_field_aim field_data_field_url field_data_field_twitter field_data_field_title field_data_field_subtitle field_data_field_state field_data_field_skype field_data_field_profile_name field_data_field_plan field_data_field_phone field_data_field_organization field_data_field_last_name field_data_field_first_name field_data_field_email field_data_field_bio field_data_field_aim cache_gravatar block_role blocked_ips shortcut_set_users realname users users_roles sessions role role_permission authmap"
-        # dump the tables
-        mysqldump ${MEDIACOMMONS_SHARED} ${TABLES} > ${TEMP_DIR}/shared.sql
-        # import data
-        mysql ${DRUPAL_DB_NAME} < ${TEMP_DIR}/shared.sql
+        if [ ${DRUPAL_SHARED} == 'true' ]; then
+          tell ${LINENO} "test" "OK: Sharing Drupal enabled.";
+        else
+          # Stop sharing databases
+          mv $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php.shared.off
+          # Leave behind a copy of the ready-to-share settings.php file to be used
+          # if the developer want to share databases
+          mv $BUILD_DIR/$BUILD_BASE_NAME/sites/default/unshare.settings.php $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
+          # tables we share
+          TABLES="mediacommons_base_import_vocabulary_map mediacommons_base_import_term_map taxonomy_vocabulary taxonomy_term_data taxonomy_term_hierarchy mediacommons_base_import_user_map mediacommons_base_import_role_map field_revision_field_url field_revision_field_twitter field_revision_field_title field_revision_field_subtitle field_revision_field_state field_revision_field_skype field_revision_field_profile_name field_revision_field_plan field_revision_field_phone field_revision_field_organization field_revision_field_last_name field_revision_field_first_name field_revision_field_email field_revision_field_bio field_revision_field_aim field_data_field_url field_data_field_twitter field_data_field_title field_data_field_subtitle field_data_field_state field_data_field_skype field_data_field_profile_name field_data_field_plan field_data_field_phone field_data_field_organization field_data_field_last_name field_data_field_first_name field_data_field_email field_data_field_bio field_data_field_aim cache_gravatar block_role blocked_ips shortcut_set_users realname users users_roles sessions role role_permission authmap"
+          # dump the tables
+          mysqldump ${MEDIACOMMONS_SHARED} ${TABLES} > ${TEMP_DIR}/shared.sql
+          # import data
+          mysql ${DRUPAL_DB_NAME} < ${TEMP_DIR}/shared.sql
+        fi ;
       else
         die ${LINENO} "test" "Drupal: Unable to connect. URI: ${BASE_URL} ROOT: ${BUILD_DIR}/${BUILD_BASE_NAME}"
     fi

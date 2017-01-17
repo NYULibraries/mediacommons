@@ -2,7 +2,9 @@
 
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
-  rm -f ${TEMP_DIR}/autobuild.pid
+  if [[ -f ${TEMP_DIR}/maintenances.pid ]]; then
+    rm -f ${TEMP_DIR}/maintenances.pid
+  fi
   exit 1;
 }
 
@@ -21,45 +23,17 @@ containsElement () {
 
 # remove if a symlink in the same directory does not point to it
 remove_if_symlink_does_not_link () {
-  declare -a LINKS=();
-  BASE=`pwd`
-  # before going crazy, make sure the given path looks like a Drupal install directory
-  MATCH=`grep -c 'DRUPAL_ROOT' $1/index.php`
-  if [ $MATCH -gt 0 ]
-    then
-      # find link dir
-      for BUILD_NAME in `ls -1 | xargs -l readlink`
-        do
-          LINKS=("${LINKS[@]}" "$BASE/$BUILD_NAME")
-        done
-        if [ $(containsElement "${LINKS[@]}" "$1") != "y" ]; then
-          if  [[ -O $1 ]];
-            then
-              echo "Removing directory ${1}"
-              rm -rf ${1}
-          else
-            echo "Not owner. Will not try to remove directory ${1}"
-          fi
-        fi
-  fi
+  local filename=$(basename ${0})
+  local replacement=""
+  local regex="[_0-9]"
+  local link=$(echo $filename | sed -e "s/$regex/$replacement/g")
+  echo $filename
+  echo $link
 }
 
 export -f remove_if_symlink_does_not_link
 
 export -f containsElement
-
-SOURCE="${BASH_SOURCE[0]}"
-
-# resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve it relative to the path where
-  # the symlink file was located
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 while getopts ":c:e:hm" opt; do
  case $opt in
@@ -85,13 +59,36 @@ done
 # load configuration file
 . $CONF_FILE
 
-[ -d $ROOT/builds ] || die ${LINENO} "test" "Builds directory ${ROOT}/builds does not exist"
+# Check if process it's running
+if [[ -f ${TEMP_DIR}/maintenances.pid ]]; then
+  read pid <${TEMP_DIR}/maintenances.pid
+  if ! kill ${pid} > /dev/null 2>&1; then
+    rm -f ${TEMP_DIR}/maintenances.pid
+  else
+    die ${LINENO} "error" "Process ${pid} still running."
+  fi
+fi
 
-cd ${ROOT}/builds
+echo $$ > ${TEMP_DIR}/maintenances.pid
 
-# Find and remove 1 days old directories
-find ${ROOT}/builds/* -maxdepth 0 -type d -mtime +1 -exec bash -c 'remove_if_symlink_does_not_link $0' {} \;
+[ -d ${ROOT}/builds ] || die ${LINENO} "test" "Builds directory ${ROOT}/builds does not exist"
 
-cd -
+projects=(${PROJECTS})
+
+for project in ${projects[*]}
+  do
+    # Find and remove 1 days old directories
+    find ${ROOT}/builds/${project}* -maxdepth 0 -type d -mtime +1 -exec bash -c 'remove_if_symlink_does_not_link' {} \;
+    if [ $? -eq 0 ];
+      then
+        echo "Successful: Build ${project}";
+      else
+        echo ${LINENO} "build" "Fail: Build ${project}";
+    fi;
+done;
+
+if [[ -f ${TEMP_DIR}/maintenances.pid ]]; then
+  rm -f ${TEMP_DIR}/maintenances.pid;
+fi
 
 exit 0
