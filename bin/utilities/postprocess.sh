@@ -8,6 +8,10 @@ die () {
   exit 1;
 }
 
+tell () {
+  echo "file: ${0} | line: ${1} | step: ${2} | command: ${3}";
+}
+
 while getopts ":c:h" opt; do
  case $opt in
   c)
@@ -33,14 +37,16 @@ done
 # load configuration file
 . $CONF_FILE
 
-echo "Called ${0} with argument -c ${CONF_FILE}"
-
 if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php ]]; then
   # check if this directory looks like Drupal 7
   MATCH=`grep -c 'DRUPAL_ROOT' ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php`
   if [ $MATCH -gt 0 ]; then
-    # share cookie
-    cat ${BUILD_APP_ROOT}/bin/utilities/no_cookies.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+     if [ ${DRUPAL_SHARED} == 'true' ]; then
+       tell ${LINENO} "test" "OK: Sharing Drupal enabled.";
+     else 
+       # share cookie
+       cat ${BUILD_APP_ROOT}/bin/utilities/no_cookies.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+     fi
   fi
 fi
 
