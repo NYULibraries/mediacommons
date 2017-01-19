@@ -94,9 +94,15 @@ function register_users_images() {
 }
 
 function migrate_all_users() {
-  foreach (d6_users() as $user) {
-    migrate_user($user);
-  }
+
+  $users = d6_users();
+  
+  migrate_user($users['19318']);
+  
+  //foreach ($users as $user) {
+  //  migrate_user($user);
+  //}
+  
 }
 
 function migrate_user($user) {
@@ -150,7 +156,7 @@ function migrate_user($user) {
       $new_user['picture'] = $user_picture->fid;
     }
   }
-
+  
   try {
     // https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
     $account = user_save(null, $new_user);
