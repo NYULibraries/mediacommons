@@ -91,8 +91,6 @@ set num_ssh_drush_sql_dump_calls_to_perform \"\$num_selected_sites\"
 
 puts \"\\nNumber of ssh drush sql-dump calls to perform: \$num_ssh_drush_sql_dump_calls_to_perform\"
 
-set export_db_script \"${DEV_SERVER_EXPORT_DB_SCRIPT}\"
-
 for {set i 1} {\$i <= \$num_ssh_drush_sql_dump_calls_to_perform} {incr i 1} {
     expect \"${NETWORK_HOST_USERNAME}@${BASTION_HOST}'s password:\"
 
