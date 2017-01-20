@@ -17,9 +17,11 @@ die () {
 
 ENVIRONMENT="development"
 
+SKIP=""
+
 MAKE_FILE=`pwd`"/mediacommons.make"
 
-while getopts ":m:c:e:h" opt; do
+while getopts ":m:c:e:hs" opt; do
  case $opt in
   c)
     [ -f $OPTARG ] || die "Configuration file does not exist."
@@ -27,6 +29,9 @@ while getopts ":m:c:e:h" opt; do
     ;;
   u)
     UPDATE=true
+    ;;
+  s)
+    SKIP="-s"
     ;;
   m)
     [ -f $OPTARG ] || die "Make file does not exist."
@@ -42,6 +47,7 @@ while getopts ":m:c:e:h" opt; do
    echo " Options:"
    echo "   -h           Show brief help"
    echo "   -m           Run some house cleaning before running job."
+   echo "   -s           Do not import Drupal 6 databases"
    echo " "
    exit 0
    ;;
@@ -70,11 +76,8 @@ echo $$ > ${TEMP_DIR}/autobuild.pid
 # Get the latest make file and do any other task before running jobs
 ${BUILD_APP_ROOT}/bin/update.sh
 
-# Do some house cleaning before running job
-# ${BUILD_APP_ROOT}/bin/maintenances.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
-
 # Build and migrate Umbrella before anything else
-${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf -m ${MAKE_FILE};
+${BUILD_APP_ROOT}/bin/umbrella.sh -c ${BUILD_APP_ROOT}/configs/build.conf -m ${MAKE_FILE} ${SKIP};
 
 projects=(${PROJECTS})
 
@@ -87,15 +90,12 @@ for project in ${projects[*]}
     if [ $? -eq 0 ];
       then
         echo "Successful: Build ${project}";
-       # Run preprocess task
+        # Run preprocess task
         echo "Run preprocess task";
         ${BUILD_APP_ROOT}/bin/utilities/preprocess.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
         # Migrate the content
         echo "Migrate the content";
         ${BUILD_APP_ROOT}/bin/migrate.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
-        # Step: Export database
-        echo "Export database";
-        ${BUILD_APP_ROOT}/bin/utilities/export_db.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
         echo "Set-up and clean-up others";
         ${BUILD_APP_ROOT}/bin/utilities/postprocess.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
       else
@@ -108,3 +108,4 @@ if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
 fi
 
 exit 0;
+

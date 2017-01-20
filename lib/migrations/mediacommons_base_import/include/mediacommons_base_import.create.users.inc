@@ -1,56 +1,33 @@
 <?php
 
 function users_file_save($file, $object) {
-
   $user = user_load($object['uid']);
-
   $file->timestamp = REQUEST_TIME;
-
   $file->filesize = filesize($file->uri);
-
   module_invoke_all('file_presave', $file);
-
   module_invoke_all('entity_presave', $file, 'file');
-
   if (empty($file->fid)) {
-  
     drupal_write_record('file_managed', $file);
-    
     // Inform modules about the newly added file.
     module_invoke_all('file_insert', $file);
-    
     module_invoke_all('entity_insert', $file, 'file');
-    
     $query = 'SELECT fid FROM {files} WHERE filename = :filename';
-    
     $fid = db_query('SELECT fid FROM {file_managed} WHERE uri = :uri', array(':uri' => $file->uri))->fetchField();  
-
   }
   else {
-    
     drupal_write_record('file_managed', $file, 'fid');
-    
     // Inform modules that the file has been updated.
     module_invoke_all('file_update', $file);
-    
     module_invoke_all('entity_update', $file, 'file'); // true
-    
     $fid = $file->fid;
-
   }
-      
   $user->picture = $fid;
-
   user_save($user);
-
   // Clear internal properties.
   unset($file->original);
-
   // Clear the static loading cache.
   entity_get_controller('file')->resetCache(array($file->fid));
-  
   return array($file, $user);
-  
 }
 
 function mc_user_file_save_data($object) {
@@ -74,59 +51,41 @@ function mc_user_file_save_data($object) {
 }
 
 function register_users_images() {
-
   /** find all */
-	$query = db_query("SELECT uid, picture FROM {users} WHERE picture <> 0");
-
-	/** return nids */
-	foreach ($query->fetchAll() as $user) {
+  $query = db_query("SELECT uid, picture FROM {users} WHERE picture <> 0");
+  /** return nids */
+  foreach ($query->fetchAll() as $user) {
     $result = db_select('mediacommons_base_import_user_map', 'u')
-                ->fields('u')
-                ->condition('fid', $user->picture)
-                ->condition('uid', $user->uid)
-                ->execute()
-                ->fetchAssoc();
-    
-    $done = mc_user_file_save_data($result);
-
+      ->fields('u')
+      ->condition('fid', $user->picture)
+      ->condition('uid', $user->uid)
+      ->execute()
+      ->fetchAssoc();
+    //$done = mc_user_file_save_data($result);
+    print_r($result);
   }
-  
 }
 
 function migrate_all_users() {
-
   $users = d6_users();
-  
-  migrate_user($users['19318']);
-  
-  //foreach ($users as $user) {
-  //  migrate_user($user);
-  //}
-  
+  foreach ($users as $user) {
+    migrate_user($user);
+  }
 }
 
 function migrate_user($user) {
-
   /** don't waste time migrating blocked users */
   if ($user->status == 0) return;
-	
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);	
-
   require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
-
   /** URL to be used as the production URL; we need to hard-code this */
   $production_url = umbrella_production_url();
-
   /** Files folder real path */
   $dupal_file_path = drupal_realpath('public://');
-
   $user_exists = user_exists_by_ouid($user->uid);
-  
   $hash_count_log2 = 11;
-
   /** User already exist in database. */
   // if ($user_exists) return; leave out for now while I find this bug
-  
   $new_user = array(
     'name' => $user->name,
     'pass' => 'U' . user_hash_password($user->pass, $hash_count_log2),
@@ -142,21 +101,19 @@ function migrate_user($user) {
     'language' => $user->language,
     'timezone_name' => $user->timezone_name,
   );
-
   /** if roles availble; map roles to the new rid */
   if (isset($user->roles)) {
     foreach (explode(',', $user->roles) as $orid) {
       $new_user['roles'][rid_by_orid($orid)] = TRUE;
     }
   }
-	
   if ($user->picture) {
-    $user_picture = download_user_picture(url($production_url . $user->picture, array('absolute' => TRUE)));
+    $user_picture_url = url($production_url . $user->picture, array('absolute' => TRUE));
+    $user_picture = download_user_picture($user_picture_url);
     if ($user_picture) {
       $new_user['picture'] = $user_picture->fid;
     }
   }
-  
   try {
     // https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
     $account = user_save(null, $new_user);

@@ -3,16 +3,16 @@
 function init() {
   $commands = array(
     array(
-  	  'label' => t('Migrate site'),
-  		'callback' => array(
-        'register_users_images',
-     		'download_files',
-        'migrate_survey_questions',
-        'migrate_survey_responses',
-        'response_arrange_order',
-        'JIRA_MC186',
-        'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
-  	  ),
+      'label' => t('Migrate site'),
+      'callback' => array(
+        //'register_users_images',
+     	//'download_files',
+        //'migrate_survey_questions',
+        //'migrate_survey_responses',
+        //'response_arrange_order',
+        //'JIRA_MC186',
+        //'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
+      ),
     )
   );
   mediacommons_base_import_init(array('commands' => $commands));

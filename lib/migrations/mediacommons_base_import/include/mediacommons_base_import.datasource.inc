@@ -2,54 +2,31 @@
 
 /** Return configured production URL */
 function umbrella_production_url() {
-
-	global $settings ;
-
-	$info_file = $settings['script_path']['dirname'] . '/' . $settings['script_path']['filename'] . '.info' ;
-
-	$info = drupal_parse_info_file ( $info_file ) ;
-
-	/** URL to be used as the production URL */
-	$production_url = $info['mediacommons']['environments']['production']['mediacommons'] ;
-
-	return $production_url;
-
+  return 'http://mediacommons.futureofthebook.org/';
 }
 
-function mediacommons_base_import_get_umbrella_production_url() {
-	return umbrella_production_url();
-}
+//function mediacommons_base_import_get_umbrella_production_url() {
+//  return umbrella_production_url();
+//}
 
 /** Return configured production URL */
 function mediacommons_base_import_get_production_url() {
-
-  global $settings ;
-
-  $info_file = $settings['script_path']['dirname'] . '/' . $settings['script_path']['filename'] . '.info' ;
-
-  $info = drupal_parse_info_file ( $info_file ) ;
-
+  global $settings;
+  $info_file = $settings['script_path']['dirname'] . '/' . $settings['script_path']['filename'] . '.info';
+  $info = drupal_parse_info_file($info_file);
   /** URL to be used as the production URL */
   $production_url = $info['mediacommons']['environments']['production'][$info['mediacommons']['project']] ;
-
   return $production_url;
-
 }
 
 /** Return configured production URL */
-function environment_url ( ) {
-
+function environment_url() {
   global $settings ;
-
   $info_file = $settings['script_path']['dirname'] . '/' . $settings['script_path']['filename'] . '.info' ;
-
   $info = drupal_parse_info_file ( $info_file ) ;
-
   /** URL to be used as the production URL */
   $environment_url = $info['mediacommons']['environments'][$info['mediacommons']['environment']][$info['mediacommons']['project']] ;
-
   return $environment_url;
-
 }
 
 /** Drupal 6 profile fields value by Drupal 6 user id */
