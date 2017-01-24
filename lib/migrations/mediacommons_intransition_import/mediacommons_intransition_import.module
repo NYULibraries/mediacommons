@@ -6,7 +6,6 @@ function init() {
       'label' => t('Migrate site'),
       'callback' => array (
       	'download_files', // download files that are managed by Drupal
-        'register_users_images',
       	'migrate_pages',
         'mediacommons_intransition_import_MC151', // See: https://jira.nyu.edu/browse/MC-151
       	'migrate_posts',

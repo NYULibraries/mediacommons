@@ -107,6 +107,7 @@ function migrate_user($user) {
       $new_user['roles'][rid_by_orid($orid)] = TRUE;
     }
   }
+  
   if ($user->picture) {
     $user_picture_url = url($production_url . $user->picture, array('absolute' => TRUE));
     $user_picture = download_user_picture($user_picture_url);
@@ -114,6 +115,7 @@ function migrate_user($user) {
       $new_user['picture'] = $user_picture->fid;
     }
   }
+  
   try {
     // https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
     $account = user_save(null, $new_user);

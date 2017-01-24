@@ -5,7 +5,6 @@ function init () {
     array(
       'label' => t('Migrate site'),
       'callback' => array(
-        'register_users_images',
       	'download_files', // download files that are managed by Drupal
       	'download_image_attach_files', // download all image attach files that are managed by Drupal
       	'migrate_pages',
