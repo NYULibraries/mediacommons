@@ -5,6 +5,7 @@ function init () {
     array(
       'label' => t('Migrate site'),
       'callback' => array(
+        'setup_project_environment', // Project should declare this callback. See *.project.inc
       	'download_files',
       	'download_image_attach_files',
       	'migrate_pages',

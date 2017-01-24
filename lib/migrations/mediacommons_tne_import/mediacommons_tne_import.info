@@ -7,9 +7,6 @@ mediacommons[project] = tne
 mediacommons[umbrella] = mediacommons
 mediacommons[environment] = development
 
-mediacommons[environments][local][tne] = http://localhost:8000/tne/
-mediacommons[environments][local][mediacommons] = http://localhost:8000/mediacommons/
-
 mediacommons[environments][development][tne] = http://devmc.dlib.nyu.edu/redesign/tne/
 mediacommons[environments][development][mediacommons] = http://devmc.dlib.nyu.edu/redesign/mediacommons/
 
