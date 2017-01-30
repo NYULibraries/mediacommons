@@ -120,8 +120,6 @@ if [ $? -eq 0 ];
     echo $INT6 >> $BUILD_DIR/$BUILD_BASE_NAME/sites/default/settings.php
     # Migrate the content
     ${ROOT}/bin/migrate.sh -c ${ROOT}/configs/mediacommons.conf;
-    # Export database
-    ${ROOT}/bin/utilities/export_db.sh -c ${ROOT}/configs/mediacommons.conf;
     echo "Set-up and clean-up others";
     ${ROOT}/bin/utilities/postprocess.sh -c ${ROOT}/configs/mediacommons.conf;
   else
@@ -129,3 +127,4 @@ if [ $? -eq 0 ];
 fi;
 
 exit  0
+

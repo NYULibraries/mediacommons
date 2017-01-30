@@ -7,11 +7,8 @@ mediacommons[project] = fieldguide
 mediacommons[umbrella] = mediacommons
 mediacommons[environment] = development
 
-mediacommons[environments][local][fieldguide] = http://localhost:8000/fieldguide/
-mediacommons[environments][local][mediacommons] = http://localhost:8000/mediacommons/
-
-mediacommons[environments][development][fieldguide] = http://devmc.dlib.nyu.edu/fieldguide/
-mediacommons[environments][development][mediacommons] = http://devmc.dlib.nyu.edu/mediacommons/
+mediacommons[environments][development][fieldguide] = http://devmc2.dlib.nyu.edu/fieldguide/
+mediacommons[environments][development][mediacommons] = http://devmc2.dlib.nyu.edu/mediacommons/
 
 mediacommons[environments][production][fieldguide] = http://mediacommons.futureofthebook.org/
 mediacommons[environments][production][mediacommons] = http://mediacommons.futureofthebook.org/

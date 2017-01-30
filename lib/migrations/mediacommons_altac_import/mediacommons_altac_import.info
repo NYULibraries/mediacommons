@@ -7,11 +7,8 @@ mediacommons[project] = altac
 mediacommons[umbrella] = mediacommons
 mediacommons[environment] = development
 
-mediacommons[environments][local][altac] = http://localhost:8000/alt-ac/
-mediacommons[environments][local][mediacommons] = http://localhost:8000/mediacommons/
-
-mediacommons[environments][development][altac] = http://devmc.dlib.nyu.edu/alt-ac/
-mediacommons[environments][development][mediacommons] = http://devmc.dlib.nyu.edu/mediacommons/
+mediacommons[environments][development][altac] = http://devmc2.dlib.nyu.edu/alt-ac/
+mediacommons[environments][development][mediacommons] = http://devmc2.dlib.nyu.edu/mediacommons/
 
 mediacommons[environments][production][altac] = http://mediacommons.futureofthebook.org/alt-ac/
 mediacommons[environments][production][mediacommons] = http://mediacommons.futureofthebook.org/
