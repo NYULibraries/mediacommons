@@ -7,6 +7,7 @@ EXPECT_SIGNAL_SELECT_SITES_COMPLETED="EXPECT: NUMBER OF SITES SELECTED = "
 BASTION_HOST=b.dlib.nyu.edu
 
 DEV_SERVER=devmc2.dlib.nyu.edu
+DEV_SERVER_PHP=/opt/remi/php56/root/usr/bin/php
 DEV_SERVER_MC=/www/sites/mediacommons
 DEV_SERVER_BUILDS=${DEV_SERVER_MC}/builds
 DEV_SERVER_CONFIGS=${DEV_SERVER_MC}/configs

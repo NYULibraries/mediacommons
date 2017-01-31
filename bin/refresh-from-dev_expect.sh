@@ -87,13 +87,11 @@ interact {
     }
 }
 
-set num_ssh_export_db_script_calls_to_perform \"\$num_selected_sites\"
+set num_ssh_drush_sql_dump_calls_to_perform \"\$num_selected_sites\"
 
-puts \"\\nNumber of ssh export_db.sh calls to perform: \$num_ssh_export_db_script_calls_to_perform\"
+puts \"\\nNumber of ssh drush sql-dump calls to perform: \$num_ssh_drush_sql_dump_calls_to_perform\"
 
-set export_db_script \"${DEV_SERVER_EXPORT_DB_SCRIPT}\"
-
-for {set i 1} {\$i <= \$num_ssh_export_db_script_calls_to_perform} {incr i 1} {
+for {set i 1} {\$i <= \$num_ssh_drush_sql_dump_calls_to_perform} {incr i 1} {
     expect \"${NETWORK_HOST_USERNAME}@${BASTION_HOST}'s password:\"
 
     send \"$password\r\";
@@ -103,12 +101,7 @@ for {set i 1} {\$i <= \$num_ssh_export_db_script_calls_to_perform} {incr i 1} {
     send \"$password\r\";
 
     expect {
-        \"Success: See dump database\" { puts \"\nexport_db.sh #\$i completed successfully.\" }
-
-        \"file: \$export_db_script | line:\" {
-             puts \"\nexport_db.sh #\$i failed with error.\"
-             exit 1
-        }
+        \"Database dump saved to\" { puts \"\ndrush sql-dump #\$i completed successfully.\" }
 
         \"Permission denied, please try again.\" {
              puts \"\nYou will need to run this script again and re-type your password.\"

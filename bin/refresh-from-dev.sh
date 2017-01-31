@@ -155,8 +155,14 @@ function refresh_database_dumps_on_server() {
     for site in "${selected_sites[@]}"
     do
         ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}" \
-            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}                                  \
-            ${DEV_SERVER_EXPORT_DB_SCRIPT} -c ${DEV_SERVER_CONFIGS}/${site}.conf
+            ${NETWORK_HOST_USERNAME}@${DEV_SERVER}                     \
+            "${DEV_SERVER_PHP} ${DEV_SERVER_MC}/bin/drush cc all       \
+                --root=${DEV_SERVER_BUILDS}/${site}                    \
+                --user=1;                                              \
+             ${DEV_SERVER_PHP} ${DEV_SERVER_MC}/bin/drush sql-dump     \
+                --root=${DEV_SERVER_BUILDS}/${site}                    \
+                --user=1                                               \
+                --result-file=${DEV_SERVER_DATABASE_DUMPS}/${site}.sql"
     done
 }
 
