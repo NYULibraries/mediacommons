@@ -50,7 +50,7 @@ function copy_drupal_code() {
 
     for site in "${selected_sites[@]}"; do
         rm -fr builds/${site}
-        rsync -azvh \
+        rsync -azvh --delete \
             -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
             ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/             \
             builds/${site}/
