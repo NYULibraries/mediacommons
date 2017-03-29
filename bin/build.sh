@@ -51,7 +51,9 @@ DEBUG=""
 
 ENVIRONMENT="local"
 
-while getopts ":e:c:m:hdsikt" opt; do
+FORCE_OVERWRITE=false
+
+while getopts ":e:c:m:hdfsikt" opt; do
  case $opt in
   c)
    [ -f $OPTARG ] || die "Configuration file does not exist."
@@ -66,6 +68,9 @@ while getopts ":e:c:m:hdsikt" opt; do
     ;;
   d)
     DEBUG='-d -v'
+    ;;
+  f)
+    FORCE_OVERWRITE=true
     ;;
   s)
     SASS=true
@@ -138,6 +143,23 @@ echo "Prepare new site using ${MAKE_FILE}." ;
 
 # Step 2: Download and prepare for the installation using make file
 STEP_2="${DRUSH} ${DEBUG} make --prepare-install -y ${MAKE_FILE} ${BUILD_DIR}/${BUILD_NAME} --uri=${BASE_URL} --environment=${ENVIRONMENT} --strict=0" ;
+
+# drush make --prepare-install command will fail with error
+# "Base path [PATH] already exists." if ${BUILD_DIR}/${BUILD_NAME} already exists.
+# -f will force overwrite of this existing directory.
+if [ $FORCE_OVERWRITE ]
+then
+  RM_CMD="rm -fr ${BUILD_DIR}/${BUILD_NAME}"
+
+  if [ ! $SIMULATE ]
+  then
+    echo "`-f` force overwrite option was set"
+    echo "${RM_CMD}"
+    eval $RM_CMD
+  else
+    tell ${LINENO} 'FORCE_OVERWRITE' "${RM_CMD}"
+  fi
+fi
 
 if [ ! $SIMULATE ] ; then eval $STEP_2 ; else tell ${LINENO} 2 "${STEP_2}" ; fi ;
 
