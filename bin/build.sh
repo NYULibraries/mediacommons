@@ -153,7 +153,7 @@ then
 
   if [ ! $SIMULATE ]
   then
-    echo "`-f` force overwrite option was set"
+    echo '"-f" force overwrite flag set'
     echo "${RM_CMD}"
     eval $RM_CMD
   else
