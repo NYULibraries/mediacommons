@@ -46,7 +46,7 @@ function mediacommons_base_import_d6_profile_fields_values_list( $oid ) {
 
 }
 
-function mediacommons_base_import_d6_profile_field_value ( $ofid, $ouid ) {
+function mediacommons_base_import_d6_profile_field_value($ofid, $ouid) {
 
   $value = FALSE ;
 
@@ -77,6 +77,27 @@ function mediacommons_base_import_d6_profile_fields_list() {
   return $fields ;
 
 }
+
+/** Drupal 6 Research Interests field */
+
+function d6_fields_research_interests_field_by_ouid($ouid) {
+  // value array
+  $field = array();
+  /** Create a database connection to the source (d6) database */
+	$query = "SELECT tid FROM {term_user_mc} t WHERE t.uid = :ouid";
+	/** Create and return a database connection to the source (d6) database */
+	$otids = Database::getConnection('default', 'drupal6')->query($query, array(':ouid' => $ouid), array());
+  foreach ($otids as $toid) {
+    $field[] = d7_tid_by_toid($toid->tid);
+  }  
+  return $field;
+}
+
+
+function d7_tid_by_toid($toid) {
+  return db_query('SELECT tid FROM {mediacommons_base_import_term_map} WHERE toid = :toid', array(':toid' => $toid))->fetchField();
+}
+
 
 function mediacommons_base_import_find_iframe_sources () {
 

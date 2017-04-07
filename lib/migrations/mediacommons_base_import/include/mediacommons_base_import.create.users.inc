@@ -12,7 +12,7 @@ function users_file_save($file, $object) {
     module_invoke_all('file_insert', $file);
     module_invoke_all('entity_insert', $file, 'file');
     $query = 'SELECT fid FROM {files} WHERE filename = :filename';
-    $fid = db_query('SELECT fid FROM {file_managed} WHERE uri = :uri', array(':uri' => $file->uri))->fetchField();  
+    $fid = db_query('SELECT fid FROM {file_managed} WHERE uri = :uri', array(':uri' => $file->uri))->fetchField();
   }
   else {
     drupal_write_record('file_managed', $file, 'fid');
@@ -76,7 +76,7 @@ function migrate_all_users() {
 function migrate_user($user) {
   /** don't waste time migrating blocked users */
   if ($user->status == 0) return;
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);	
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
   /** URL to be used as the production URL; we need to hard-code this */
   $production_url = umbrella_production_url();
@@ -107,7 +107,6 @@ function migrate_user($user) {
       $new_user['roles'][rid_by_orid($orid)] = TRUE;
     }
   }
-  
   if ($user->picture) {
     $user_picture_url = url($production_url . $user->picture, array('absolute' => TRUE));
     $user_picture = download_user_picture($user_picture_url);
@@ -115,7 +114,6 @@ function migrate_user($user) {
       $new_user['picture'] = $user_picture->fid;
     }
   }
-  
   try {
     // https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
     $account = user_save(null, $new_user);
@@ -126,84 +124,68 @@ function migrate_user($user) {
         $pathinfo = pathinfo($user->picture);
         $ufp = $pathinfo['basename'];
       }
+      // While developing we are using Reroute Email module to aviod sending
+      // emails to our users
+      // see: https://www.drupal.org/project/reroute_email
+      /** User profile picture */
+      /** Update realname module */
+      if ($realname = d6_users_realname($user->uid)) {
+        $realname_account = realname_load_multiple(array($account));
+        if (empty($realname_account[0])) {
+          $account->realname = $realname;
+        	// Save to the database and the static cache.
+        	db_merge('realname')->key(array('uid' => $account->uid))->fields(array('realname' => $realname, 'created' => REQUEST_TIME))->execute();
+        	// Allow modules to react to the realname being updated.
+        	module_invoke_all('realname_update', $realname, $account);
+        }
+      }
+      /** Update profile fields */
+      mediacommons_base_import_migrate_profile_fields($account, $user);
+      db_insert('mediacommons_base_import_user_map')->fields(array('ouid' => $user->uid, 'uid' => $account->uid, 'fid'=> $fid, 'filename' => $ufp))->execute();
       drush_log(dt('User @user created', array ('@user' => $user->name)), 'ok');
-      db_insert('mediacommons_base_import_user_map')->fields(
-        array('ouid' => $user->uid, 
-              'uid' => $account->uid, 
-              'fid'=> $fid, 
-              'filename' => $ufp)
-         )->execute();
-
-      unset($fid);
-      
-      unset($ufp);
-      
-      unset($pathinfo);
-      
     }
   }
   catch (Exception $e) {
     drush_log(dt('Caught exception: @exception' , array('@exception' => $e->getMessage())), 'error');
-    drush_log(dt('Error migrating user @user', array ('@user' => $user->name)), 'error');
-    return;
-  }
-
-  if ($account) {
-    // While developing we are using Reroute Email module to aviod sending
-    // emails to our users
-    // see: https://www.drupal.org/project/reroute_email
-    /** User profile picture */
-    
-    /** Update realname module */
-    $realname = d6_users_realname($user->uid);
-    
-    if ($realname) {
-      $realname_account = realname_load_multiple(array($account));
-      if (empty($realname_account[0])) {
-      	// Save to the database and the static cache.
-      	db_merge('realname')->key(array('uid' => $account->uid))->fields(array('realname' => $realname, 'created' => REQUEST_TIME))->execute();
-      	// Allow modules to react to the realname being updated.
-      	module_invoke_all('realname_update', $realname, $account);
-      }
+    if ($account) {
+      drush_log(dt('Error migrating user @user', array ('@user' => $user->name)), 'error');
+      user_delete($account->uid);
     }
-
-    /** Update profile fields */
-    mediacommons_base_import_migrate_profile_fields($user->uid);
   }
 }
 
 /** Given a Drupal 6 UID; load D7 user and migrate the profile fields */
-function mediacommons_base_import_migrate_profile_fields($ouid) {
-
-  $uid = user_exists_by_ouid($ouid);
-
-  $account = user_load($uid, TRUE);
-
+function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
   /** Profile fields in Drupal 6 */
   $fields = mediacommons_base_import_d6_profile_fields_list();
-
+  // Research Interests
+  // Production site use https://www.drupal.org/project/user_terms
+  // this field is provided by user_terms
+  $fields['profile_research_interests'] = count($fields) + 1;
   /**
    * Map D6 fields to D7 machine name
    * https://jira.nyu.edu/browse/MC-87
    */
-  $fields_map = array (
+  $fields_map = array(
     'profile_name' => array('field' => 'field_profile_name'),
-    'profile_first_name' => array( 'field' => 'field_first_name'),
-    'profile_last_name' => array( 'field' => 'field_last_name'),
-    'profile_url' => array( 'field' => 'field_url'),
-    'profile_affiliation' => array( 'field' => 'field_organization'),
-    'profile_about' => array( 'field' => 'field_bio'),
-    'profile_plan' => array( 'field' => 'field_plan',),
-    'profile_city' => array( 'field' => 'field_city'),
-    'profile_state' => array( 'field' => 'field_state'),
-    'profile_country' => array( 'field' => 'field_country'),
-    'profile_phone_number' => array( 'field' => 'field_phone'),
-    'profile_AIM' => array( 'field' => 'field_aim'),
-    'profile_skype' => array( 'field' => 'field_skype'),
-    'profile_title' => array( 'field' => 'field_title'),
-    'profile_email' => array( 'field' => 'field_email'),
+    'profile_url' => array('field' => 'field_url'),
+    'profile_affiliation' => array('field' => 'field_organization'),
+    'profile_about' => array('field' => 'field_bio'),
+    'profile_plan' => array('field' => 'field_plan',),
+    'profile_city' => array('field' => 'field_city'),
+    'profile_state' => array('field' => 'field_state'),
+    'profile_country' => array('field' => 'field_country'),
+    'profile_phone_number' => array('field' => 'field_phone'),
+    'profile_AIM' => array('field' => 'field_aim'),
+    'profile_skype' => array('field' => 'field_skype'),
+    'profile_first_name' => array('field' => 'field_first_name'),
+    'profile_last_name' => array('field' => 'field_last_name'),
+    'profile_email' => array('field' => 'field_email'),
+    'profile_title' => array('field' => 'field_title'),
+    'profile_research_interests' => array( 'field' => 'field_taxonomy'),
   );
 
+  // map fields
   foreach ($fields as $key => $ofid) {
     if (isset($fields_map[$key])) {
       $fields_map[$key]['ofid'] = $ofid;
@@ -217,21 +199,25 @@ function mediacommons_base_import_migrate_profile_fields($ouid) {
       }
     }
   }
-
   /**
    * Wrapp user account with an entity metadata wrappers
    * see: https://www.drupal.org/documentation/entity-metadata-wrappers
    */
   $wrapper = entity_metadata_wrapper('user', $account);
-  
+  // fields
 	foreach ($fields_map as $key => $value) {
-		$this_field = $wrapper->$fields_map[$key]['field'];
-		$value = mediacommons_base_import_d6_profile_field_value($value['ofid'], $ouid);
-		if ($value) {
-			try {
-			  if ($fields_map[$key]['type'] == 'text_textfield') {
+    $this_field = $wrapper->$fields_map[$key]['field'];
+    if ($key != 'profile_research_interests') {
+      $field_value = mediacommons_base_import_d6_profile_field_value($value['ofid'], $olduser->uid);
+    }
+    elseif ($key == 'profile_research_interests') {
+      $field_value = d6_fields_research_interests_field_by_ouid($olduser->uid);
+    }
+    if ($field_value) {
+    	try {
+    		if ($fields_map[$key]['type'] == 'text_textfield') {
           try {
-            $this_field->set(substr(utf8_encode($value), 0, $fields_map[$key]['settings']['max_length']));
+            $this_field->set(substr(utf8_encode($field_value), 0, $fields_map[$key]['settings']['max_length']));
           }
           catch (EntityMetadataWrapperException $exc) {
             drush_print_r($exc->getTraceAsString());
@@ -239,116 +225,127 @@ function mediacommons_base_import_migrate_profile_fields($ouid) {
         }
         else if ($fields_map[$key]['type'] == 'link_field') {
           try {
-            $this_field->set(array('url' => utf8_encode($value)));
+            $this_field->set(array('url' => utf8_encode($field_value)));
           }
           catch (EntityMetadataWrapperException $exc ) {
             drush_print_r($exc->getTraceAsString());
           }
         }
-			  else if ($fields_map[$key]['type'] == 'text_textarea') {
-				  try {
-            $this_field->set(array('value' => utf8_encode($value), 'format' => 'filtered_html'));
-				  }
-				  catch (EntityMetadataWrapperException $exc) {
+    		else if ($fields_map[$key]['type'] == 'text_textarea') {
+    			try {
+            $this_field->set(array('value' => utf8_encode($field_value), 'format' => 'filtered_html'));
+    			}
+    			catch (EntityMetadataWrapperException $exc) {
             drush_print_r($exc->getTraceAsString());
-          }
-	      }
-				else if ($fields_map[$key]['type'] == 'telephone_default') {
-          try {
-					  $this_field->set(utf8_encode($value));
-				  }
-					catch (EntityMetadataWrapperException $exc) {
-            drush_print_r($exc->getTraceAsString());
-          }
-				}
-				else if ($fields_map[$key]['type'] == 'email_textfield') {
-					try {
-					  $this_field->set(utf8_encode($value));
-				  }
-					catch (EntityMetadataWrapperException $exc) {
-            drush_print_r($exc->getTraceAsString());
-          }
-				}
-				else if ($fields_map[$key]['type'] === 'taxonomy_autocomplete') {
-				  if ( $fields_map[$key]['field'] === 'field_organization') {
-					  $value = trim(utf8_encode($value));
-						/** Organizations */
-						$vocabulary = taxonomy_vocabulary_machine_name_load('organizations');
-						/** Does the vocabulary organizations exist */
-						if ($vocabulary) {
-						  $query = new EntityFieldQuery;
-							$term = $query
-							  ->entityCondition('entity_type', 'taxonomy_term')
-								->propertyCondition('name', $value)
-								->propertyCondition('vid', $vocabulary->vid)
-								->execute();
-						  if ($term) {
-							  $keys = array_keys($term['taxonomy_term']);
-								$tid = array_pop($keys);
-							}
-							else {
-							  $term = new stdClass();
-								$term->name = trim($value);
-								$term->vid = $vocabulary->vid;
-								taxonomy_term_save($term);
-								$tid = $term->tid;
-							}
-							if ($tid) {
-							  $this_field->set($tid);
-							}
-						}
-					}
-				}
-				else if ($fields_map[$key]['type'] === 'options_select') {
-				  if ($fields_map[$key]['field'] === 'field_city') {
-						// nothing to do at the moment
-					}
-					elseif ( $fields_map[$key]['field'] === 'field_state') {
-					  /** State */
-						$vocabulary = taxonomy_vocabulary_machine_name_load ( 'state' );
-						/** Does the vocabulary organizations exist */
-						if ( $vocabulary ) {
-						  $value = trim (utf8_encode($value));
-							$query = new EntityFieldQuery;
-							$term = $query
-							  ->entityCondition('entity_type', 'taxonomy_term')
-								->propertyCondition('name', $value )
-								->propertyCondition('vid', $vocabulary->vid)
-								->execute();
-							if ( $term ) {
-							  $keys = array_keys($term['taxonomy_term']);
-								$tid = array_pop($keys);
-								$this_field->set($tid );
-							}
-						}
-					}
-				}
-				else if ($fields_map[$key]['field'] === 'field_country') {
-		      /** Country */
-					$vocabulary = taxonomy_vocabulary_machine_name_load('country');
-					/** Does the vocabulary organizations exist */
-					if ($vocabulary) {
-					  $value = trim (utf8_encode($value));
-						$query = new EntityFieldQuery;
-						$term = $query->entityCondition('entity_type', 'taxonomy_term')
-							            ->propertyCondition('name', $value)
-							            ->propertyCondition('vid', $vocabulary->vid)
-							            ->execute();
-						if ($term) {
-						      $keys = array_keys($term['taxonomy_term']);
-							    $tid = array_pop($keys);
-							    $this_field->set($tid);
-						}
-				  }
-		    }
-				else {}
-		  }
-			catch (Exception $e) {
-        drush_log('Caught exception: ',  $e->getMessage(), 'error');
-			}
-		}
+            }
+    	    }
+    			else if ($fields_map[$key]['type'] == 'telephone_default') {
+            try {
+    					  $this_field->set(utf8_encode($field_value));
+    				  }
+    					catch (EntityMetadataWrapperException $exc) {
+                drush_print_r($exc->getTraceAsString());
+              }
+    				}
+    				else if ($fields_map[$key]['type'] == 'email_textfield') {
+    					try {
+    					  $this_field->set(utf8_encode($field_value));
+    				  }
+    					catch (EntityMetadataWrapperException $exc) {
+                drush_print_r($exc->getTraceAsString());
+              }
+    				}
+    				else if ($fields_map[$key]['type'] === 'taxonomy_autocomplete') {
+              if ( $fields_map[$key]['field'] === 'field_taxonomy') {
+                $this_field->set($field_value);
+              }
+    				  elseif ($fields_map[$key]['field'] === 'field_organization') {
+    					  $field_value = trim(utf8_encode($field_value));
+    						/** Organizations */
+    						$vocabulary = taxonomy_vocabulary_machine_name_load('organizations');
+    						/** Does the vocabulary organizations exist */
+    						if ($vocabulary) {
+    						  $query = new EntityFieldQuery;
+    							$term = $query
+    							  ->entityCondition('entity_type', 'taxonomy_term')
+    								->propertyCondition('name', $field_value)
+    								->propertyCondition('vid', $vocabulary->vid)
+    								->execute();
+    						  if ($term) {
+    							  $keys = array_keys($term['taxonomy_term']);
+    								$tid = array_pop($keys);
+    							}
+    							else {
+    							  $term = new stdClass();
+    								$term->name = trim($field_value);
+    								$term->vid = $vocabulary->vid;
+    								taxonomy_term_save($term);
+    								$tid = $term->tid;
+    							}
+    							if ($tid) {
+    							  $this_field->set($tid);
+    							}
+    						}
+    					}
+    				}
+    				else if ($fields_map[$key]['type'] === 'options_select') {
+    				  if ($fields_map[$key]['field'] === 'field_city') {
+    						// nothing to do at the moment
+    					}
+    					elseif ( $fields_map[$key]['field'] === 'field_state') {
+    					  /** State */
+    						$vocabulary = taxonomy_vocabulary_machine_name_load ( 'state' );
+    						/** Does the vocabulary organizations exist */
+    						if ( $vocabulary ) {
+    						  $field_value = trim (utf8_encode($field_value));
+    							$query = new EntityFieldQuery;
+    							$term = $query
+    							  ->entityCondition('entity_type', 'taxonomy_term')
+    								->propertyCondition('name', $field_value )
+    								->propertyCondition('vid', $vocabulary->vid)
+    								->execute();
+    							if ( $term ) {
+    							  $keys = array_keys($term['taxonomy_term']);
+    								$tid = array_pop($keys);
+    								$this_field->set($tid );
+    							}
+    						}
+    					}
+              elseif ( $fields_map[$key]['field'] === 'field_country') {
+                /** Country */
+      					$vocabulary = taxonomy_vocabulary_machine_name_load('country');
+      					/** Does the vocabulary organizations exist */
+      					if ($vocabulary) {
+      					  $field_value = trim (utf8_encode($field_value));
+      						$query = new EntityFieldQuery;
+      						$term = $query->entityCondition('entity_type', 'taxonomy_term')
+      							            ->propertyCondition('name', $field_value)
+      							            ->propertyCondition('vid', $vocabulary->vid)
+      							            ->execute();
+      						if ($term) {
+      						      $keys = array_keys($term['taxonomy_term']);
+      							    $tid = array_pop($keys);
+      							    $this_field->set($tid);
+      						}
+      				  }
+              }
+
+              // Research Interests
+              //
+              // print_r($fields_map);
+              // return;
+
+
+
+
+            }
+    		  }
+    			catch (Exception $e) {
+            drush_log('Caught exception: ',  $e->getMessage(), 'error');
+    			}
+    }
 	}
-	try {
+  try {
     $wrapper->save();
 	}
 	catch (Exception $e) {
