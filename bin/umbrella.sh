@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # if anything in this script fail; FAIL big! WE MUST STOP any other
 # process related to autobuild.sh.
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 die () {
   echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
   if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
