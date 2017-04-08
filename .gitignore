@@ -23,6 +23,8 @@ lib/profiles/*
 lib/scripts/*
 lib/files/*
 lib/dumps/*
+lib/dbs
+lib/libraries
 
 !lib/modules/README
 !lib/themes/README

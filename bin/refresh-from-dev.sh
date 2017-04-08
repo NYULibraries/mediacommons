@@ -50,7 +50,7 @@ function copy_drupal_code() {
 
     for site in "${selected_sites[@]}"; do
         rm -fr builds/${site}
-        rsync -azvh \
+        rsync -azvh --delete \
             -e "ssh -o ProxyCommand='ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}'" \
             ${NETWORK_HOST_USERNAME}@${DEV_SERVER}:${DEV_SERVER_BUILDS}/${site}/             \
             builds/${site}/
@@ -91,7 +91,7 @@ function change_database_password_in_all_drupal_settings_files() {
         # Using solution posted by Gordon Davisson on stackoverflow:
         # http://stackoverflow.com/questions/14889005/hex-codes-in-sed-not-behaving-as-expected-on-osx
         # "Hex codes in sed - not behaving as expected on OSX"
-        old_db_password="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' | sed $'s/^\x27//' | sed $'s/\x27$//' )"
+        old_db_password="$( ${DRUSH} sql-connect | awk '{print $5}' | sed 's/--password=//' | sed $'s/^\x27//' | sed $'s/\x27$//' )"
         settings_file=$( find . -name settings.php )
         sed -i.old_db_password.bak "s/${old_db_password}/${new_db_password}/" $settings_file
     done
@@ -156,10 +156,10 @@ function refresh_database_dumps_on_server() {
     do
         ssh -o ProxyCommand="ssh -W %h:%p ${NETWORK_HOST_USERNAME}@${BASTION_HOST}" \
             ${NETWORK_HOST_USERNAME}@${DEV_SERVER}                     \
-            "${DEV_SERVER_PHP} ${DEV_SERVER_MC}/bin/drush cc all       \
+            "DRUSH_PHP=${DEV_SERVER_PHP} ${DEV_SERVER_MC}/bin/drush cc all       \
                 --root=${DEV_SERVER_BUILDS}/${site}                    \
                 --user=1;                                              \
-             ${DEV_SERVER_PHP} ${DEV_SERVER_MC}/bin/drush sql-dump     \
+             DRUSH_PHP=${DEV_SERVER_PHP} ${DEV_SERVER_MC}/bin/drush sql-dump     \
                 --root=${DEV_SERVER_BUILDS}/${site}                    \
                 --user=1                                               \
                 --result-file=${DEV_SERVER_DATABASE_DUMPS}/${site}.sql"
@@ -224,8 +224,8 @@ function recreate_databases() {
         cd $site
 
         database=$( echo $site | sed 's/-//' )
-        dbuser=$( ${DRUSH} sql-connect | awk '{print $2}' | sed 's/--user=//' )
-        dbpassword="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
+        dbuser=$( ${DRUSH} sql-connect | awk '{print $4}' | sed 's/--user=//' )
+        dbpassword="$( ${DRUSH} sql-connect | awk '{print $5}' | sed 's/--password=//' )"
 
         recreate_database $database
 
@@ -257,8 +257,8 @@ function do_database_grants() {
         cd $site
 
         database=$( echo $site | sed 's/-//' )
-        dbuser=$( ${DRUSH} sql-connect | awk '{print $2}' | sed 's/--user=//' )
-        dbpassword="$( ${DRUSH} sql-connect | awk '{print $3}' | sed 's/--password=//' )"
+        dbuser=$( ${DRUSH} sql-connect | awk '{print $4}' | sed 's/--user=//' )
+        dbpassword="$( ${DRUSH} sql-connect | awk '{print $5}' | sed 's/--password=//' )"
 
         mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON ${database}.* TO '${dbuser}'@'localhost' IDENTIFIED BY '${dbpassword}'"
 

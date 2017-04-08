@@ -2,7 +2,7 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.53"
+projects[drupal][version] = "7.54"
 
 ; Modules
 
@@ -26,8 +26,8 @@ projects[nodequeue][version] = "2.1"
 projects[pathauto][version] = "1.3"
 projects[realname][version] = "1.3"
 projects[strongarm][version] = "2.0"
-projects[token][version] = "1.6"
-projects[views][version] = "3.14"
+projects[token][version] = "1.7"
+projects[views][version] = "3.16"
 projects[views_fieldsets][version] = "2.1"
 projects[admin_menu][version] = "3.0-rc5"
 projects[devel][version] = "1.5"
@@ -38,13 +38,11 @@ projects[gravatar][version] = "1.1"
 projects[ckeditor][version] = "1.16"
 projects[manualcrop][version] = "1.6"
 projects[uuid][version] = "1.0-beta2"
-projects[better_exposed_filters][version] = "3.3"
-projects[viewfield][version] = "2.0"
+projects[better_exposed_filters][version] = "3.4"
+projects[viewfield][version] = "2.1"
 projects[reroute_email][version] = "1.2"
-
-; admin modules
 projects[admin_views][version] = "1.6"
-projects[views_bulk_operations][version] = "3.3"
+projects[views_bulk_operations][version] = "3.4"
 
 ; in-house modules
 projects[mediacommons_modules][type] = "module"
@@ -91,7 +89,6 @@ libraries[jquery.imagesloaded][download][type] = "get"
 libraries[jquery.imagesloaded][download][url] = "https://github.com/desandro/imagesloaded/archive/v2.1.2.tar.gz"
 libraries[jquery.imagesloaded][download][subtree] = "imagesloaded-2.1.2"
 libraries[jquery.imagesloaded][type] = "library"
-
 
 libraries[jquery.imgareaselect][download][type] = "file"
 libraries[jquery.imgareaselect][download][url] = "https://github.com/odyniec/imgareaselect/archive/v0.9.11-rc.1.tar.gz"

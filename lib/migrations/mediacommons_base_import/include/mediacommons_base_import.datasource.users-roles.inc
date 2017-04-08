@@ -54,6 +54,48 @@ function d6_user_one() {
 
 }
 
+function load_fitzpatrick() {
+	// Kathleen Fitzpatrick uid 12
+	$users = array();
+	/** Create a database connection to the source (d6) database */
+	$query = Database::getConnection('default', 'drupal6')
+    ->select('users', 'u')
+ 	  ->fields('u', array(
+			'uid',
+			'name',
+			'pass',
+			'mail',
+			'theme',
+			'signature',
+			'signature_format',
+			'created',
+			'access',
+			'login',
+			'status',
+			'language',
+			'picture',
+			'init',
+			'timezone_name'
+   	)
+	)
+	->condition('u.uid', 12);
+
+	$query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
+
+	$query->groupBy('uid');
+
+	$query->addExpression("GROUP_CONCAT(DISTINCT ur.rid SEPARATOR ',')", 'roles');
+
+	$results = $query->execute();
+
+	foreach ($results as $result) {
+		$users[$result->uid] = $result;
+	}
+
+	return $users;
+
+}
+
 function d6_users () {
 	$users = array () ;
 	/** Create a database connection to the source (d6) database */
