@@ -99,6 +99,8 @@ for project in ${projects[*]}
         ${BUILD_APP_ROOT}/bin/migrate.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
         echo "Set-up and clean-up others";
         ${BUILD_APP_ROOT}/bin/utilities/postprocess.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
+        echo "Set-up Apache Solr";
+        ${BUILD_APP_ROOT}/bin/utilities/apachesolr.sh -c ${BUILD_APP_ROOT}/configs/${project}.conf;
       else
         echo ${LINENO} "build" "Fail: Build ${project}";
     fi;

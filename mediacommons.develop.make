@@ -43,6 +43,7 @@ projects[viewfield][version] = "2.1"
 projects[reroute_email][version] = "1.2"
 projects[admin_views][version] = "1.6"
 projects[views_bulk_operations][version] = "3.4"
+projects[apachesolr_comments][version] = "1.0"
 
 ; in-house modules
 projects[mediacommons_modules][type] = "module"

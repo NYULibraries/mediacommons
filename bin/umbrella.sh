@@ -124,9 +124,10 @@ if [ $? -eq 0 ];
     ${ROOT}/bin/migrate.sh -c ${ROOT}/configs/mediacommons.conf;
     echo "Set-up and clean-up others";
     ${ROOT}/bin/utilities/postprocess.sh -c ${ROOT}/configs/mediacommons.conf;
+    echo "Set-up Apache Solr";
+    ${ROOT}/bin/utilities/apachesolr.sh -c ${ROOT}/configs/mediacommons.conf;
   else
    die ${LINENO} "test" "build" "Fail: Unable to build";
 fi;
 
 exit  0
-
