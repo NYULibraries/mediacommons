@@ -48,6 +48,7 @@ projects[role_delegation][version] = "1.1"
 projects[rules][version] = "2.10"
 projects[field_permissions][version] = "1.0"
 projects[og][version] = "2.9"
+projects[nodeformcols][version] = "1.1"
 
 ; in-house modules
 projects[mediacommons_modules][type] = "module"
