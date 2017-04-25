@@ -73,6 +73,105 @@ function migrate_all_users() {
   }
 }
 
+function create_test_users() {
+  $users = array(
+    // Cluster curator
+    'mc.cluster.curator.1' => array(
+      'name' => 'mc.cluster.curator.1',
+      'mail' => 'mc.cluster.curator.1@nyu.edu',
+      'roles' => array(4 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+    'mc.cluster.curator.2' => array(
+      'name' => 'mc.cluster.curator.2',
+      'mail' => 'mc.cluster.curator.2@nyu.edu',
+      'roles' => array(4 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+    'mc.cluster.curator.3' => array(
+      'name' => 'mc.cluster.curator.3',
+      'mail' => 'mc.cluster.curator.3@nyu.edu',
+      'roles' => array(4 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+
+    // Editors
+    'mc.managing.editor.1' => array(
+      'name' => 'mc.managing.editor.1',
+      'mail' => 'mc.managing.editor.1@nyu.edu',
+      'roles' => array(6 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+    'mc.managing.editor.2' => array(
+      'name' => 'mc.managing.editor.2',
+      'mail' => 'mc.managing.editor.2@nyu.edu',
+      'roles' => array(6 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+    'mc.managing.editor.3' => array(
+      'name' => 'mc.managing.editor.3',
+      'mail' => 'mc.managing.editor.3@nyu.edu',
+      'roles' => array(6 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+
+    // Contributor
+    'mc.contributor.1' => array(
+      'name' => 'mc.contributor.1',
+      'mail' => 'mc.contributor.1@nyu.edu',
+      'roles' => array(5 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+    'mc.contributor.2' => array(
+      'name' => 'mc.contributor.2',
+      'mail' => 'mc.contributor.2@nyu.edu',
+      'roles' => array(5 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+    'mc.contributor.3' => array(
+      'name' => 'mc.contributor.3',
+      'mail' => 'mc.contributor.3@nyu.edu',
+      'roles' => array(5 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+
+    // Administrator
+    'mc.administrator.1' => array(
+      'name' => 'mc.administrator.1',
+      'mail' => 'mc.administrator.1@nyu.edu',
+      'roles' => array(3 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+    'mc.administrator.2' => array(
+      'name' => 'mc.administrator.2',
+      'mail' => 'mc.administrator.2@nyu.edu',
+      'roles' => array(3 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+    'mc.administrator.3' => array(
+      'name' => 'mc.administrator.3',
+      'mail' => 'mc.administrator.3@nyu.edu',
+      'roles' => array(3 => true),
+      'pass' => '000000',
+      'status' => 1,
+    ),
+  );
+  foreach ($users as $user) {
+    user_save(null, $user);
+  }
+}
+
 function migrate_user($user) {
   /** don't waste time migrating blocked users */
   if ($user->status == 0) return;
