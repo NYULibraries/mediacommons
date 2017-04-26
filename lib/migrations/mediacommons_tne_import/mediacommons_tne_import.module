@@ -13,6 +13,7 @@ function init () {
         'migrate_clusters',
         'migrate_responses',
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
+        'node_access_rebuild',
       ),
     ),
   );

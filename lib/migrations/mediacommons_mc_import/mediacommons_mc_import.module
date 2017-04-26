@@ -16,6 +16,7 @@ function init () {
         'migrate_pages',
         'migrate_frontpages',
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
+        'node_access_rebuild',
       ),
     ),
   );

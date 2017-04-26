@@ -5,13 +5,14 @@ function init() {
     array(
       'label' => t('Migrate site'),
       'callback' => array(
-        'setup_project_environment', // Project should declare this callback. See *.project.inc        
+        'setup_project_environment', // Project should declare this callback. See *.project.inc
      	  'download_files',
         'migrate_survey_questions',
         'migrate_survey_responses',
         'response_arrange_order',
         'JIRA_MC186',
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
+        'node_access_rebuild',
       ),
     )
   );
