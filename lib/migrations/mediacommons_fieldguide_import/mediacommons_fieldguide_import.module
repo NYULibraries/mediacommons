@@ -13,6 +13,7 @@ function init() {
         'JIRA_MC186',
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
         'node_access_rebuild',
+        'enable_mediacommons_views', // while I test the View to render the latest hub for ticket https://jira.nyu.edu/jira/browse/MC-195
       ),
     )
   );
