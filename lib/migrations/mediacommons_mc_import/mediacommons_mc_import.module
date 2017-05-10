@@ -7,16 +7,18 @@ function init () {
       'callback' => array(
         'setup_project_environment', // Project should declare this callback. See *.project.inc
         'create_test_users', /** @TODO: Remove when we are ready for production */
-        //'download_files',
+        'download_files',
         'import_vocabulary',
-        //'import_terms',
-        //'prepare_taxonomy_fields',
-        //'map_roles',
-        //'migrate_all_users',
-        //'migrate_pages',
-        //'migrate_frontpages',
+        'import_terms',
+        'prepare_taxonomy_fields',
+        'map_roles',
+        'migrate_all_users',
+        'migrate_pages',
+        'migrate_frontpages',
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
         'node_access_rebuild',
+        'drupal_flush_all_caches',
+        'drupal_cron_run',
       ),
     ),
   );
