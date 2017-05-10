@@ -12,4 +12,6 @@ function setup_project_environment () {
 
   drupal_flush_all_caches();
 
+  drupal_cron_run();
+
 }

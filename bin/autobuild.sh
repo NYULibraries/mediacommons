@@ -106,6 +106,8 @@ for project in ${projects[*]}
     fi;
 done;
 
+${BUILD_APP_ROOT}/bin/utilities/mcblocks.sh -c ${BUILD_APP_ROOT}/configs/build.conf;
+
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
   rm -f ${TEMP_DIR}/autobuild.pid;
 fi
