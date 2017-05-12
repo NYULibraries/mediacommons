@@ -153,3 +153,19 @@ function mediacommons_base_import_d6_vocabulary_list() {
 	$query = 'SELECT * FROM {vocabulary};';
 	return Database::getConnection('default', 'drupal6')->query($query, array(), array()) ;
 }
+
+function d6_terms () {
+	$terms = array();
+	$query = 'SELECT tid, vid, name, description, weight FROM {term_data}';
+	$target = 'default';
+	foreach (array('drupal6', 'int6', 'imr6') as $project) {
+	  /** Create a database connection to the source (d6) database */
+	  foreach (Database::getConnection($target, $project)->query($query) as $result) {
+      $result->project = $project;
+		  $result->md5 = md5($result->name);
+		  $terms[] = $result;
+  	}
+	}
+	return $terms;
+}
+
