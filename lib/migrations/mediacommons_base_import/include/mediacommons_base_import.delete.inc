@@ -74,6 +74,25 @@ function mediacommons_base_import_delete_hubs ( ) {
   }
 }
 
+function mediacommons_base_import_delete_terms ( ) {
+  
+  db_delete('mediacommons_base_import_term_map')
+    ->condition('tid', '0', '<>')
+    ->execute();
+
+  db_delete('taxonomy_term_data')
+    ->condition('tid', '0', '<>')
+    ->execute();
+
+  db_delete('taxonomy_term_hierarchy')
+    ->condition('tid', '0', '<>')
+    ->execute();
+
+  db_delete('taxonomy_term_hierarchy')
+    ->condition('tid', '0', '<>')
+    ->execute();
+}
+
 /** Kill 'em all */
 function mediacommons_base_import_delete_content ($ype = 'all') {
 
