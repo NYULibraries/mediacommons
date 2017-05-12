@@ -9,7 +9,8 @@ function init () {
         'create_test_users', /** @TODO: Remove when we are ready for production */
         'download_files',
         'import_vocabulary',
-        'import_terms',
+        'generate_terms',
+        //'import_terms',
         'prepare_taxonomy_fields',
         'map_roles',
         'migrate_all_users',
