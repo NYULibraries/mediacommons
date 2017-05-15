@@ -132,7 +132,7 @@ function change_database_names() {
             continue
         elif [ "${site}" == 'tne' ]
         then
-            old_database_name='devtnedb'
+            old_database_name='devtne'
         fi
 
         cd $MEDIACOMMONS/builds/
