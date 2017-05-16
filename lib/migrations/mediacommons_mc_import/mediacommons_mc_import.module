@@ -8,9 +8,7 @@ function init () {
         'setup_project_environment', // Project should declare this callback. See *.project.inc
         'create_test_users', /** @TODO: Remove when we are ready for production */
         'download_files',
-        'import_vocabulary',
         'generate_terms',
-        //'import_terms',
         'prepare_taxonomy_fields',
         'map_roles',
         'migrate_all_users',
