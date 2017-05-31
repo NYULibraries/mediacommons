@@ -44,3 +44,47 @@ function mediacommons_intransition_import_MC151 () {
   menu_link_save($form_state['values']);
   
 }
+
+function mediacommons_intransition_import_custom_blocks () {
+
+  $templates = drupal_get_path('module', 'mediacommons_blocks') . '/templates';
+
+  $content_connect = file_get_contents("$templates/int-connect-block.html");
+
+  $options = array(
+    'type' => 'fulltext',
+    'mbid' => 'mc_intransition_connect',    
+    'label' => 'Connect',
+    'content' => $content_connect,
+    'options' => array(
+      'status' => 1,
+      'weight' => -2,
+      'region' => 'homepage_sidebar',
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => '<front>',
+    ),
+  );
+  
+  mediacommons_blocks_save_block($options);
+
+  $content_announce = file_get_contents("$templates/int-announce-block.html");
+
+  $options = array(
+    'type' => 'fulltext',
+    'mbid' => 'mc_intransition_announce',    
+    'label' => 'Announce',
+    'content' => $content_announce,
+    'options' => array(
+      'status' => 1,
+      'weight' => -3,
+      'region' => 'homepage_sidebar',
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => '<front>',
+    ),
+  );
+  
+  mediacommons_blocks_save_block($options);
+  
+  drupal_flush_all_caches();
+
+}

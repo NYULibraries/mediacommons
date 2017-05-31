@@ -51,7 +51,7 @@ projects[og][version] = "2.9"
 projects[nodeformcols][version] = "1.1"
 projects[vertical_tabs_config][version] = "1.2"
 projects[view_unpublished][version] = "1.2"
-projects[imce][version] = "1.10"
+projects[imce][version] = "1.11"
 projects[auto_nodetitle][version] = "1.0"
 
 ; in-house modules
