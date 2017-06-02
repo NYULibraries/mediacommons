@@ -46,7 +46,7 @@ function mediacommons_intransition_import_MC151 () {
 }
 
 function mediacommons_intransition_import_custom_blocks () {
-
+  
   $templates = drupal_get_path('module', 'mediacommons_blocks') . '/templates';
 
   $content_connect = file_get_contents("$templates/int-connect-block.html");
