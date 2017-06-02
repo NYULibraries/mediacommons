@@ -53,6 +53,7 @@ projects[vertical_tabs_config][version] = "1.2"
 projects[view_unpublished][version] = "1.2"
 projects[imce][version] = "1.11"
 projects[auto_nodetitle][version] = "1.0"
+projects[google_recaptcha][version] = "1.2"
 
 ; in-house modules
 projects[mediacommons_modules][type] = "module"
