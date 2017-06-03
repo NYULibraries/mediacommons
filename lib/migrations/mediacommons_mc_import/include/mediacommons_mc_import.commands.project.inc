@@ -1,6 +1,6 @@
 <?php
 
-function setup_project_environment () {
+function setup_project_environment() {
 
   variable_set('mediacommons_project', 'mediacommons');
 
@@ -13,5 +13,18 @@ function setup_project_environment () {
   drupal_flush_all_caches();
 
   drupal_cron_run();
+
+}
+
+
+function enable_twitter_block() {
+
+  module_enable(array('mediacommons_twitter'));
+
+  variable_set('mediacommons_twitter_label', 'Twitter Widget');
+
+  variable_set('mediacommons_twitter_url', 'https://twitter.com/lhenze/lists/mediacommons');
+
+  drupal_flush_all_caches();
 
 }
