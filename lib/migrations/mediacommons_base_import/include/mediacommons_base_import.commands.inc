@@ -1,6 +1,6 @@
 <?php
 
-function clean_images_paths ( $text ) {
+function clean_images_paths($text) {
   include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
   $html = str_get_html ( $text ) ;
   // Find all img
@@ -40,7 +40,7 @@ function clean_images_paths ( $text ) {
   return (string) $html ;
 }
 
-function clean_embed_field_input ( $text ) {
+function clean_embed_field_input($text) {
 
   include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
 
@@ -106,7 +106,7 @@ function clean_embed_field_input ( $text ) {
 
 }
 
-function allowed_iframe_sources ( $url ) {
+function allowed_iframe_sources($url) {
 
   $allowed_domains = array ( ) ;
 
@@ -130,7 +130,7 @@ function allowed_iframe_sources ( $url ) {
 
 }
 
-function extract_iframe_sources ( $text ) {
+function extract_iframe_sources($text) {
 
 	include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' ) ;
 
@@ -183,8 +183,7 @@ function extract_iframe_sources ( $text ) {
 
 }
 
-
-function mediacommons_base_import_embed_field ( $new_node ) {
+function mediacommons_base_import_embed_field($new_node) {
 
   include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
 
@@ -274,7 +273,7 @@ function mediacommons_base_import_embed_field ( $new_node ) {
 
 }
 
-function mediacommons_base_import_body_field () {
+function mediacommons_base_import_body_field() {
 
   include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
 

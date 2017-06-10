@@ -1,21 +1,12 @@
 <?php
 
-function mediacommons_base_import_comment ($nid, $oldNid) {
-
-  $nodes_records = $users_records = $comments_record = array();
-
+function mediacommons_base_import_comment ($nid, $onid) {
+  $users_records = array();
   $users_query = 'SELECT * FROM {mediacommons_base_import_user_map}';
-
   $users = db_query($users_query);
-
   $query = 'SELECT * FROM {comments} WHERE nid = :nid';
-
-  $comments = Database::getConnection('default', 'drupal6')->query($query, array(':nid' => $oldNid), array());
-
-  foreach ($users as $user) {
-    $users_records[$user->ouid] = $user->uid;
-  }
-
+  $comments = Database::getConnection('default', 'drupal6')->query($query, array(':nid' => $onid));
+  foreach ($users as $user) $users_records[$user->ouid] = $user->uid;
   foreach ($comments as $comment) {
     $new_comment = (object) array(
       'nid' => $nid,
@@ -42,22 +33,13 @@ function mediacommons_base_import_comment ($nid, $oldNid) {
         ),
       ),
     );
-
     comment_submit($new_comment);
     comment_save($new_comment);
-
-    $comments_record[] = array(
-      'old' => $comment,
-      'new' => $new_comment
-    );
-
     db_insert('mediacommons_base_import_comments_map')
       ->fields(array(
-        'ocid' => (int)$comment->cid,
-        'cid' => (int)$new_comment->cid,
+        'ocid' => $comment->cid,
+        'cid' => $new_comment->cid,
       )
     )->execute();
-
   }
-
 }

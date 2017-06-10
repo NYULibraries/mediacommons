@@ -178,7 +178,7 @@ function migrate_user($user) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
   /** URL to be used as the production URL; we need to hard-code this */
-  $production_url = umbrella_production_url();
+  $production_url = 'http://mediacommons.futureofthebook.org/';
   /** Files folder real path */
   $dupal_file_path = drupal_realpath('public://');
   $user_exists = user_exists_by_ouid($user->uid);
@@ -206,13 +206,15 @@ function migrate_user($user) {
       $new_user['roles'][rid_by_orid($orid)] = TRUE;
     }
   }
-  if ($user->picture) {
+  
+  if (!empty($user->picture)) {
     $user_picture_url = url($production_url . $user->picture, array('absolute' => TRUE));
     $user_picture = download_user_picture($user_picture_url);
     if ($user_picture) {
       $new_user['picture'] = $user_picture->fid;
     }
   }
+
   try {
     // https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
     $account = user_save(null, $new_user);
@@ -238,10 +240,19 @@ function migrate_user($user) {
         	module_invoke_all('realname_update', $realname, $account);
         }
       }
+      
       /** Update profile fields */
       mediacommons_base_import_migrate_profile_fields($account, $user);
-      db_insert('mediacommons_base_import_user_map')->fields(array('ouid' => $user->uid, 'uid' => $account->uid, 'fid'=> $fid, 'filename' => $ufp))->execute();
+      
+      db_insert('mediacommons_base_import_user_map')->fields(array(
+        'ouid' => $user->uid, 
+        'uid' => $account->uid, 
+        'fid'=> $fid, 
+        'filename' => $ufp)
+      )->execute();
+
       drush_log(dt('User @user created', array ('@user' => $user->name)), 'ok');
+
     }
   }
   catch (Exception $e) {

@@ -34,7 +34,7 @@ function download_files() {
 	
 	global $settings;
 	
-	$production_base_url = $settings['mediacommons']['environments']['production'][ $settings['mediacommons']['umbrella'] ] ;
+	$production_base_url = 'http://mediacommons.futureofthebook.org/';
 	
 	$production_url = mediacommons_base_import_get_production_url();
 	
@@ -142,33 +142,20 @@ function download_files() {
 }
 
 function download_image_attach_files() {
-
-	global $settings;
-
-	$production_base_url = $settings['mediacommons']['environments']['production'][ $settings['mediacommons']['umbrella'] ] ;
-
-	$production_url = mediacommons_base_import_get_production_url () ;
-
-	$files = array();
-
-	if ( $wrapper = file_stream_wrapper_get_instance_by_uri( 'public://' ) ) $destination_dir = $wrapper->realpath() ;
-
-	else return drush_log ( 'Unable to find destination directory.', 'error' ) ;
-
+  drush_log('I need to fix this');
+  return ;
+  $production_base_url = 'http://mediacommons.futureofthebook.org/';
+  $production_url = mediacommons_base_import_get_production_url();
+  $files = array();
+  $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
+  if ($wrapper) {
+    $destination_dir = $wrapper->realpath();
 	foreach (image_attach_files ( ) as $file) {
-
 		$ofid = $file->fid;
-
-		if ( ! $ofid ) continue;
-
-		$pathinfo = pathinfo ( $file->filename ) ;
-
-		$filepath = pathinfo ( $file->filepath ) ;
-		
-		continue;
-
-		if ( $pathinfo['extension'] ) $filename = $file->filename ;
-
+		if (!$ofid) continue;
+		$pathinfo = pathinfo($file->filename);
+		$filepath = pathinfo($file->filepath);
+		if ( $pathinfo['extension'] ) $filename = $file->filename;
 		/** because of some idiot */
 		else $filename = basename ( $file->filepath ) ;
 
@@ -234,8 +221,8 @@ function download_image_attach_files() {
 
 		}
 
-	}
-
+	}	
+  }
 }
 
 function mc_file_save(stdClass $file) {

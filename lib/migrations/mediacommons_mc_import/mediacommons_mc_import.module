@@ -7,10 +7,10 @@ function init () {
       'callback' => array(
         'setup_project_environment', // Project should declare this callback. See *.project.inc
         'create_test_users', /** @TODO: Remove when we are ready for production */
-        'download_files',
         'generate_terms',
         'prepare_taxonomy_fields',
         'map_roles',
+        'download_files',
         'migrate_all_users',
         'migrate_pages',
         'migrate_frontpages',

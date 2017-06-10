@@ -1,0 +1,11 @@
+name = MediaCommons
+description = Migration script for MediaCommons
+core = 7.x
+version = 7.x-1.0
+
+mediacommons[project] = mediacommons
+mediacommons[umbrella] = mediacommons
+mediacommons[environment] = development
+
+mediacommons[environments][development][mediacommons] = http://devmc2.dlib.nyu.edu/redesign/mediacommons/
+mediacommons[environments][production][mediacommons] = http://mediacommons.futureofthebook.org/
