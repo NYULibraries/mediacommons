@@ -8,6 +8,10 @@ die () {
   exit 1;
 }
 
+tell () {
+  echo "file: ${0} | line: ${1} | step: ${2} | command: ${3}";
+}
+
 SOURCE="${BASH_SOURCE[0]}"
 
 # resolve $SOURCE until the file is no longer a symlink

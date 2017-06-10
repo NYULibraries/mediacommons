@@ -10,6 +10,10 @@ die () {
   exit 1;
 }
 
+tell () {
+  echo "file: ${0} | line: ${1} | step: ${2} | command: ${3}";
+}
+
 ENVIRONMENT="development"
 
 SKIP=""
