@@ -54,8 +54,10 @@ projects[view_unpublished][version] = "1.2"
 projects[imce][version] = "1.11"
 projects[auto_nodetitle][version] = "1.0"
 projects[google_recaptcha][version] = "1.2"
+projects[rubik][version] = "4.4"
+projects[tao][version] = "3.1"
+projects[zen][version] = "5.6"
 
-; in-house modules
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
 projects[mediacommons_modules][download][url] = "https://github.com/NYULibraries/mediacommons_modules.git"
@@ -74,10 +76,6 @@ projects[mediacommons_umbrella][download][url] = "https://github.com/NYULibrarie
 projects[mediacommons_umbrella][download][branch] = "develop"
 
 ; Themes
-
-projects[rubik][version] = "4.4"
-projects[tao][version] = "3.1"
-projects[zen][version] = "5.6"
 
 projects[mediacommons][download][type] = "git"
 projects[mediacommons][download][url] = "https://github.com/NYULibraries/mediacommons_theme.git"
