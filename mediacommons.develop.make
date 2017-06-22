@@ -2,12 +2,12 @@ core = 7.x
 
 api = 2
 
-projects[drupal][version] = "7.55"
+projects[drupal][version] = "7.56"
 
 ; Modules
 
 projects[apachesolr][version] = "1.8"
-projects[apachesolr_multisitesearch][version] = "1.1"
+projects[apachesolr_multisitesearch][version] = "1.2"
 projects[ctools][version] = "1.12"
 projects[cnr][version] = "4.22"
 projects[date][version] = "2.10"
