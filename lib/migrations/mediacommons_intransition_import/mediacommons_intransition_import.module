@@ -15,7 +15,8 @@ function init() {
         'enable_twitter_block',        
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
         'node_access_rebuild',
-        'drupal_flush_all_caches',        
+        'config_apachesolr',
+        'drupal_flush_all_caches',
         'drupal_cron_run',
       ),
     ),

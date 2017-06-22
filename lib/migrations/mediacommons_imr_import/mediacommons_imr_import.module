@@ -13,10 +13,10 @@ function init() {
       	'migrate_theme_weeks',
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
         'enable_twitter_block', 
+        'node_access_rebuild',
         'config_apachesolr',
         'drupal_flush_all_caches',
         'drupal_cron_run',
-        'node_access_rebuild',
       ),
     ),
   );
