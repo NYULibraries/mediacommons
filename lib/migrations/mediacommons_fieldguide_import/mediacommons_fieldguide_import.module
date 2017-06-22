@@ -15,6 +15,9 @@ function init() {
         'enable_twitter_block',        
         'node_access_rebuild',
         'enable_mediacommons_views',
+        'config_apachesolr',
+        'drupal_flush_all_caches',
+        'drupal_cron_run',
       ),
     )
   );
