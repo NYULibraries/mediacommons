@@ -1,5 +1,43 @@
 <?php
 
+// it's been a long time, but this is probably close to what you need
+function isDeclaration($line) {
+  return $line[0] != '#' && strpos($line, "=");
+}
+
+// https://jira.nyu.edu/jira/browse/MC-281
+function get_build_config() {
+  $configuration = array();
+  $config = drush_get_option('bg');
+  $data = file_get_contents($config);  
+  $lines = explode("\n", $data);
+  foreach (array_filter($lines, "isDeclaration") as $declaration) {
+    $option = explode('=', $declaration);
+    if ($option && count($option) == 2) {
+      $key = strtolower($option[0]);
+      $value = $option[1];
+      $configuration[$key] = $value;
+    }
+  }
+  return $configuration;
+}
+
+function config_recaptcha() {
+  $configuration = get_build_config();
+  $default = variable_get('google_recaptcha');
+  $overwrites = array();
+  if (isset($configuration['gapk']) && isset($configuration['gask'])) {
+    $overwrites['public_key'] = $configuration['gapk'];
+    $overwrites['secret_key'] = $configuration['gask'];
+  }
+  $overwrites['settings']['write_log'] = 1;
+  $overwrites['settings']['widget_size'] = 'compact';
+  $overwrites['settings']['widget_theme'] = 'light';
+  $overwrites['settings']['language'] = 'en';
+  $data = array_merge($default, $overwrites);
+  variable_set('google_recaptcha', $data);
+}
+
 function clean_images_paths($text) {
   include_once ( libraries_get_path('simplehtmldom') . '/simple_html_dom.php' );
   $html = str_get_html ( $text ) ;
