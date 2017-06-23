@@ -6,6 +6,7 @@ projects[drupal][version] = "7.56"
 
 ; Modules
 
+projects[context][version] = "3.7"
 projects[apachesolr][version] = "1.8"
 projects[apachesolr_multisitesearch][version] = "1.2"
 projects[ctools][version] = "1.12"
