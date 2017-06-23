@@ -134,7 +134,7 @@ if [[ -f $BUILD_DIR/$BUILD_BASE_NAME/index.php ]]; then
     ${DRUSH} -d -v core-status --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1
     if [ $? -eq 0 ];
       then
-        ${DRUSH} $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --environment=${ENVIRONMENT} --strict=0 --task="${MIGRATION_TASK}"
+        ${DRUSH} $DEBUG scr $MIGRATION_SCRIPT --uri=$BASE_URL --root=$BUILD_DIR/$BUILD_BASE_NAME --user=1 --environment=${ENVIRONMENT} --strict=0 --bg=${CONF_FILE} --task="${MIGRATION_TASK}"
         if [ ${DRUPAL_SHARED} == 'true' ]; then
           tell ${LINENO} "test" "OK: Sharing Drupal enabled.";
         else
