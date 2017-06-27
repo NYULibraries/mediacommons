@@ -30,6 +30,7 @@ function config_recaptcha() {
     $overwrites['public_key'] = $configuration['gapk'];
     $overwrites['secret_key'] = $configuration['gask'];
   }
+  $overwrites['protected_forms'] = array('user_register_form');
   $overwrites['settings']['write_log'] = 1;
   $overwrites['settings']['widget_size'] = 'compact';
   $overwrites['settings']['widget_theme'] = 'light';
