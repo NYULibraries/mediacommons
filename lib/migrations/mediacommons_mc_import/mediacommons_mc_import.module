@@ -7,6 +7,7 @@ function init () {
       'callback' => array(
         'setup_project_environment', // Project should declare this callback. See *.project.inc
         'create_test_users', /** @TODO: Remove when we are ready for production */
+        'config_recaptcha', // https://jira.nyu.edu/jira/browse/MC-281
         'generate_terms',
         'prepare_taxonomy_fields',
         'map_roles',
@@ -18,7 +19,6 @@ function init () {
         'enable_twitter_block',
         'node_access_rebuild',
         'config_apachesolr',
-        'config_recaptcha', // https://jira.nyu.edu/jira/browse/MC-281
         'drupal_flush_all_caches',
         'drupal_cron_run',
       ),
