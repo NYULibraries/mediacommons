@@ -47,6 +47,7 @@ projects[views_bulk_operations][version] = "3.4"
 projects[apachesolr_comments][version] = "1.0"
 projects[role_delegation][version] = "1.1"
 projects[rules][version] = "2.10"
+projects[reg_with_pic][version] = "1.0"
 projects[field_permissions][version] = "1.0"
 projects[og][version] = "2.9"
 projects[nodeformcols][version] = "1.1"
@@ -58,6 +59,8 @@ projects[google_recaptcha][version] = "1.2"
 projects[rubik][version] = "4.4"
 projects[tao][version] = "3.1"
 projects[zen][version] = "5.6"
+
+
 
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
