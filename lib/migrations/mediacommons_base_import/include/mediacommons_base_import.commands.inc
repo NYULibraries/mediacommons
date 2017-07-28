@@ -5,6 +5,10 @@ function isDeclaration($line) {
   return $line[0] != '#' && strpos($line, "=");
 }
 
+function mediacommons_prepare_blocks($theme) {
+  return _block_rehash($theme);
+}
+
 // https://jira.nyu.edu/jira/browse/MC-281
 function get_build_config() {
   $configuration = array();
