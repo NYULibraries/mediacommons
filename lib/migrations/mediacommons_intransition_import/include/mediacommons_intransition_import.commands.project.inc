@@ -150,31 +150,57 @@ function _prepare_blocks($theme) {
 }
 
 function enable_twitter_block() {
+
   drush_log('Task: Enable Twitter block', 'ok');
+  
   $enabled = module_enable(array('mediacommons_twitter'));
+  
   if ($enabled) {
-    variable_set('mediacommons_twitter_label', 'Twitter Widget');
-    variable_set('mediacommons_twitter_url', 'https://twitter.com/lhenze/lists/mediacommons');
-    $args = array('weight' => '-1', 'region' => 'homepage_sidebar', 'theme' => 'mediacommons', 'status' => '1');
+  
+    // https://jira.nyu.edu/jira/browse/MC-319
+    
+    $region = 'homepage_sidebar';
+
     $theme = 'mediacommons';
+
     $block = 'mediacommons_twitter';
+    
+    variable_set('mediacommons_twitter_label', 'Twitter Widget');
+
+    //$twitter_url = '';
+    
+    //variable_set('mediacommons_twitter_url', $twitter_url);
+
+    $twitter_user = 'inTransitionCMS';  
+
+    variable_set('mediacommons_twitter_user', $twitter_user);
+
+    $args = array(
+      'weight' => '-1', 
+      'status' => '1',
+      'region' => $region,
+      'theme' => $theme,
+    );
+
     drupal_theme_initialize();
+    
     // Fetch and sort blocks. We need to do this to init our block
-    $blocks = _prepare_blocks($theme);
+    $blocks = mediacommons_prepare_blocks($theme);
+    
     $transaction = db_transaction();
+    
     try {
-      db_update('block')->fields($args)->condition('module', $block)->condition('delta', $block)->condition('theme', 'mediacommons')->execute();
+      db_update('block')
+         ->fields($args)
+        ->condition('module', $block)
+        ->condition('delta', $block)
+        ->condition('theme', 'mediacommons')
+        ->execute();
     }
     catch (Exception $e) {
       $transaction->rollback();
       print_r($e);
       throw $e;
     }
-    
-    // Flush cache
-    cache_clear_all();
-
-    drupal_flush_all_caches();
-
-  }
+  }  
 }
