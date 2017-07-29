@@ -10,7 +10,7 @@ function init() {
         'migrate_survey_questions',
         'migrate_survey_responses',
         'response_arrange_order',
-        'JIRA_MC186',
+        'JIRA_MC186', //Fieldguide hubs do not have contributors field populated
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
         'enable_twitter_block',        
         'node_access_rebuild',
