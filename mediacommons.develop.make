@@ -56,11 +56,10 @@ projects[view_unpublished][version] = "1.2"
 projects[imce][version] = "1.11"
 projects[auto_nodetitle][version] = "1.0"
 projects[google_recaptcha][version] = "1.2"
+projects[better_formats][version] = "1.0-beta2"
 projects[rubik][version] = "4.4"
 projects[tao][version] = "3.1"
 projects[zen][version] = "5.6"
-
-
 
 projects[mediacommons_modules][type] = "module"
 projects[mediacommons_modules][download][type] = "git"
