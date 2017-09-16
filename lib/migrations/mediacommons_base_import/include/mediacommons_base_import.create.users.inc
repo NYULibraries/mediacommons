@@ -210,9 +210,9 @@ function migrate_user($user) {
   if (!empty($user->picture)) {
     $user_picture_url = url($production_url . $user->picture, array('absolute' => TRUE));
     $user_picture = download_user_picture($user_picture_url);
-    if ($user_picture) {
-      $new_user['picture'] = $user_picture->fid;
-    }
+  //  if ($user_picture) {
+  //    $new_user['picture'] = $user_picture->fid;
+  //  }
   }
 
   try {

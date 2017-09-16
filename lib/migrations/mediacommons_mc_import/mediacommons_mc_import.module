@@ -21,6 +21,7 @@ function init () {
         'config_apachesolr',
         'drupal_flush_all_caches',
         'drupal_cron_run',
+        '_MC277',
       ),
     ),
   );
