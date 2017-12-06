@@ -1,47 +1,116 @@
 <?php
 
-function config_apachesolr() {
+function _steps() {
+  config_apachesolr();  
+}
 
+function config_apachesolr() {
+  
   module_load_include('inc', 'apachesolr', 'apachesolr.index');
+  
+  $enabled = module_enable(array('apachesolr_multisitesearch'));
+  
+  // Make this Solr search environment multisite capable
+  apachesolr_environment_variable_set('solr', 'multisitesearch', TRUE);
+  
+  $hash = 'imr';
+  
+  variable_set('apachesolr_site_hash', $hash);
+  
+  //print_r(apachesolr_environment_variable_get('solr', 'multisitesearch_sites', array())); 
+  
+  if ($enabled) {
+    variable_set('make_multisite', "1");
+  }
 
   $blacklisted = array(
-    'front_page_post'
+    'front_page_post',
+    'message',
+    'page',
   );
 
   $bundles = array_keys(node_type_get_types());
 
   $bundles_to_index = array_diff($bundles, $blacklisted);
-
+  
   $env_id = 'solr';
 
   $entity_types = array('node', 'comment');
   
   foreach ($entity_types as $entity_type) {
     $transaction = db_transaction();
-    try {
-      db_delete('apachesolr_index_bundles')
-        ->condition('env_id', $env_id)
-        ->condition('entity_type', $entity_type)
-        ->execute();
-      $insert = db_insert('apachesolr_index_bundles')
-        ->fields(array('env_id', 'entity_type', 'bundle'));
+    try {      
+      db_delete('apachesolr_index_bundles')->condition('env_id', $env_id)->condition('entity_type', $entity_type)->execute();
+      $insert = db_insert('apachesolr_index_bundles')->fields(array('env_id', 'entity_type', 'bundle'));
       foreach ($bundles_to_index as $bundle) {
-        if ($entity_type == 'comment') $bundle = 'comment_node_' . $bundle;  
-        $insert->values(array(
-          'env_id' => $env_id,
-          'entity_type' => $entity_type,
-          'bundle' => $bundle,
-        ));
-      
+        if ($entity_type == 'comment') {
+          $bundle = 'comment_node_' . $bundle;
+        }
+        $i = $insert->values(array('env_id' => $env_id, 'entity_type' => $entity_type, 'bundle' => $bundle));
       }
-      $insert->execute();
+      $done = $insert->execute();
     }
     catch (Exception $e) {
       $transaction->rollback();
       throw $e;
     }
   }
+  
+  $info = facetapi_get_facet_info('apachesolr@solr');
+  
+  $realm = facetapi_realm_load('block');
+  
+  $adapter = facetapi_adapter_load('apachesolr@solr');
+  
+  $blocks = array(
+    'bundle', // Content type. Filter by content type.
+    'im_field_co_editor', // Co-editor. Filter by field field_co_editor of type user_reference.
+    'im_field_contributors', // Contributors. Filter by field field_contributors of type user_reference.
+    'im_field_curators_editors', // Curated by. Filter by field field_curators_editors of type user_reference.
+    'im_field_taxonomy',  // Tags. Filter by field field_taxonomy of type taxonomy_term_reference.
+    'dm_field_pubdate', // Publication date. Filter by field field_pubdate of type datestamp.      
+  );
+  // Make sure we have the blocks we want to enable  
+  foreach ($info as $facet_name => $facet) {
+    if (in_array($facet_name, $blocks)) {
+      facetapi_save_facet_status($adapter, $realm, $facet, 1, 0, TRUE);      
+    }
+  }
+  
+  $theme = 'mediacommons';
+  
+  $region = 'searchresults_sidebar';
+  
+  $blocks = mediacommons_prepare_blocks($theme);
+
+  drupal_theme_initialize();
+  
+  $args = array(
+    'weight' => '-1',
+    'status' => '1',
+    'region' => $region,
+    'theme' => $theme,
+  );
+  
+  foreach (facetapi_get_block_info(array('block')) as $block => $data) {
+    $transaction = db_transaction();
+    try {
+      db_update('block')
+        ->fields($args)
+        ->condition('module', 'facetapi')
+        ->condition('delta', $block)
+        ->condition('theme', 'mediacommons')
+        ->execute();
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      print_r($e);
+      throw $e;
+    }    
+  }
+  
   cache_clear_all();
+
 }
 
 /**
@@ -110,7 +179,7 @@ function enable_twitter_block() {
     $block = 'mediacommons_twitter';
     
     variable_set('mediacommons_twitter_label', 'Twitter Widget');
-
+    
     //$twitter_url = '';
     
     //variable_set('mediacommons_twitter_url', $twitter_url);

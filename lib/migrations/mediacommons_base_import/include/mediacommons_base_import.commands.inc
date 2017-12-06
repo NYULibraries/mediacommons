@@ -13,14 +13,16 @@ function mediacommons_prepare_blocks($theme) {
 function get_build_config() {
   $configuration = array();
   $config = drush_get_option('bg');
-  $data = file_get_contents($config);  
-  $lines = explode("\n", $data);
-  foreach (array_filter($lines, "isDeclaration") as $declaration) {
-    $option = explode('=', $declaration);
-    if ($option && count($option) == 2) {
-      $key = strtolower($option[0]);
-      $value = $option[1];
-      $configuration[$key] = $value;
+  if (!empty($config) && file_exists($config)) { 
+    $data = file_get_contents($config);
+    $lines = explode("\n", $data);
+    foreach (array_filter($lines, "isDeclaration") as $declaration) {
+      $option = explode('=', $declaration);
+      if ($option && count($option) == 2) {
+        $key = strtolower($option[0]);
+        $value = $option[1];
+        $configuration[$key] = $value;
+      }
     }
   }
   return $configuration;

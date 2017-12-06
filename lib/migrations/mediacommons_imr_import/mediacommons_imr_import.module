@@ -5,19 +5,22 @@ function init() {
     array(
       'label' => t('Migrate site'),
       'callback' => array(
-        'setup_project_environment', // Project should declare this callback. See *.project.inc
-      	'download_files', // download files that are managed by Drupal
-      	'migrate_pages',
-        'mediacommons_imr_import_MC151', // See: https://jira.nyu.edu/browse/MC-151
-        'migrate_posts',
-      	'migrate_theme_weeks',
-        'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
-        'enable_twitter_block', 
-        'node_access_rebuild',
-        'config_apachesolr',
-        'config_recaptcha', // https://jira.nyu.edu/jira/browse/MC-281
-        'drupal_flush_all_caches',
-        'drupal_cron_run',
+        //'setup_project_environment', // Project should declare this callback. See *.project.inc
+      	//'download_files', // download files that are managed by Drupal
+      	//'migrate_pages',
+        //'mediacommons_imr_import_MC151', // See: https://jira.nyu.edu/browse/MC-151
+        //'migrate_posts',
+      	//'migrate_theme_weeks',
+        //'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
+        //'enable_twitter_block', 
+        //'node_access_rebuild',
+        //'config_apachesolr',
+        //'config_recaptcha', // https://jira.nyu.edu/jira/browse/MC-281
+        //'drupal_flush_all_caches',
+        //'drupal_cron_run',
+
+        '_steps',
+
       ),
     ),
   );

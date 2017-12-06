@@ -53,16 +53,20 @@ function create_spoke($old_node) {
 
   $new_node->moderate = $old_node->moderate ;
 
-  $new_node->sticky = $old_node->sticky ;
+  $new_node->sticky = $old_node->sticky;
 
-  if ( isset ( $old_node->field_body ) ) {
+  if (isset($old_node->field_body)) {
     $new_node->field_body[$new_node->language][0] = array ( 'value' => $old_node->field_body, 'format' => 'filtered_html' ) ;
   }
 
   /** attached representative image */
-  if ( isset ( $old_node->field_attached_images_ri ) ) {
+  if (isset ( $old_node->field_attached_images_ri)) {
     $fid = mediacommons_base_import_get_file_fid_by_ofid ( $old_node->field_attached_images_ri->fid ) ;
-    if ( $fid ) $new_node->field_attached_images[$new_node->language][] = (array) file_load ( $fid ) ;
+    if ($fid) {
+      $_file = (array) file_load ($fid);
+      $new_node->field_attached_images[$new_node->language][] = $_file;
+      $new_node->field_representative_image[$new_node->language][] = $_file;
+    }
   }
 
   /** attached all other images */

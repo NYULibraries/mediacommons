@@ -1,5 +1,22 @@
 <?php
 
+
+function _update_profile_fields() {
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+  try {
+  	$users = d6_users();
+  	foreach ($users as $d6_user) {
+  		$account = user_by_ouid($d6_user->uid);
+  		if ($account) {
+  		  mediacommons_base_import_migrate_profile_fields($account, $d6_user);
+  		}
+  	}
+  }
+  catch (Exception $e) {
+  	drush_log('Caught exception: ',  $e->getMessage(), 'error');
+  }
+}
+
 function users_file_save($file, $object) {
   $user = user_load($object['uid']);
   $file->timestamp = REQUEST_TIME;
@@ -67,6 +84,7 @@ function register_users_images() {
 }
 
 function migrate_all_users() {
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   $users = d6_users();
   foreach ($users as $user) {
     migrate_user($user);
@@ -173,18 +191,23 @@ function create_test_users() {
 }
 
 function migrate_user($user) {
+  
   /** don't waste time migrating blocked users */
   if ($user->status == 0) return;
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+
+  /** User already exist in database. */
+  if (user_exists_by_ouid($user->uid)) return;
+  
   require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
+
   /** URL to be used as the production URL; we need to hard-code this */
   $production_url = 'http://mediacommons.futureofthebook.org/';
+  
   /** Files folder real path */
   $dupal_file_path = drupal_realpath('public://');
-  $user_exists = user_exists_by_ouid($user->uid);
+  
   $hash_count_log2 = 11;
-  /** User already exist in database. */
-  // if ($user_exists) return; leave out for now while I find this bug
+  
   $new_user = array(
     'name' => $user->name,
     'pass' => 'U' . user_hash_password($user->pass, $hash_count_log2),
@@ -200,31 +223,32 @@ function migrate_user($user) {
     'language' => $user->language,
     'timezone_name' => $user->timezone_name,
   );
+  
   /** if roles availble; map roles to the new rid */
-  if (isset($user->roles)) {
-    foreach (explode(',', $user->roles) as $orid) {
-      $new_user['roles'][rid_by_orid($orid)] = TRUE;
+  if (isset($user->roles)) foreach (explode(',', $user->roles) as $orid) $new_user['roles'][rid_by_orid($orid)] = TRUE;
+
+  try {
+    /** user picture file identifier + replacement token for user file basename */
+    $fid = $ufp = 0;
+    if (!empty($user->picture)) {
+      $user_picture_url = url($production_url . $user->picture, array('absolute' => TRUE));
+      $user_picture = download_user_picture($user_picture_url);
+      if ($user_picture) {
+         $new_user['picture'] = $user_picture->fid;
+         $fid = $user_picture->fid;
+         $pathinfo = pathinfo($user->picture);
+         $ufp = $pathinfo['basename'];
+      }
     }
   }
-  
-  if (!empty($user->picture)) {
-    $user_picture_url = url($production_url . $user->picture, array('absolute' => TRUE));
-    $user_picture = download_user_picture($user_picture_url);
-  //  if ($user_picture) {
-  //    $new_user['picture'] = $user_picture->fid;
-  //  }
+  catch (Exception $e) {
+    drush_log(dt('Caught exception: @exception' , array('@exception' => $e->getMessage())), 'error');
   }
-
+  
   try {
     // https://api.drupal.org/api/drupal/modules!user!user.module/function/user_save/7.x
     $account = user_save(null, $new_user);
     if ($account) {
-      $ufp = 0;
-      $fid = ($user_picture->fid) ? $user_picture->fid : 0;
-      if ($fid) {
-        $pathinfo = pathinfo($user->picture);
-        $ufp = $pathinfo['basename'];
-      }
       // While developing we are using Reroute Email module to aviod sending
       // emails to our users
       // see: https://www.drupal.org/project/reroute_email
@@ -240,10 +264,10 @@ function migrate_user($user) {
         	module_invoke_all('realname_update', $realname, $account);
         }
       }
-      
+
       /** Update profile fields */
-      mediacommons_base_import_migrate_profile_fields($account, $user);
-      
+      // mediacommons_base_import_migrate_profile_fields($account, $user);
+
       db_insert('mediacommons_base_import_user_map')->fields(array(
         'ouid' => $user->uid, 
         'uid' => $account->uid, 
@@ -252,7 +276,6 @@ function migrate_user($user) {
       )->execute();
 
       drush_log(dt('User @user created', array ('@user' => $user->name)), 'ok');
-
     }
   }
   catch (Exception $e) {
@@ -309,14 +332,24 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
       }
     }
   }
+  
   /**
    * Wrapp user account with an entity metadata wrappers
    * see: https://www.drupal.org/documentation/entity-metadata-wrappers
    */
   $wrapper = entity_metadata_wrapper('user', $account);
+  
   // fields
 	foreach ($fields_map as $key => $value) {
-    $this_field = $wrapper->$fields_map[$key]['field'];
+    try {
+    	if (isset($fields_map[$key]['field'])) {
+    		$this_field = $wrapper->{$fields_map[$key]['field']};
+    	}
+    }
+    catch (Exception $e) {
+    	drush_log(dt('Caught exception: @exception' , array('@exception' => $e->getMessage())), 'error');
+    }
+    
     if ($key != 'profile_research_interests') {
       $field_value = mediacommons_base_import_d6_profile_field_value($value['ofid'], $olduser->uid);
     }
@@ -421,44 +454,32 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
     							}
     						}
     					}
-              elseif ( $fields_map[$key]['field'] === 'field_country') {
-                /** Country */
-      					$vocabulary = taxonomy_vocabulary_machine_name_load('country');
-      					/** Does the vocabulary organizations exist */
-      					if ($vocabulary) {
-      					  $field_value = trim (utf8_encode($field_value));
-      						$query = new EntityFieldQuery;
-      						$term = $query->entityCondition('entity_type', 'taxonomy_term')
-      							            ->propertyCondition('name', $field_value)
-      							            ->propertyCondition('vid', $vocabulary->vid)
-      							            ->execute();
-      						if ($term) {
-      						      $keys = array_keys($term['taxonomy_term']);
-      							    $tid = array_pop($keys);
-      							    $this_field->set($tid);
-      						}
-      				  }
-              }
-
-              // Research Interests
-              //
-              // print_r($fields_map);
-              // return;
-
-
-
-
-            }
-    		  }
-    			catch (Exception $e) {
-            drush_log('Caught exception: ',  $e->getMessage(), 'error');
-    			}
+          elseif ($fields_map[$key]['field'] === 'field_country') {
+            /** Country */
+      		$vocabulary = taxonomy_vocabulary_machine_name_load('country');
+      		/** Does the vocabulary organizations exist */
+      		if ($vocabulary) {
+      		  $field_value = trim (utf8_encode($field_value));
+      		  $query = new EntityFieldQuery;
+      		  $term = $query->entityCondition('entity_type', 'taxonomy_term')->propertyCondition('name', $field_value)->propertyCondition('vid', $vocabulary->vid)->execute();
+      		  if ($term) {
+      			$keys = array_keys($term['taxonomy_term']);
+      			$tid = array_pop($keys);
+                $this_field->set($tid);
+      		  }
+      		}
+          }
+        }
+      }
+      catch (Exception $e) {
+        drush_log('Caught exception: ',  $e->getMessage(), 'error');
+      }
     }
-	}
+  }
   try {
     $wrapper->save();
-	}
-	catch (Exception $e) {
+  }
+  catch (Exception $e) {
     drush_log('Caught exception: ',  $e->getMessage(), 'error');
-	}
+  }
 }

@@ -1,9 +1,7 @@
 <?php
 
 function setup_project_environment() {
-
   variable_set('mediacommons_project', 'mediacommons');
-
 }
 
 function config_apachesolr() {
@@ -11,7 +9,8 @@ function config_apachesolr() {
   module_load_include('inc', 'apachesolr', 'apachesolr.index');
 
   $blacklisted = array(
-    'front_page_post'
+    'front_page_post',
+    'message',
   );
 
   $bundles = array_keys(node_type_get_types());
@@ -47,6 +46,12 @@ function config_apachesolr() {
       throw $e;
     }
   }
+  
+  // I need to "refresh metadata"
+  // enable facetapi
+  // "Make this Solr search environment multisite capable"
+  // configure blocks
+  
   cache_clear_all();
 }
 

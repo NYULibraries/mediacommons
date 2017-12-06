@@ -5,23 +5,24 @@ function init () {
     array(
       'label' => t('Migrate site'),
       'callback' => array(
-        'setup_project_environment', // Project should declare this callback. See *.project.inc
-        'create_test_users', /** @TODO: Remove when we are ready for production */
-        'config_recaptcha', // https://jira.nyu.edu/jira/browse/MC-281
-        'generate_terms',
-        'prepare_taxonomy_fields',
-        'map_roles',
-        'download_files',
-        'migrate_all_users',
-        'migrate_pages',
-        'migrate_frontpages',
-        'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
-        'enable_twitter_block', // https://jira.nyu.edu/jira/browse/MC-319
-        'node_access_rebuild',
-        'config_apachesolr',
-        'drupal_flush_all_caches',
-        'drupal_cron_run',
-        '_MC277',
+      	'_update_profile_fields',
+      //'setup_project_environment', // Project should declare this callback. See *.project.inc
+      //'create_test_users', /** @TODO: Remove when we are ready for production */
+      //'config_recaptcha', // https://jira.nyu.edu/jira/browse/MC-281
+      //'generate_terms',
+      //'prepare_taxonomy_fields',
+      //'map_roles',
+      //'download_files',
+      //'migrate_all_users',
+      //'migrate_pages',
+      //'migrate_frontpages',
+      //'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262      
+      //'enable_twitter_block', // https://jira.nyu.edu/jira/browse/MC-319
+      //'node_access_rebuild',
+      //'config_apachesolr',
+      //'drupal_flush_all_caches',
+      //'drupal_cron_run',
+      //'_MC277', // contributor images missing on IMR hub page: why?
       ),
     ),
   );

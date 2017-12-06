@@ -4,13 +4,21 @@
  *  Find out if user is already in the system by its Drupal 6 user id
  */
 function user_exists_by_ouid($ouid) {
-	if ($ouid == 1) return 1;
-	$author_exist = db_query('SELECT uid FROM {mediacommons_base_import_user_map} u WHERE ouid = :ouid', array( ':ouid' => (int) $ouid) ) ;
-	if ($author_exist->rowCount() > 0) {
-		$author = $author_exist->fetchObject() ;
-		return $author->uid;
-	}
-	return FALSE;
+  if ($ouid == 1) return 1;
+  $author_exist = db_query('SELECT uid FROM {mediacommons_base_import_user_map} u WHERE ouid = :ouid', array(':ouid' => (int) $ouid));
+  if ($author_exist->rowCount() > 0) {
+    $author = $author_exist->fetchObject();
+    return $author->uid;
+  }
+  return FALSE;
+}
+
+function user_by_ouid ($ouid) {
+  $exists = user_exists_by_ouid($ouid);
+  if ($exists) {
+  	return user_load($exists, TRUE);
+  }
+  else return FALSE;
 }
 
 function d6_user_one() {

@@ -1,33 +1,33 @@
 <?php
 
 function download_user_picture($url) {
-	$wrapper = file_stream_wrapper_get_instance_by_uri('public://');
-	$file_data = drupal_http_request($url);
-	$filepath = pathinfo($url);
-	$destination_file = 'public://pictures/' . $filepath['basename'];
-	if ($file_data) {
-		if ($file_data->code == 200) {
-			return file_save_data($file_data->data, $destination_file, FILE_EXISTS_REPLACE);
-		}
-	}
+  $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
+  $file_data = drupal_http_request($url);
+  $filepath = pathinfo($url);
+  $destination_file = 'public://pictures/' . $filepath['basename'];
+  if ($file_data) {
+    if ($file_data->code == 200) {
+      return file_save_data($file_data->data, $destination_file, FILE_EXISTS_REPLACE);
+    }
+  }
 }
 
 function mediacommons_base_import_download_file($url) {
-	$wrapper = file_stream_wrapper_get_instance_by_uri('public://');
-	if ($wrapper) {
-		$destination_dir = $wrapper->realpath();
-	}
-	else {
-		return drush_log('Unable to find destination directory.', 'error');
-	}
-	$file_data = drupal_http_request($url);
-	$filepath = pathinfo($url);
-	$destination_file = 'public://' . $filepath['basename'];
-	if ($file_data) {
-		if ($file_data->code == 200) {
-			return file_save_data($file_data->data, $destination_file, FILE_EXISTS_REPLACE);
-		}
-	}
+  $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
+  if ($wrapper) {
+    $destination_dir = $wrapper->realpath();
+  }
+  else {
+    return drush_log('Unable to find destination directory.', 'error');
+  }
+  $file_data = drupal_http_request($url);
+  $filepath = pathinfo($url);
+  $destination_file = 'public://' . $filepath['basename'];
+  if ($file_data) {
+    if ($file_data->code == 200) {
+      return file_save_data($file_data->data, $destination_file, FILE_EXISTS_REPLACE);
+    }
+  }
 }
 
 function download_files() {
