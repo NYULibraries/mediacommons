@@ -3,27 +3,27 @@
 function config_apachesolr() {
 
   module_load_include('inc', 'apachesolr', 'apachesolr.index');
-  
+
   drupal_flush_all_caches();
-  
+
   $theme = 'mediacommons';
-  
+
   $hash = 'mc';
 
   $env_id = 'solr';
-  
+
   $info = facetapi_get_facet_info('apachesolr@solr');
-  
+
   $realm = facetapi_realm_load('block');
-  
+
   $adapter = facetapi_adapter_load('apachesolr@solr');
-  
+
   $region = 'searchresults_sidebar';
-  
+
   $module = 'facetapi';
-  
+
   $args = array('weight' => '-1', 'status' => '1',' region' => $region, 'theme' => $theme);
-	
+
   $blocks = array(
 	'im_field_co_editor', // Co-editor. Filter by field field_co_editor of type user_reference.
 	'im_field_contributors', // Contributors. Filter by field field_contributors of type user_reference.
@@ -39,29 +39,29 @@ function config_apachesolr() {
 
   // Make this Solr search environment multisite capable
   apachesolr_environment_variable_set('solr', 'multisitesearch', TRUE);
-  
+
   // We don't index MediaCommons Umbrella
   db_delete('apachesolr_index_bundles')->condition('env_id', $env_id)->condition('entity_type', $entity_type)->execute();
-	
+
   // Make sure we have the blocks we want to enable
   foreach ($info as $facet_name => $facet) {
 	if (in_array($facet_name, $blocks)) {
 	  facetapi_save_facet_enabled($adapter, $realm, $facet);
 	}
   }
-	
+
   drupal_flush_all_caches();
-	
+
   // Fetch and sort blocks. We need to do this to init our block
   mediacommons_prepare_blocks($theme);
-	
+
   drupal_theme_initialize();
-	
+
   ctools_css_flush_caches();
-	
+
   // if we don't clear statics facetapi_get_block_info won't return the list of all facets we just enabled
   drupal_static_reset();
-	
+
   foreach (facetapi_get_block_info(array('block')) as $block => $data) {
     _block_rehash($theme);
 	try {
