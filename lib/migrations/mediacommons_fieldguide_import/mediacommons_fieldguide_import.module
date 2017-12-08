@@ -4,9 +4,9 @@ function init() {
   $commands = array(
     array(
       'label' => t('Migrate site'),
-      'callback' => array(
+      'callback' => array(	
         'setup_project_environment', // Project should declare this callback. See *.project.inc
-     	  'download_files',
+     	'download_files',
         'migrate_survey_questions',
         'migrate_survey_responses',
         'response_arrange_order',
@@ -15,8 +15,8 @@ function init() {
         'enable_twitter_block',        
         'node_access_rebuild',
         'enable_mediacommons_views',
-        'config_apachesolr',
         'config_recaptcha', // https://jira.nyu.edu/jira/browse/MC-281
+      	'config_apachesolr', // must be at the end becuse this function will reset Drupal's statics
         'drupal_flush_all_caches',
         'drupal_cron_run',
       ),

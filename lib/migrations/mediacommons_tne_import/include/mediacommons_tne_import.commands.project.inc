@@ -1,47 +1,115 @@
 <?php
 
 function config_apachesolr() {
-
-  module_load_include('inc', 'apachesolr', 'apachesolr.index');
-
-  $blacklisted = array(
-    'front_page_post'
-  );
-
-  $bundles = array_keys(node_type_get_types());
-
-  $bundles_to_index = array_diff($bundles, $blacklisted);
-
-  $env_id = 'solr';
-
-  $entity_types = array('node', 'comment');
-  
-  foreach ($entity_types as $entity_type) {
-    $transaction = db_transaction();
-    try {
-      db_delete('apachesolr_index_bundles')
-        ->condition('env_id', $env_id)
-        ->condition('entity_type', $entity_type)
-        ->execute();
-      $insert = db_insert('apachesolr_index_bundles')
-        ->fields(array('env_id', 'entity_type', 'bundle'));
-      foreach ($bundles_to_index as $bundle) {
-        if ($entity_type == 'comment') $bundle = 'comment_node_' . $bundle;  
-        $insert->values(array(
-          'env_id' => $env_id,
-          'entity_type' => $entity_type,
-          'bundle' => $bundle,
-        ));
-      
-      }
-      $insert->execute();
+    
+    drupal_flush_all_caches();
+    
+    $theme = 'mediacommons';
+    
+    $hash = 'tne';
+    
+    // exclude content types
+    $blacklisted = array(
+        'front_page_post',
+        'message',
+        'page',
+    );
+    
+    $bundles = array_keys(node_type_get_types());
+    
+    $bundles_to_index = array_diff($bundles, $blacklisted);
+    
+    $env_id = 'solr';
+    
+    $entity_types = array('node', 'comment');
+    
+    $blocks = array(
+        'im_field_co_editor', // Co-editor. Filter by field field_co_editor of type user_reference.
+        'im_field_contributors', // Contributors. Filter by field field_contributors of type user_reference.
+        'im_field_curators_editors', // Curated by. Filter by field field_curators_editors of type user_reference.
+        'im_field_taxonomy',  // Tags. Filter by field field_taxonomy of type taxonomy_term_reference.
+        'im_field_reviewer',  // Reviewer. Filter by field field_reviewer of type user_reference.
+        'dm_field_pubdate', // Publication date. Filter by field field_pubdate of type datestamp.
+        'hash',  // Site. Filter by Site (Multisite).
+        'sm_vid_tags', // Tags. Filter by Tags (Multisite).
+    );
+    
+    module_load_include('inc', 'apachesolr', 'apachesolr.index');
+    
+    variable_set('apachesolr_site_hash', $hash);
+    
+    // Make this Solr search environment multisite capable
+    apachesolr_environment_variable_set('solr', 'multisitesearch', TRUE);
+    
+    foreach ($entity_types as $entity_type) {
+        try {
+            db_delete('apachesolr_index_bundles')->condition('env_id', $env_id)->condition('entity_type', $entity_type)->execute();
+            $insert = db_insert('apachesolr_index_bundles')->fields(array('env_id', 'entity_type', 'bundle'));
+            foreach ($bundles_to_index as $bundle) {
+                if ($entity_type == 'comment') {
+                    $bundle = 'comment_node_' . $bundle;
+                }
+                $insert->values(array('env_id' => $env_id, 'entity_type' => $entity_type, 'bundle' => $bundle));
+            }
+            $insert->execute();
+        }
+        catch (Exception $e) {
+            throw $e;
+        }
     }
-    catch (Exception $e) {
-      $transaction->rollback();
-      throw $e;
+    
+    $info = facetapi_get_facet_info('apachesolr@solr');
+    
+    $realm = facetapi_realm_load('block');
+    
+    $adapter = facetapi_adapter_load('apachesolr@solr');
+    
+    // Make sure we have the blocks we want to enable
+    foreach ($info as $facet_name => $facet) {
+        if (in_array($facet_name, $blocks)) {
+            facetapi_save_facet_enabled($adapter, $realm, $facet);
+        }
     }
-  }
-  cache_clear_all();
+    
+    cache_clear_all();
+    
+    drupal_flush_all_caches();
+    
+    $theme = 'mediacommons';
+    
+    // Fetch and sort blocks. We need to do this to init our block
+    mediacommons_prepare_blocks($theme);
+    
+    drupal_theme_initialize();
+    
+    $region = 'searchresults_sidebar';
+    
+    $module = 'facetapi';
+    
+    $args = array('weight' => '-1', 'status' => '1',' region' => $region, 'theme' => $theme);
+    
+    ctools_css_flush_caches();
+    
+    // if we don't clear statics facetapi_get_block_info won't return the list of all facets we just enabled
+    drupal_static_reset();
+    
+    foreach (facetapi_get_block_info(array('block')) as $block => $data) {
+        _block_rehash($theme);
+        try {
+            db_update('block')->fields($args)->condition('module', $module)->condition('theme', $theme)->condition('delta', $block)->execute();
+        }
+        catch (Exception $e) {
+            throw $e;
+        }
+    }
+    
+    $filter = array($hash => $hash);
+    
+    // Multisite capable, but search only this site
+    apachesolr_environment_variable_set('solr', 'multisitesearch_sites', $filter);
+    
+    drupal_flush_all_caches();
+    
 }
 
 function setup_project_environment () {

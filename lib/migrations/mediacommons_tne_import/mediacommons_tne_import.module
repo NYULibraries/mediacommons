@@ -13,13 +13,12 @@ function init () {
         'migrate_clusters',
         'migrate_responses',
         'enable_devel_options', // https://jira.nyu.edu/jira/browse/MC-262
-        'enable_twitter_block', // https://jira.nyu.edu/jira/browse/MC-319
-        'config_apachesolr',
+        'enable_twitter_block', // https://jira.nyu.edu/jira/browse/MC-319        
         'config_recaptcha', // https://jira.nyu.edu/jira/browse/MC-281
-        'node_access_rebuild',        
+        'node_access_rebuild',
         'cache_clear_all',  // flush cache
         'drupal_flush_all_caches',
-        'drupal_cron_run',
+        'config_apachesolr',
       ),
     ),
   );  
