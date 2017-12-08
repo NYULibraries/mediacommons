@@ -38,17 +38,4 @@ echo "\$base_url = '${BASE_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/defa
 # Set Apache Solr environment (URL) and overwrite the one in database.
 echo "\$conf['apachesolr_environments']['solr']['url'] = '${MEDIACOMMONS_APACHESOLR_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
 
-${DRUSH} en -y mediacommons_solr --root=${BUILD_DIR}/${BUILD_BASE_NAME} --uri=${BASE_URL}
-
-# We wipe clean Apache Solr index
-if [ "${BUILD_BASE_NAME}" = "mediacommons" ]; then
-  curl "${MEDIACOMMONS_APACHESOLR_URL}/update?stream.body=<delete><query>*:*</query></delete>&commit=true"
-fi
-
-# Mark all the documents in the site
-${DRUSH} -d -y solr-mark-all --root=${BUILD_DIR}/${BUILD_BASE_NAME} --uri=${BASE_URL}
-
-# Run index off all documents
-${DRUSH} -d -y solr-index --root=${BUILD_DIR}/${BUILD_BASE_NAME} --uri=${BASE_URL}
-
 exit 0
