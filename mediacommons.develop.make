@@ -8,6 +8,7 @@ projects[drupal][version] = "7.56"
 
 projects[context][version] = "3.7"
 projects[apachesolr][version] = "1.9"
+projects[facetapi][version] = "1.5"
 projects[apachesolr_multisitesearch][version] = "1.2"
 projects[ctools][version] = "1.12"
 projects[cnr][version] = "4.22"
