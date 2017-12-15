@@ -25,17 +25,21 @@ function config_apachesolr() {
   $args = array('weight' => '-1', 'status' => '1',' region' => $region, 'theme' => $theme);
 
   $blocks = array(
-	'im_field_co_editor', // Co-editor. Filter by field field_co_editor of type user_reference.
-	'im_field_contributors', // Contributors. Filter by field field_contributors of type user_reference.
-	'im_field_curators_editors', // Curated by. Filter by field field_curators_editors of type user_reference.
+	// 'im_field_co_editor', // Co-editor. Filter by field field_co_editor of type user_reference.
+	// 'im_field_contributors', // Contributors. Filter by field field_contributors of type user_reference.
+	// 'im_field_curators_editors', // Curated by. Filter by field field_curators_editors of type user_reference.
 	'im_field_taxonomy',  // Tags. Filter by field field_taxonomy of type taxonomy_term_reference.
-	'im_field_reviewer',  // Reviewer. Filter by field field_reviewer of type user_reference.
+	// 'im_field_reviewer',  // Reviewer. Filter by field field_reviewer of type user_reference.
 	'dm_field_pubdate', // Publication date. Filter by field field_pubdate of type datestamp.
 	'hash',  // Site. Filter by Site (Multisite).
 	'sm_vid_tags', // Tags. Filter by Tags (Multisite).
   );
 
   variable_set('apachesolr_site_hash', $hash);
+
+  variable_set('search_active_modules', array('apachesolr_search'));
+
+  variable_set('search_default_module', 'apachesolr_search');
 
   // Make this Solr search environment multisite capable
   apachesolr_environment_variable_set('solr', 'multisitesearch', TRUE);
@@ -83,41 +87,41 @@ function setup_project_environment() {
 function enable_twitter_block() {
 
   drush_log('Task: Enable Twitter block', 'ok');
-  
+
   $enabled = module_enable(array('mediacommons_twitter'));
-  
+
   if ($enabled) {
-  
+
     // https://jira.nyu.edu/jira/browse/MC-319
-    
+
     $region = 'umb_homepage_sidebar';
 
     $theme = 'mediacommons';
 
     $block = 'mediacommons_twitter';
-    
-    $twitter_user = 'mediacommons';  
-      
+
+    $twitter_user = 'mediacommons';
+
     variable_set('mediacommons_twitter_label', 'Twitter Widget');
-    
+
     // variable_set('mediacommons_twitter_url', 'https://twitter.com/lhenze/lists/mediacommons');
-    
+
     variable_set('mediacommons_twitter_user', $twitter_user);
 
     $args = array(
-      'weight' => '-1', 
+      'weight' => '-1',
       'status' => '1',
       'region' => $region,
       'theme' => $theme,
     );
 
     drupal_theme_initialize();
-    
+
     // Fetch and sort blocks. We need to do this to init our block
     $blocks = mediacommons_prepare_blocks($theme);
-    
+
     $transaction = db_transaction();
-    
+
     try {
       db_update('block')
          ->fields($args)
@@ -126,12 +130,12 @@ function enable_twitter_block() {
         ->condition('theme', 'mediacommons')
         ->execute();
     }
-    
+
     catch (Exception $e) {
       $transaction->rollback();
       print_r($e);
       throw $e;
     }
-  }  
-  
+  }
+
 }
