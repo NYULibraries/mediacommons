@@ -38,4 +38,11 @@ echo "\$base_url = '${BASE_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/defa
 # Set Apache Solr environment (URL) and overwrite the one in database.
 echo "\$conf['apachesolr_environments']['solr']['url'] = '${MEDIACOMMONS_APACHESOLR_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
 
+# while working in my VM
+
+# HOSTIP=`cat /home/base/host.ip`
+# echo "\$basename='${BUILD_BASE_NAME}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+# echo "\$hostip='${HOSTIP}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+# cat ${BUILD_APP_ROOT}/bin/utilities/ip.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+
 exit 0

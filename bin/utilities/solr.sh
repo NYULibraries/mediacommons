@@ -37,32 +37,24 @@ echo "Reset Apache Solr index"
 curl "${MEDIACOMMONS_APACHESOLR_URL}/update?stream.body=<delete><query>*:*</query></delete>&commit=true&wt=json"
 
 # Mark all the documents in the site
-${DRUSH} -d -y solr-mark-all --root=${BUILD_APP_ROOT}/builds/mediacommons
+${DRUSH} -y solr-mark-all --root=${BUILD_APP_ROOT}/builds/mediacommons
 
 # Run index off all documents
-${DRUSH} -d -y solr-index --root=${BUILD_APP_ROOT}/builds/mediacommons
+${DRUSH} -y solr-index --root=${BUILD_APP_ROOT}/builds/mediacommons
 
 projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
-  echo ${project}
-
-  # Mark all the documents in the site
-  ${DRUSH} -d -y solr-mark-all --root=${BUILD_APP_ROOT}/builds/${project}
-
-  # Run index off all documents
-  ${DRUSH} -d -y solr-index --root=${BUILD_APP_ROOT}/builds/${project}
-
+    # Mark all the documents in the site
+    ${DRUSH} -y solr-mark-all --root=${BUILD_APP_ROOT}/builds/${project}
+    # Run index off all documents
+    ${DRUSH} -y solr-index --root=${BUILD_APP_ROOT}/builds/${project}
 done
 
 for project in ${projects[*]}
   do
-  echo ${project}
-
-  # Mark all the documents in the site
-  ${DRUSH} -d -y solr-metadata --root=${BUILD_APP_ROOT}/builds/${project}
-
+    ${DRUSH} -d -y solr-metadata --root=${BUILD_APP_ROOT}/builds/${project}
 done
 
 exit 0
