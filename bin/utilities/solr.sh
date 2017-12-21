@@ -42,6 +42,8 @@ ${DRUSH} -y solr-mark-all --root=${BUILD_APP_ROOT}/builds/mediacommons
 # Run index off all documents
 ${DRUSH} -y solr-index --root=${BUILD_APP_ROOT}/builds/mediacommons
 
+${DRUSH} -y solr-metadata --root=${BUILD_APP_ROOT}/builds/mediacommons
+
 projects=(${PROJECTS})
 
 for project in ${projects[*]}
