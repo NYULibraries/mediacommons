@@ -28,7 +28,7 @@ function config_apachesolr() {
 	// 'im_field_co_editor', // Co-editor. Filter by field field_co_editor of type user_reference.
 	// 'im_field_contributors', // Contributors. Filter by field field_contributors of type user_reference.
 	// 'im_field_curators_editors', // Curated by. Filter by field field_curators_editors of type user_reference.
-	'im_field_taxonomy',  // Tags. Filter by field field_taxonomy of type taxonomy_term_reference.
+	// 'im_field_taxonomy',  // Tags. Filter by field field_taxonomy of type taxonomy_term_reference.
 	// 'im_field_reviewer',  // Reviewer. Filter by field field_reviewer of type user_reference.
 	'dm_field_pubdate', // Publication date. Filter by field field_pubdate of type datestamp.
 	'hash',  // Site. Filter by Site (Multisite).
