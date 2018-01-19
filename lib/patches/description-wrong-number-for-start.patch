@@ -1,0 +1,22 @@
+diff --git a/apachesolr_search.module b/apachesolr_search.module
+index c6858e9..9dfe771 100644
+--- a/apachesolr_search.module
++++ b/apachesolr_search.module
+@@ -1521,14 +1521,14 @@ function apachesolr_search_preprocess_search_results(&$variables) {
+       return NULL;
+     }
+     $total = $variables['response']->response->numFound;
++    $start = $variables['response']->response->start;
+     $params = $variables['query']->getParams();
+-
++    $params['start'] = $start; // wrong numbers... module bug
+     $variables['description'] = t('Showing items @start through @end of @total.', array(
+       '@start' => $params['start'] + 1,
+       '@end' => $params['start'] + $params['rows'] - 1,
+       '@total' => $total,
+-    ));
+-    // Redefine the pager if it was missing
++    ));    // Redefine the pager if it was missing
+     pager_default_initialize($total, $params['rows']);
+     $variables['pager'] = theme('pager', array('tags' => NULL));
+ 
