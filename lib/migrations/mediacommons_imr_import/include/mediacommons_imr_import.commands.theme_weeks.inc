@@ -139,7 +139,6 @@ function theme_week_dates($date_source, $old_node) {
       if (isset($months[0][1])) {
         $end_month = $months[0][1];
         if (!in_array($end_month, $listMonths)) {
-          drush_log($end_month, 'ok');
           switch ($i) {
             case "Sept":
               $end_month = "September";
