@@ -8,6 +8,17 @@ function config_apachesolr() {
 
   $theme = 'mediacommons';
 
+  $entity_types = array('node', 'comment');
+
+  foreach ($entity_types as $entity_type) {
+    try {
+      db_delete('apachesolr_index_bundles')->condition('env_id', $env_id)->condition('entity_type', $entity_type)->execute();
+    }
+    catch (Exception $e) {
+      throw $e;
+    }
+  }  
+
   $hash = 'mc';
 
   $env_id = 'solr';
