@@ -4,7 +4,7 @@
  * Migrate Theme Weeks.
  */
 function migrate_theme_weeks () {
-  foreach ( theme_weeks() as $key => $old_node ) migrate_theme_week ( $old_node ) ;
+  foreach (theme_weeks() as $key => $old_node) migrate_theme_week($old_node);
 }
 
 /**
@@ -71,7 +71,7 @@ function migrate_theme_week ( $old_node ) {
    */
   foreach ( $node['field_spokes'] as $onid ) $node['field_contributors'][] = ouid_by_onid ( $onid ) ;
 
-  $dates = theme_week_dates ( $old_node->title ) ;
+  $dates = theme_week_dates ( $old_node->title,  $old_node) ;
 
   /**
    * Subtract the dates from the title of the Theme Week
@@ -85,7 +85,7 @@ function migrate_theme_week ( $old_node ) {
 
   }
 
-  return create_hub ( $node ) ;
+  return create_hub ( $node );
 
 }
 
@@ -100,7 +100,7 @@ function theme_weeks_title ( $title_source ) {
 
   if ( isset ( $match[0] ) ) return str_replace ( $match[0] , '' , $title_source ) ;
 
-  return trim ( $title_source ) ;
+  return trim($title_source);
 
 }
 
@@ -108,44 +108,71 @@ function theme_weeks_title ( $title_source ) {
  * Crazy but the only realible source of dates is the title
  * of the Theme Week
  */
-function theme_week_dates ( $date_source ) {
-
-  $start_month = $end_month = $start_day = $end_day = NULL ;
-
+function theme_week_dates($date_source, $old_node) {  
+  $listMonths = array(
+    'January',
+    'February',
+    'March', 
+    'April', 
+    'May', 
+    'June', 
+    'July', 
+    'August', 
+    'September', 
+    'October', 
+    'November', 
+    'December'
+  );
+  $created_year = date('Y', $old_node->created);
+  $start_month = $end_month = $start_day = $end_day = NULL;
   $date_source = trim($date_source);
-
   $p = '/\[(.*)\]/';
-
   $year_pattern = '/[0-9]{4}$/';
-
   $months_pattern = '/[a-zA-Z]+/';
-
   $days_pattern = '/[0-9]{1,2}/';
-
   preg_match($p, $date_source, $match);
-
-  if ( isset ( $match[1] ) ) {
-
+  if (isset($match[1])) {
     preg_match($year_pattern, $match[1], $years);
-
-    preg_match_all($months_pattern, $match[1], $months);
-
-    if ( isset ( $months[0] ) ) {
-      if ( isset ( $months[0][0]) ) $start_month = $months[0][0] ;
-      if ( isset ( $months[0][1]) ) $end_month = $months[0][1] ;
-      if ( $end_month == NULL && ! empty ( $start_month ) ) $end_month = $start_month;
+    preg_match_all($months_pattern, $match[1], $months);    
+    if (isset($months[0])) {      
+      if (isset($months[0][0])) $start_month = $months[0][0];      
+      if (isset($months[0][1])) {
+        $end_month = $months[0][1];
+        if (!in_array($end_month, $listMonths)) {
+          drush_log($end_month, 'ok');
+          switch ($i) {
+            case "Sept":
+              $end_month = "September";
+              break;
+            case "Jan":
+              $end_month = "January";
+              break;
+            case "th":
+            case "rd":
+            case "st":
+            case "nd":
+              $end_month = $start_month;
+              break;
+          }
+        }
+      }
+      if ($end_month == NULL && !empty ($start_month)) $end_month = $start_month;
     }
-
-    preg_match_all($days_pattern, str_replace($years, ' ', $match[1]), $days);
-
+    preg_match_all($days_pattern, str_replace($years, ' ', $match[1]), $days);    
     if (isset($days[0])) {
-      if ( isset( $days[0][0] ) ) $start_day = $days[0][0] ;
-      if ( isset( $days[0][1] ) ) $end_day = $days[0][1] ;
+      if (isset($days[0][0])) $start_day = $days[0][0];
+      if (isset($days[0][1])) $end_day = $days[0][1];
     }
-
-    return array (
-      'start' => $start_month . ' ' . $start_day . ', ' . $years[0],
-      'end' => $end_month . ' ' . $end_day . ', ' . $years[0],
+    // https://jira.nyu.edu/jira/browse/MC-381
+    if (empty($years)) {
+      $year = $created_year;
+    }
+    else {
+      $year = $years[0];
+    }
+    return array(
+      'start' => $start_month . ' ' . $start_day . ', ' . $year,
+      'end' => $end_month . ' ' . $end_day . ', ' . $year,
     );
   }
 }

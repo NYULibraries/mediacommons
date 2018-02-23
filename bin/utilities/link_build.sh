@@ -1,24 +1,10 @@
 #!/bin/bash
+# https://askubuntu.com/questions/967623/creating-symbolic-links-within-folders-shared-with-the-windows-host-system
 
 die () {
   echo $1
   exit 1
 }
-
-SOURCE="${BASH_SOURCE[0]}"
-
-# resolve $SOURCE until the file is no longer a symlink
-while [ -h "$SOURCE" ]; do 
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  # if $SOURCE was a relative symlink, we need to resolve it relative to the path where
-  # the symlink file was located
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
-DEBUG=""
 
 while getopts ":c:hd" opt; do
   case $opt in
@@ -26,12 +12,9 @@ while getopts ":c:hd" opt; do
       [ -f $OPTARG ] || die "Configuration file does not exist." 
       CONF_FILE=$OPTARG
       ;;
-    d)
-      DEBUG="-d -v"
-      ;;
     h)
       echo " "
-      echo " Usage: ./migrate.sh -c example.conf"
+      echo " Usage: ./utilities/link_build.sh -c example.conf"
       echo " "
       echo " Options:"
       echo "   -h           Show brief help"
@@ -47,7 +30,7 @@ done
 # load configuration file
 . $CONF_FILE
 
-LIBRARY="$(dirname "$DIR")"/../lib
+LIBRARY="${BUILD_APP_ROOT}/lib"
 
 [ -d $LIBRARY ] || die "Library directory ${LIBRARY} does not exist"
 
