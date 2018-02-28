@@ -1,40 +1,21 @@
 <?php
 
 function config_apachesolr() {
-
   module_load_include('inc', 'apachesolr', 'apachesolr.index');
-
   drupal_flush_all_caches();
-
   $theme = 'mediacommons';
-
-  $entity_types = array('node', 'comment');
-
-  foreach ($entity_types as $entity_type) {
-    try {
-      db_delete('apachesolr_index_bundles')->condition('env_id', $env_id)->condition('entity_type', $entity_type)->execute();
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-  }  
-
+  $entity_types = array('node', 'comment');  
+  foreach (db_query('SELECT * FROM apachesolr_index_bundles') as $record) {
+    db_delete('apachesolr_index_bundles')->condition('env_id', $record->env_id)->condition('bundle', $record->bundle)->execute();
+  }
   $hash = 'mc';
-
   $env_id = 'solr';
-
   $info = facetapi_get_facet_info('apachesolr@solr');
-
   $realm = facetapi_realm_load('block');
-
   $adapter = facetapi_adapter_load('apachesolr@solr');
-
   $region = 'searchresults_sidebar';
-
   $module = 'facetapi';
-
   $args = array('weight' => '-1', 'status' => '1',' region' => $region, 'theme' => $theme);
-
   $blocks = array(
 	// 'im_field_co_editor', // Co-editor. Filter by field field_co_editor of type user_reference.
 	// 'im_field_contributors', // Contributors. Filter by field field_contributors of type user_reference.
@@ -45,50 +26,34 @@ function config_apachesolr() {
 	'hash',  // Site. Filter by Site (Multisite).
 	'sm_vid_tags', // Tags. Filter by Tags (Multisite).
   );
-
   variable_set('apachesolr_site_hash', $hash);
-
   variable_set('search_active_modules', array('apachesolr_search'));
-
   variable_set('search_default_module', 'apachesolr_search');
-
   // Make this Solr search environment multisite capable
   apachesolr_environment_variable_set('solr', 'multisitesearch', TRUE);
-
-  // We don't index MediaCommons Umbrella
-  db_delete('apachesolr_index_bundles')->condition('env_id', $env_id)->condition('entity_type', $entity_type)->execute();
-
   // Make sure we have the blocks we want to enable
   foreach ($info as $facet_name => $facet) {
-	if (in_array($facet_name, $blocks)) {
-	  facetapi_save_facet_enabled($adapter, $realm, $facet);
-	}
+	  if (in_array($facet_name, $blocks)) {
+	    facetapi_save_facet_enabled($adapter, $realm, $facet);
+  	}
   }
-
   drupal_flush_all_caches();
-
   // Fetch and sort blocks. We need to do this to init our block
   mediacommons_prepare_blocks($theme);
-
   drupal_theme_initialize();
-
   ctools_css_flush_caches();
-
   // if we don't clear statics facetapi_get_block_info won't return the list of all facets we just enabled
   drupal_static_reset();
-
   foreach (facetapi_get_block_info(array('block')) as $block => $data) {
     _block_rehash($theme);
-	try {
-	  db_update('block')->fields($args)->condition('module', $module)->condition('theme', $theme)->condition('delta', $block)->execute();
-	}
-	catch (Exception $e) {
-	  throw $e;
-	}
+	  try {
+	    db_update('block')->fields($args)->condition('module', $module)->condition('theme', $theme)->condition('delta', $block)->execute();
+	  }
+	  catch (Exception $e) {
+	    throw $e;
+	  }
   }
-
   drupal_flush_all_caches();
-
 }
 
 function setup_project_environment() {

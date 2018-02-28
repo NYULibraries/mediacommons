@@ -103,7 +103,7 @@ function config_apachesolr() {
             db_update('block')->fields($args)->condition('module', $module)->condition('theme', $theme)->condition('delta', $block)->execute();
         }
         catch (Exception $e) {
-            throw $e;
+          throw $e;
         }
     }
 
