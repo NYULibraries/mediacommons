@@ -18,15 +18,17 @@ final class ApacheConfigurationTest extends TestCase {
     const PATHS = [ '', 'alt-ac', 'fieldguide', 'imr', 'intransition', 'mediacommons', 'tne' ];
     const PREFIXES = [ 'www', '' ];
 
-    public function testTest() {
-        $startUrl = "http://dev.media-commons.org/mediacommons/";
-        $expectedEndUrl = "http://dev.mediacommons.org/mediacommons/";
-        $expectedNumRedirects = 1;
+    const RESULT_EXPECTED = 'Expected';
+    const RESULT_GOT = 'Got';
+    const RESULT_REDIRECT_COUNT = 'Redirect count';
 
-        list( $effectiveUrl, $numRedirections ) = $this->checkRedirect( $startUrl );
+    /**
+     * @dataProvider generateTestUrls
+     */
+    public function testRedirect( $testUrl, $expectedEndUrl ) {
+        list( $gotEndUrl, $numRedirections ) = $this->checkRedirect( $testUrl, $expectedEndUrl );
 
-        $this->assertEquals( $expectedEndUrl, $effectiveUrl );
-        $this->assertEquals( $expectedNumRedirects, $numRedirections);
+        $this->assertEquals( $expectedEndUrl, $gotEndUrl );
     }
 
     public function generateTestUrls() {
@@ -63,13 +65,13 @@ final class ApacheConfigurationTest extends TestCase {
                         if ( $path ) {
                             $canonicalUrl = $canonicalFullyQualifiedDomainName . "/${path}/";
 
-                            $testUrls[ "${fullyQualifiedDomainName}/${path}" ] = $canonicalUrl;
-                            $testUrls[ "${fullyQualifiedDomainName}/${path}/" ] = $canonicalUrl;
+                            array_push( $testUrls, [ "${fullyQualifiedDomainName}/${path}", $canonicalUrl ] );
+                            array_push( $testUrls, [ "${fullyQualifiedDomainName}/${path}/", $canonicalUrl ] );
                         } else {
                             $canonicalUrl = $canonicalFullyQualifiedDomainName . '/';
 
-                            $testUrls[ "${fullyQualifiedDomainName}" ] = $canonicalUrl;
-                            $testUrls[ "${fullyQualifiedDomainName}/" ] = $canonicalUrl;
+                            array_push( $testUrls, [ "${fullyQualifiedDomainName}", $canonicalUrl ] );
+                            array_push( $testUrls, [ "${fullyQualifiedDomainName}/", $canonicalUrl ] );
                         }
 
                     }
