@@ -31,6 +31,12 @@ final class ApacheConfigurationTest extends TestCase {
     const CANONICAL_PARENT_DOMAIN_NAME = 'mediacommons.org';
     const CANONICAL_PROTOCOL = 'http';
 
+
+    /**
+     * Which protocols to test.  Right now we are only testing http
+     */
+    const PROTOCOLS_TO_TEST = [ 'http' ];
+
     /**
      * The web server instances that we are testing.
      *
@@ -97,53 +103,57 @@ final class ApacheConfigurationTest extends TestCase {
     public function generateTestUrls() {
         $testUrls = [];
 
-        foreach ( self::INSTANCES as $instance ) {
-            $basename = $instance[ 'basename' ];
+        foreach ( self::PROTOCOLS_TO_TEST as $protocol ) {
 
-            foreach(self::PARENT_DOMAINS as $parentDomain ) {
+            foreach ( self::INSTANCES as $instance ) {
+                $basename = $instance[ 'basename' ];
 
-                foreach( self::PREFIXES as $prefix ) {
-                    $subdomain = $basename;
+                foreach(self::PARENT_DOMAINS as $parentDomain ) {
 
-                    if ( $prefix ) {
-                        if ( $subdomain ) {
-                            $subdomain = $prefix . '-' . $subdomain;
+                    foreach( self::PREFIXES as $prefix ) {
+                        $subdomain = $basename;
+
+                        if ( $prefix ) {
+                            if ( $subdomain ) {
+                                $subdomain = $prefix . '-' . $subdomain;
+                            } else {
+                                $subdomain = $prefix;
+                            }
                         } else {
-                            $subdomain = $prefix;
-                        }
-                    } else {
-                        // Do nothing
-                    }
-
-                    foreach (self::PATHS as $path ) {
-
-                        if ( $subdomain ) {
-                            $canonicalFullyQualifiedDomainName = $basename ?
-                                $basename . '.' . self::CANONICAL_PARENT_DOMAIN_NAME :
-                                self::CANONICAL_PARENT_DOMAIN_NAME;
-                            $fullyQualifiedDomainName = "${subdomain}.${parentDomain}";
-                        } else {
-                            $canonicalFullyQualifiedDomainName = self::CANONICAL_PARENT_DOMAIN_NAME;
-                            $fullyQualifiedDomainName = "${parentDomain}";
+                            // Do nothing
                         }
 
-                        if ( $path ) {
-                            $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/${path}/";
+                        foreach (self::PATHS as $path ) {
 
-                            array_push( $testUrls, [ "${fullyQualifiedDomainName}/${path}", $canonicalUrl ] );
-                            array_push( $testUrls, [ "${fullyQualifiedDomainName}/${path}/", $canonicalUrl ] );
-                        } else {
-                            $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/";
+                            if ( $subdomain ) {
+                                $canonicalFullyQualifiedDomainName = $basename ?
+                                    $basename . '.' . self::CANONICAL_PARENT_DOMAIN_NAME :
+                                    self::CANONICAL_PARENT_DOMAIN_NAME;
+                                $fullyQualifiedDomainName = "${subdomain}.${parentDomain}";
+                            } else {
+                                $canonicalFullyQualifiedDomainName = self::CANONICAL_PARENT_DOMAIN_NAME;
+                                $fullyQualifiedDomainName = "${parentDomain}";
+                            }
 
-                            array_push( $testUrls, [ "${fullyQualifiedDomainName}", $canonicalUrl ] );
-                            array_push( $testUrls, [ "${fullyQualifiedDomainName}/", $canonicalUrl ] );
+                            if ( $path ) {
+                                $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/${path}/";
+
+                                array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/${path}", $canonicalUrl ] );
+                                array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/${path}/", $canonicalUrl ] );
+                            } else {
+                                $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/";
+
+                                array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}", $canonicalUrl ] );
+                                array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/", $canonicalUrl ] );
+                            }
+
                         }
 
                     }
 
                 }
-
             }
+
         }
 
         return $testUrls;
