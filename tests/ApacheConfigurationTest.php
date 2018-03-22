@@ -83,6 +83,33 @@ final class ApacheConfigurationTest extends TestCase {
     }
 
     /**
+     * @dataProvider generateTestUrls
+     *
+     * Simple verification that testGenerateTestUrls is creating correct test data
+     */
+    public function testGenerateTestUrls( $testUrl, $expectedEndUrl ) {
+        $urlParts = parse_url( $testUrl );
+        $host = $urlParts[ 'host' ];
+        $path = array_key_exists( 'path', $urlParts ) ? rtrim( $urlParts[ 'path' ], '/' ): null;
+
+        if ( preg_match( '/dev/', $host ) ) {
+            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://dev.' . self::CANONICAL_PARENT_DOMAIN_NAME;
+        } else if ( preg_match( '/stage/', $host ) ) {
+            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://stage.' . self::CANONICAL_PARENT_DOMAIN_NAME;
+        } else {
+            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_PARENT_DOMAIN_NAME;
+        }
+
+        if ( $path && $path !== '/' ) {
+            $correctExpectedEndUrl .= "${path}/";
+        } else {
+            $correctExpectedEndUrl .= '/';
+        }
+
+        $this->assertEquals( $correctExpectedEndUrl, $expectedEndUrl );
+    }
+
+    /**
      * Data provider for testRedirect test.
      *
      * Returns an array of arrays:
