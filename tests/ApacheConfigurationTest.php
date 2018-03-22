@@ -69,7 +69,7 @@ final class ApacheConfigurationTest extends TestCase {
                             $canonicalUrl = $canonicalFullyQualifiedDomainName . '/';
 
                             $testUrls[ "${fullyQualifiedDomainName}" ] = $canonicalUrl;
-                            $testUrls["${fullyQualifiedDomainName}/" ] = $canonicalUrl;
+                            $testUrls[ "${fullyQualifiedDomainName}/" ] = $canonicalUrl;
                         }
 
                     }
