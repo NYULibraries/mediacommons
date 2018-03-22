@@ -31,7 +31,6 @@ final class ApacheConfigurationTest extends TestCase {
     const CANONICAL_PARENT_DOMAIN_NAME = 'mediacommons.org';
     const CANONICAL_PROTOCOL = 'http';
 
-
     /**
      * Which protocols to test.  Right now we are only testing http
      */
