@@ -68,7 +68,7 @@ final class ApacheConfigurationTest extends TestCase {
      * @dataProvider generateTestUrls
      */
     public function testRedirect( $testUrl, $expectedEndUrl ) {
-        list( $gotEndUrl ) = $this->checkRedirect( $testUrl, $expectedEndUrl );
+        $gotEndUrl = $this->checkRedirect( $testUrl, $expectedEndUrl );
 
         $this->assertEquals( $expectedEndUrl, $gotEndUrl );
     }
