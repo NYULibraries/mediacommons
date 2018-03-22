@@ -54,20 +54,9 @@ final class ApacheConfigurationTest extends TestCase {
     ];
 
     /**
-     * Possible start URL parent domains
-     */
-    const PARENT_DOMAINS = [ 'mediacommons.org', 'media-commons.org' ];
-
-    /**
      * Possible start paths
      */
     const PATHS = [ '', 'alt-ac', 'fieldguide', 'imr', 'intransition', 'mediacommons', 'tne' ];
-
-    /** Possible start prefixes to be appended (with/withouth hyphen) to the
-     * INSTANCE basename values
-     *
-     */
-    const PREFIXES = [ 'www', '' ];
 
     /**
      * @dataProvider generateTestUrls
@@ -127,6 +116,21 @@ final class ApacheConfigurationTest extends TestCase {
      * @return array test data structured according to the PHPUnit data provider spec
      */
     public function generateTestUrls() {
+        return $this->generateTestUrlsMediacommonsDomain();
+    }
+
+    public function generateTestUrlsMediacommonsDomain() {
+        /**
+         * Possible start URL parent domains
+         */
+        $parentDomains = [ 'mediacommons.org', 'media-commons.org' ];
+
+        /** Possible start prefixes to be appended (with/withouth hyphen) to the
+         * INSTANCE basename values
+         *
+         */
+        $prefixes = [ 'www', '' ];
+
         $testUrls = [];
 
         foreach ( self::PROTOCOLS_TO_TEST as $protocol ) {
@@ -134,9 +138,9 @@ final class ApacheConfigurationTest extends TestCase {
             foreach ( self::INSTANCES as $instance ) {
                 $basename = $instance[ 'basename' ];
 
-                foreach(self::PARENT_DOMAINS as $parentDomain ) {
+                foreach( $parentDomains as $parentDomain ) {
 
-                    foreach( self::PREFIXES as $prefix ) {
+                    foreach( $prefixes as $prefix ) {
                         $subdomain = $basename;
 
                         if ( $prefix ) {
