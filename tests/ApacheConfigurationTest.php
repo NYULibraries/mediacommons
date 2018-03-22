@@ -118,7 +118,9 @@ final class ApacheConfigurationTest extends TestCase {
                     foreach (self::PATHS as $path ) {
 
                         if ( $subdomain ) {
-                            $canonicalFullyQualifiedDomainName = $basename . '.' . self::CANONICAL_PARENT_DOMAIN_NAME;
+                            $canonicalFullyQualifiedDomainName = $basename ?
+                                $basename . '.' . self::CANONICAL_PARENT_DOMAIN_NAME :
+                                self::CANONICAL_PARENT_DOMAIN_NAME;
                             $fullyQualifiedDomainName = "${subdomain}.${parentDomain}";
                         } else {
                             $canonicalFullyQualifiedDomainName = self::CANONICAL_PARENT_DOMAIN_NAME;
