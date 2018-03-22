@@ -18,10 +18,6 @@ final class ApacheConfigurationTest extends TestCase {
     const PATHS = [ '', 'alt-ac', 'fieldguide', 'imr', 'intransition', 'mediacommons', 'tne' ];
     const PREFIXES = [ 'www', '' ];
 
-    const RESULT_EXPECTED = 'Expected';
-    const RESULT_GOT = 'Got';
-    const RESULT_REDIRECT_COUNT = 'Redirect count';
-
     /**
      * @dataProvider generateTestUrls
      */
