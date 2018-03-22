@@ -3,6 +3,8 @@ use PHPUnit\Framework\TestCase;
 
 final class ApacheConfigurationTest extends TestCase {
     const CANONICAL_PARENT_DOMAIN_NAME = 'mediacommons.org';
+    const CANONICAL_PROTOCOL = 'http';
+
     const INSTANCES = [
         'dev' => [
             'basename' => 'dev',
@@ -59,12 +61,12 @@ final class ApacheConfigurationTest extends TestCase {
                         }
 
                         if ( $path ) {
-                            $canonicalUrl = $canonicalFullyQualifiedDomainName . "/${path}/";
+                            $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/${path}/";
 
                             array_push( $testUrls, [ "${fullyQualifiedDomainName}/${path}", $canonicalUrl ] );
                             array_push( $testUrls, [ "${fullyQualifiedDomainName}/${path}/", $canonicalUrl ] );
                         } else {
-                            $canonicalUrl = $canonicalFullyQualifiedDomainName . '/';
+                            $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/";
 
                             array_push( $testUrls, [ "${fullyQualifiedDomainName}", $canonicalUrl ] );
                             array_push( $testUrls, [ "${fullyQualifiedDomainName}/", $canonicalUrl ] );
