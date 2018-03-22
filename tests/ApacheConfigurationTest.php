@@ -6,6 +6,11 @@
  *  Tests for MediaCommons Apache configuration:
  *  https://jira.nyu.edu/jira/browse/MC-392
  *
+ *  To run:
+ *
+ *      composer install
+ *      vendor/phpunit/phpunit/phpunit tests/ApacheConfigurationTest.php
+ *
  *  PHP version 5
  */
 
