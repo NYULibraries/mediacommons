@@ -24,7 +24,7 @@ final class ApacheConfigurationTest extends TestCase {
      * @dataProvider generateTestUrls
      */
     public function testRedirect( $testUrl, $expectedEndUrl ) {
-        list( $gotEndUrl, $numRedirections ) = $this->checkRedirect( $testUrl, $expectedEndUrl );
+        list( $gotEndUrl ) = $this->checkRedirect( $testUrl, $expectedEndUrl );
 
         $this->assertEquals( $expectedEndUrl, $gotEndUrl );
     }
@@ -98,9 +98,7 @@ final class ApacheConfigurationTest extends TestCase {
         // We don't use https yet, but might in the future.
         $effectiveUrl = preg_replace( '/^HTTPS/', 'https', $effectiveUrl );
 
-        $redirectCounts = curl_getinfo( $ch, CURLINFO_REDIRECT_COUNT );
-
-        return [ $effectiveUrl, $redirectCounts ];
+        return $effectiveUrl;
     }
 
 }
