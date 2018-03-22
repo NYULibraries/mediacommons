@@ -116,7 +116,11 @@ final class ApacheConfigurationTest extends TestCase {
      * @return array test data structured according to the PHPUnit data provider spec
      */
     public function generateTestUrls() {
-        return $this->generateTestUrlsMediacommonsDomain();
+        $testUrls = $this->generateTestUrlsMediacommonsDomain();
+
+        array_merge( $testUrls, $this->generateTestUrlsDlibDomain() );
+
+        return $testUrls;
     }
 
     public function generateTestUrlsMediacommonsDomain() {
@@ -187,6 +191,10 @@ final class ApacheConfigurationTest extends TestCase {
         }
 
         return $testUrls;
+    }
+
+    public function generateTestUrlsDlibDomain() {
+        return [];
     }
 
     public function checkRedirect( $url ) {
