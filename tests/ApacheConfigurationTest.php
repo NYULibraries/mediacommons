@@ -1,10 +1,36 @@
 <?php
+
+/**
+ *  Tests for MediaCommons Apache configuration
+ *
+ *  Tests for MediaCommons Apache configuration:
+ *  https://jira.nyu.edu/jira/browse/MC-392
+ *
+ *  PHP version 5
+ */
+
 use PHPUnit\Framework\TestCase;
 
+/**
+ *  Contains tests for Apache configuration.  At the moment, only redirects are
+ *  being tested.
+ *
+ *  For full explanation of the redirection scheme, see:
+ *  https://jira.nyu.edu/jira/browse/MC-392
+ */
 final class ApacheConfigurationTest extends TestCase {
+    /**
+     * All redirects should end up at this protocol and domain or subdomain of this
+     * domain.
+     */
     const CANONICAL_PARENT_DOMAIN_NAME = 'mediacommons.org';
     const CANONICAL_PROTOCOL = 'http';
 
+    /**
+     * The web server instances that we are testing.
+     *
+     * Basenames are used with PREFIX values to set subdomain.
+     */
     const INSTANCES = [
         'dev' => [
             'basename' => 'dev',
@@ -16,8 +42,21 @@ final class ApacheConfigurationTest extends TestCase {
             'basename' => '',
         ]
     ];
+
+    /**
+     * Possible start URL parent domains
+     */
     const PARENT_DOMAINS = [ 'mediacommons.org', 'media-commons.org' ];
+
+    /**
+     * Possible start paths
+     */
     const PATHS = [ '', 'alt-ac', 'fieldguide', 'imr', 'intransition', 'mediacommons', 'tne' ];
+
+    /** Possible start prefixes to be appended (with/withouth hyphen) to the
+     * INSTANCE basename values
+     *
+     */
     const PREFIXES = [ 'www', '' ];
 
     /**
@@ -29,6 +68,24 @@ final class ApacheConfigurationTest extends TestCase {
         $this->assertEquals( $expectedEndUrl, $gotEndUrl );
     }
 
+    /**
+     * Data provider for testRedirect test.
+     *
+     * Returns an array of arrays:
+     * [
+     *     [ "www-dev.mediacommons.org", "http://dev.mediacommons.org/",
+     *     [ "www-dev.mediacommons.org/", "http://dev.mediacommons.org/",
+     *     [ "www-dev.mediacommons.org/alt-ac", "http://dev.mediacommons.org/alt-ac/",
+     *     [ "www-dev.mediacommons.org/alt-ac/", "http://dev.mediacommons.org/alt-ac/",
+     *
+     *     ...
+     * ]
+     *
+     * The keys are start URLs, the values are the effective URLs that the user
+     * is expected to be directed to.
+     *
+     * @return array test data structured according to the PHPUnit data provider spec
+     */
     public function generateTestUrls() {
         $testUrls = [];
 
