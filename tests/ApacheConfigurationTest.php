@@ -94,6 +94,12 @@ final class ApacheConfigurationTest extends TestCase {
         curl_exec( $ch );
 
         $effectiveUrl = curl_getinfo( $ch, CURLINFO_EFFECTIVE_URL );
+
+        // Sometimes the URL starts with "HTTP:".  Normalize to lowercase.
+        $effectiveUrl = preg_replace( '/^HTTP/', 'http', $effectiveUrl );
+        // We don't use https yet, but might in the future.
+        $effectiveUrl = preg_replace( '/^HTTPS/', 'https', $effectiveUrl );
+
         $redirectCounts = curl_getinfo( $ch, CURLINFO_REDIRECT_COUNT );
 
         return [ $effectiveUrl, $redirectCounts ];
