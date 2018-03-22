@@ -118,7 +118,7 @@ final class ApacheConfigurationTest extends TestCase {
     public function generateTestUrls() {
         $testUrls = $this->generateTestUrlsMediacommonsDomain();
 
-        array_merge( $testUrls, $this->generateTestUrlsDlibDomain() );
+        $testUrls = array_merge( $testUrls, $this->generateTestUrlsDlibDomain() );
 
         return $testUrls;
     }
