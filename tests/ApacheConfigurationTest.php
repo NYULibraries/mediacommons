@@ -449,124 +449,13 @@ final class ApacheConfigurationTest extends TestCase {
                 [ 'http://www.media-commons.org/mediacommons', 'http://mediacommons.org/' ],
                 [ 'http://www.media-commons.org/mediacommons/', 'http://mediacommons.org/' ],
                 [ 'http://www.media-commons.org/tne', 'http://mediacommons.org/tne/' ],
-                [ 'http://www.media-commons.org/tne/x', 'http://mediacommons.org/tne/' ],
+                [ 'http://www.media-commons.org/tne/', 'http://mediacommons.org/tne/' ],
             ];
 
         $testUrls = $this->generateTestUrls();
 
         $this->assertEquals( $expectedTestUrls, $testUrls,
-             'testGenerateUrls() did not create the correct set of test URLS' );
-    }
-
-    /**
-     * @dataProvider generateTestUrlsSimple
-     *
-     * Simple verification that testGenerateTestUrls is specifying correct canonical
-     * URLs for dev, stage, and prod URLs.
-     */
-    public function testGenerateTestUrlsSimple( $testUrl, $expectedEndUrl ) {
-        $urlParts = parse_url( $testUrl );
-        $host = $urlParts[ 'host' ];
-        $path = array_key_exists( 'path', $urlParts ) ? rtrim( $urlParts[ 'path' ], '/' ): null;
-
-        if ( preg_match( '/dev/', $host ) ) {
-            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_HOSTS[ 'dev' ];
-        } else if ( preg_match( '/stage/', $host ) ) {
-            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_HOSTS[ 'stage' ];
-        } else {
-            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_HOSTS[ 'prod' ];
-        }
-
-        if ( $path && $path !== '/' && ! preg_match( '/\/mediacommons\/?$/', $path ) ) {
-            $correctExpectedEndUrl .= "${path}/";
-        } else {
-            $correctExpectedEndUrl .= '/';
-        }
-
-        $this->assertEquals( $correctExpectedEndUrl, $expectedEndUrl );
-    }
-
-    /**
-     * Data provider for testRedirect test.
-     *
-     * Returns an array of arrays:
-     * [
-     *     [ "www-dev.mediacommons.org", "http://dev.mediacommons.org/",
-     *     [ "www-dev.mediacommons.org/", "http://dev.mediacommons.org/",
-     *     [ "www-dev.mediacommons.org/alt-ac", "http://dev.mediacommons.org/alt-ac/",
-     *     [ "www-dev.mediacommons.org/alt-ac/", "http://dev.mediacommons.org/alt-ac/",
-     *
-     *     ...
-     * ]
-     *
-     * The keys are start URLs, the values are the effective URLs that the user
-     * is expected to be directed to.
-     *
-     * @return array test data structured according to the PHPUnit data provider spec
-     */
-    public function generateTestUrls() {
-        $testUrls = [];
-
-        foreach ( self::PROTOCOLS_TO_TEST as $protocol ) {
-
-            foreach ( self::HOSTS_TO_TEST as $instance => $hostsToTest ) {
-
-                foreach ( $hostsToTest as $hostToTest ) {
-
-                    foreach ( self::PATHS as $path ) {
-
-                        $canonicalHost = self::CANONICAL_HOSTS[ $instance ];
-
-                        if ( $path ) {
-
-                            if ( $path !== 'mediacommons' ) {
-                                $canonicalUrl = self::CANONICAL_PROTOCOL . "://${canonicalHost}/${path}/";
-                            } else {
-                                // Umbrella site is served from root
-                                $canonicalUrl = self::CANONICAL_PROTOCOL . "://${canonicalHost}/";
-                            }
-
-                            array_push( $testUrls, [ "${protocol}://${hostToTest}/${path}", $canonicalUrl ] );
-                            array_push( $testUrls, [ "${protocol}://${hostToTest}/${path}/", $canonicalUrl ] );
-                        } else {
-                            $canonicalUrl = self::CANONICAL_PROTOCOL . "://${canonicalHost}/";
-
-                            array_push( $testUrls, [ "${protocol}://${hostToTest}", $canonicalUrl ] );
-                            array_push( $testUrls, [ "${protocol}://${hostToTest}/", $canonicalUrl ] );
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        return $testUrls;
-    }
-
-    /**
-     * Do curl request to get effective URL, page content, and error, if any.
-     *
-     * @param $url
-     *
-     * @return array the final URL in the redirect chain, the content on that
-     *               page, and error, if any
-     */
-    public function checkRedirect( $url ) {
-        curl_setopt( self::$ch, CURLOPT_URL, $url );
-
-        $result = curl_exec( self::$ch );
-
-        $effectiveUrl = curl_getinfo( self::$ch, CURLINFO_EFFECTIVE_URL );
-
-        // Sometimes the URL starts with "HTTP:".  Normalize to lowercase.
-        $effectiveUrl = preg_replace( '/^HTTP/', 'http', $effectiveUrl );
-        // We don't use https yet, but might in the future.
-        $effectiveUrl = preg_replace( '/^HTTPS/', 'https', $effectiveUrl );
-
-        return [ $effectiveUrl, $result, curl_error( self::$ch ) ];
+                             'testGenerateUrls() did not create the correct set of test URLS' );
     }
 
 }
