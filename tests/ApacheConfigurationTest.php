@@ -81,7 +81,7 @@ final class ApacheConfigurationTest extends TestCase {
      * @dataProvider generateTestUrls
      */
     public function testRedirect( $testUrl, $expectedEndUrl ) {
-        $gotEndUrl = $this->checkRedirect( $testUrl, $expectedEndUrl );
+        $gotEndUrl = $this->checkRedirect( $testUrl );
 
         $failureMessage = "${testUrl} redirected to incorrect URL ${expectedEndUrl}; " .
                           "should redirect to ${gotEndUrl}";
