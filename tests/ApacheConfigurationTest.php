@@ -194,7 +194,40 @@ final class ApacheConfigurationTest extends TestCase {
     }
 
     public function generateTestUrlsDlibDomain() {
-        return [];
+        $domainSuffix = 'mc2.dlib.nyu.edu';
+
+        $testUrls = [];
+
+        foreach ( self::INSTANCES as $instance ) {
+            $basename = $instance[ 'basename' ];
+
+            $fullyQualifiedDomainName = "${basename}${domainSuffix}";
+
+            if ( $basename ) {
+                $canonicalFullyQualifiedDomainName = $basename . '.' . self::CANONICAL_PARENT_DOMAIN_NAME;
+            } else {
+                $canonicalFullyQualifiedDomainName = self::CANONICAL_PARENT_DOMAIN_NAME;
+            }
+
+            foreach ( self::PROTOCOLS_TO_TEST as $protocol ) {
+                foreach ( self::PATHS as $path ) {
+                    if ( $path ) {
+                        $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/${path}/";
+
+                        array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/${path}", $canonicalUrl ] );
+                        array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/${path}/", $canonicalUrl ] );
+                    } else {
+                        $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/";
+
+                        array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}", $canonicalUrl ] );
+                        array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/", $canonicalUrl ] );
+                    }
+                }
+            }
+
+        }
+
+        return $testUrls;
     }
 
     public function checkRedirect( $url ) {
