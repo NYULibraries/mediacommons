@@ -7,7 +7,7 @@
  *  https://jira.nyu.edu/jira/browse/MC-392
  *
  *  To run:
- *
+ *      # Install composer: https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx
  *      composer install
  *      vendor/phpunit/phpunit/phpunit tests/ApacheConfigurationTest.php
  *
@@ -17,8 +17,7 @@
 use PHPUnit\Framework\TestCase;
 
 /**
- *  Contains tests for Apache configuration.  At the moment, only redirects are
- *  being tested.
+ *  Contains tests for Apache configuration.
  *
  *  For full explanation of the redirection scheme, see:
  *  https://jira.nyu.edu/jira/browse/MC-392
@@ -110,7 +109,8 @@ final class ApacheConfigurationTest extends TestCase {
     /**
      * @dataProvider generateTestUrls
      *
-     * Simple verification that testGenerateTestUrls is creating correct test data
+     * Simple verification that testGenerateTestUrls is specifying correct canonical
+     * URLs for dev, stage, and prod URLs.
      */
     public function testGenerateTestUrls( $testUrl, $expectedEndUrl ) {
         $urlParts = parse_url( $testUrl );
@@ -188,6 +188,14 @@ final class ApacheConfigurationTest extends TestCase {
         return $testUrls;
     }
 
+    /**
+     * Do curl request to get effective URL, page content, and error, if any.
+     *
+     * @param $url
+     *
+     * @return array the final URL in the redirect chain, the content on that
+     *               page, and error, if any
+     */
     public function checkRedirect( $url ) {
         curl_setopt( self::$ch, CURLOPT_URL, $url );
 
