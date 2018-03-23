@@ -84,6 +84,7 @@ final class ApacheConfigurationTest extends TestCase {
 
         curl_setopt( self::$ch, CURLOPT_NOBODY, TRUE );
         curl_setopt( self::$ch, CURLOPT_FOLLOWLOCATION, TRUE );
+        curl_setopt( self::$ch, CURLOPT_RETURNTRANSFER, TRUE );
     }
 
     public static function tearDownAfterClass() {
@@ -185,7 +186,8 @@ final class ApacheConfigurationTest extends TestCase {
 
     public function checkRedirect( $url ) {
         curl_setopt( self::$ch, CURLOPT_URL, $url );
-        curl_exec( self::$ch );
+
+        $result = curl_exec( self::$ch );
 
         $effectiveUrl = curl_getinfo( self::$ch, CURLINFO_EFFECTIVE_URL );
 
