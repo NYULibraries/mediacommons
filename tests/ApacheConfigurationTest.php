@@ -97,8 +97,12 @@ final class ApacheConfigurationTest extends TestCase {
     public function testRedirect( $testUrl, $expectedEndUrl ) {
         list( $gotEndUrl, $responseContent, $error ) = $this->checkRedirect( $testUrl );
 
-        $failureMessage = "${testUrl} redirected to incorrect URL ${gotEndUrl}; " .
-                          "should redirect to ${expectedEndUrl}";
+        if ( $error ) {
+            $this->fail( "${testUrl} failed with error: \"${error}\"" );
+        } else {
+            $failureMessage = "${testUrl} redirected to incorrect URL ${gotEndUrl}; " .
+                              "should redirect to ${expectedEndUrl}";
+        }
 
         $this->assertEquals( $expectedEndUrl, $gotEndUrl, $failureMessage );
     }
