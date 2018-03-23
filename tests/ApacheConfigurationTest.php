@@ -107,12 +107,12 @@ final class ApacheConfigurationTest extends TestCase {
     }
 
     /**
-     * @dataProvider generateTestUrls
+     * @dataProvider generateTestUrlsSimple
      *
      * Simple verification that testGenerateTestUrls is specifying correct canonical
      * URLs for dev, stage, and prod URLs.
      */
-    public function testGenerateTestUrls( $testUrl, $expectedEndUrl ) {
+    public function testGenerateTestUrlsSimple( $testUrl, $expectedEndUrl ) {
         $urlParts = parse_url( $testUrl );
         $host = $urlParts[ 'host' ];
         $path = array_key_exists( 'path', $urlParts ) ? rtrim( $urlParts[ 'path' ], '/' ): null;
