@@ -86,6 +86,10 @@ final class ApacheConfigurationTest extends TestCase {
         curl_setopt( self::$ch, CURLOPT_FOLLOWLOCATION, TRUE );
     }
 
+    public static function tearDownAfterClass() {
+        curl_close( self::$ch );
+    }
+
     /**
      * @dataProvider generateTestUrls
      */
