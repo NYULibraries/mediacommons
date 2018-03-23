@@ -77,6 +77,15 @@ final class ApacheConfigurationTest extends TestCase {
      */
     const PATHS = [ '', 'alt-ac', 'fieldguide', 'imr', 'intransition', 'mediacommons', 'tne' ];
 
+    private static $ch;
+
+    public static function setUpBeforeClass() {
+        self::$ch = curl_init();
+
+        curl_setopt( self::$ch, CURLOPT_NOBODY, TRUE );
+        curl_setopt( self::$ch, CURLOPT_FOLLOWLOCATION, TRUE );
+    }
+
     /**
      * @dataProvider generateTestUrls
      */
@@ -171,15 +180,10 @@ final class ApacheConfigurationTest extends TestCase {
     }
 
     public function checkRedirect( $url ) {
-        $ch = curl_init();
+        curl_setopt( self::$ch, CURLOPT_URL, $url );
+        curl_exec( self::$ch );
 
-        curl_setopt( $ch, CURLOPT_URL, $url );
-        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, TRUE );
-        curl_setopt( $ch, CURLOPT_NOBODY, TRUE );
-
-        curl_exec( $ch );
-
-        $effectiveUrl = curl_getinfo( $ch, CURLINFO_EFFECTIVE_URL );
+        $effectiveUrl = curl_getinfo( self::$ch, CURLINFO_EFFECTIVE_URL );
 
         // Sometimes the URL starts with "HTTP:".  Normalize to lowercase.
         $effectiveUrl = preg_replace( '/^HTTP/', 'http', $effectiveUrl );
