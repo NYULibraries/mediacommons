@@ -95,7 +95,7 @@ final class ApacheConfigurationTest extends TestCase {
      * @dataProvider generateTestUrls
      */
     public function testRedirect( $testUrl, $expectedEndUrl ) {
-        $gotEndUrl = $this->checkRedirect( $testUrl );
+        list( $gotEndUrl, $responseContent, $error ) = $this->checkRedirect( $testUrl );
 
         $failureMessage = "${testUrl} redirected to incorrect URL ${gotEndUrl}; " .
                           "should redirect to ${expectedEndUrl}";
@@ -196,7 +196,7 @@ final class ApacheConfigurationTest extends TestCase {
         // We don't use https yet, but might in the future.
         $effectiveUrl = preg_replace( '/^HTTPS/', 'https', $effectiveUrl );
 
-        return $effectiveUrl;
+        return [ $effectiveUrl, $result, curl_error( self::$ch ) ];
     }
 
 }
