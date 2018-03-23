@@ -28,7 +28,11 @@ final class ApacheConfigurationTest extends TestCase {
      * All redirects should end up at this protocol and domain or subdomain of this
      * domain.
      */
-    const CANONICAL_PARENT_DOMAIN_NAME = 'mediacommons.org';
+    const CANONICAL_HOSTS = [
+        'dev' => 'dev.mediacommons.org',
+        'stage' => 'dev.mediacommons.org',
+        'prod' => 'mediacommons.org',
+    ];
     const CANONICAL_PROTOCOL = 'http';
 
     /**
@@ -41,15 +45,33 @@ final class ApacheConfigurationTest extends TestCase {
      *
      * Basenames are used with PREFIX values to set subdomain.
      */
-    const INSTANCES = [
+    const HOSTS_TO_TEST = [
         'dev' => [
-            'basename' => 'dev',
+            'devmc2.dlib.nyu.edu',
+
+            'dev.mediacommons.org',
+            'dev.media-commons.org',
+
+            'www-dev.mediacommons.org',
+            'www-dev.media-commons.org',
         ],
         'stage' => [
-            'basename' => 'stage',
+            'stagemc2.dlib.nyu.edu',
+
+            'stage.mediacommons.org',
+            'stage.media-commons.org',
+
+            'www-stage.mediacommons.org',
+            'www-stage.media-commons.org',
         ],
         'prod' => [
-            'basename' => '',
+            'mc2.dlib.nyu.edu',
+
+            'mediacommons.org',
+            'media-commons.org',
+
+            'www.mediacommons.org',
+            'www.media-commons.org',
         ]
     ];
 
@@ -81,11 +103,11 @@ final class ApacheConfigurationTest extends TestCase {
         $path = array_key_exists( 'path', $urlParts ) ? rtrim( $urlParts[ 'path' ], '/' ): null;
 
         if ( preg_match( '/dev/', $host ) ) {
-            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://dev.' . self::CANONICAL_PARENT_DOMAIN_NAME;
+            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_HOSTS[ 'dev' ];
         } else if ( preg_match( '/stage/', $host ) ) {
-            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://stage.' . self::CANONICAL_PARENT_DOMAIN_NAME;
+            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_HOSTS[ 'stage' ];
         } else {
-            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_PARENT_DOMAIN_NAME;
+            $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_HOSTS[ 'prod' ];
         }
 
         if ( $path && $path !== '/' ) {
@@ -116,113 +138,34 @@ final class ApacheConfigurationTest extends TestCase {
      * @return array test data structured according to the PHPUnit data provider spec
      */
     public function generateTestUrls() {
-        $testUrls = $this->generateTestUrlsMediacommonsDomain();
-
-        $testUrls = array_merge( $testUrls, $this->generateTestUrlsDlibDomain() );
-
-        return $testUrls;
-    }
-
-    public function generateTestUrlsMediacommonsDomain() {
-        /**
-         * Possible start URL parent domains
-         */
-        $parentDomains = [ 'mediacommons.org', 'media-commons.org' ];
-
-        /** Possible start prefixes to be appended (with/withouth hyphen) to the
-         * INSTANCE basename values
-         *
-         */
-        $prefixes = [ 'www', '' ];
-
         $testUrls = [];
 
         foreach ( self::PROTOCOLS_TO_TEST as $protocol ) {
 
-            foreach ( self::INSTANCES as $instance ) {
-                $basename = $instance[ 'basename' ];
+            foreach ( self::HOSTS_TO_TEST as $instance => $hostsToTest ) {
 
-                foreach( $parentDomains as $parentDomain ) {
+                foreach ( $hostsToTest as $hostToTest ) {
 
-                    foreach( $prefixes as $prefix ) {
-                        $subdomain = $basename;
+                    foreach ( self::PATHS as $path ) {
 
-                        if ( $prefix ) {
-                            if ( $subdomain ) {
-                                $subdomain = $prefix . '-' . $subdomain;
-                            } else {
-                                $subdomain = $prefix;
-                            }
+                        $canonicalHost = self::CANONICAL_HOSTS[ $instance ];
+
+                        if ( $path ) {
+                            $canonicalUrl = self::CANONICAL_PROTOCOL . "://${canonicalHost}/${path}/";
+
+                            array_push( $testUrls, [ "${protocol}://${hostToTest}/${path}", $canonicalUrl ] );
+                            array_push( $testUrls, [ "${protocol}://${hostToTest}/${path}/", $canonicalUrl ] );
                         } else {
-                            // Do nothing
-                        }
+                            $canonicalUrl = self::CANONICAL_PROTOCOL . "://${canonicalHost}/";
 
-                        foreach (self::PATHS as $path ) {
-
-                            if ( $subdomain ) {
-                                $canonicalFullyQualifiedDomainName = $basename ?
-                                    $basename . '.' . self::CANONICAL_PARENT_DOMAIN_NAME :
-                                    self::CANONICAL_PARENT_DOMAIN_NAME;
-                                $fullyQualifiedDomainName = "${subdomain}.${parentDomain}";
-                            } else {
-                                $canonicalFullyQualifiedDomainName = self::CANONICAL_PARENT_DOMAIN_NAME;
-                                $fullyQualifiedDomainName = "${parentDomain}";
-                            }
-
-                            if ( $path ) {
-                                $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/${path}/";
-
-                                array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/${path}", $canonicalUrl ] );
-                                array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/${path}/", $canonicalUrl ] );
-                            } else {
-                                $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/";
-
-                                array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}", $canonicalUrl ] );
-                                array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/", $canonicalUrl ] );
-                            }
-
+                            array_push( $testUrls, [ "${protocol}://${hostToTest}", $canonicalUrl ] );
+                            array_push( $testUrls, [ "${protocol}://${hostToTest}/", $canonicalUrl ] );
                         }
 
                     }
 
                 }
-            }
 
-        }
-
-        return $testUrls;
-    }
-
-    public function generateTestUrlsDlibDomain() {
-        $domainSuffix = 'mc2.dlib.nyu.edu';
-
-        $testUrls = [];
-
-        foreach ( self::INSTANCES as $instance ) {
-            $basename = $instance[ 'basename' ];
-
-            $fullyQualifiedDomainName = "${basename}${domainSuffix}";
-
-            if ( $basename ) {
-                $canonicalFullyQualifiedDomainName = $basename . '.' . self::CANONICAL_PARENT_DOMAIN_NAME;
-            } else {
-                $canonicalFullyQualifiedDomainName = self::CANONICAL_PARENT_DOMAIN_NAME;
-            }
-
-            foreach ( self::PROTOCOLS_TO_TEST as $protocol ) {
-                foreach ( self::PATHS as $path ) {
-                    if ( $path ) {
-                        $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/${path}/";
-
-                        array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/${path}", $canonicalUrl ] );
-                        array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/${path}/", $canonicalUrl ] );
-                    } else {
-                        $canonicalUrl = self::CANONICAL_PROTOCOL  . "://${canonicalFullyQualifiedDomainName}/";
-
-                        array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}", $canonicalUrl ] );
-                        array_push( $testUrls, [ "${protocol}://${fullyQualifiedDomainName}/", $canonicalUrl ] );
-                    }
-                }
             }
 
         }
