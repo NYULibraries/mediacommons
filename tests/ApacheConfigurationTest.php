@@ -125,7 +125,7 @@ final class ApacheConfigurationTest extends TestCase {
             $correctExpectedEndUrl = self::CANONICAL_PROTOCOL . '://' . self::CANONICAL_HOSTS[ 'prod' ];
         }
 
-        if ( $path && $path !== '/' ) {
+        if ( $path && $path !== '/' && ! preg_match( '/\/mediacommons\/?$/', $path ) ) {
             $correctExpectedEndUrl .= "${path}/";
         } else {
             $correctExpectedEndUrl .= '/';
@@ -166,7 +166,13 @@ final class ApacheConfigurationTest extends TestCase {
                         $canonicalHost = self::CANONICAL_HOSTS[ $instance ];
 
                         if ( $path ) {
-                            $canonicalUrl = self::CANONICAL_PROTOCOL . "://${canonicalHost}/${path}/";
+
+                            if ( $path !== 'mediacommons' ) {
+                                $canonicalUrl = self::CANONICAL_PROTOCOL . "://${canonicalHost}/${path}/";
+                            } else {
+                                // Umbrella site is served from root
+                                $canonicalUrl = self::CANONICAL_PROTOCOL . "://${canonicalHost}/";
+                            }
 
                             array_push( $testUrls, [ "${protocol}://${hostToTest}/${path}", $canonicalUrl ] );
                             array_push( $testUrls, [ "${protocol}://${hostToTest}/${path}/", $canonicalUrl ] );
