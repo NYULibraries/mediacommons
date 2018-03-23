@@ -25,8 +25,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class ApacheConfigurationTest extends TestCase {
     /**
-     * All redirects should end up at this protocol and domain or subdomain of this
-     * domain.
+     * All redirects should end up at these domains, at scheme CANONICAL_PROTOCOL.
      */
     const CANONICAL_HOSTS = [
         'dev' => 'dev.mediacommons.org',
@@ -41,9 +40,7 @@ final class ApacheConfigurationTest extends TestCase {
     const PROTOCOLS_TO_TEST = [ 'http' ];
 
     /**
-     * The web server instances that we are testing.
-     *
-     * Basenames are used with PREFIX values to set subdomain.
+     * Hosts to test, arranged by instance.
      */
     const HOSTS_TO_TEST = [
         'dev' => [
