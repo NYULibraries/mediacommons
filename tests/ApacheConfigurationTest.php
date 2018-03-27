@@ -197,7 +197,7 @@ final class ApacheConfigurationTest extends TestCase {
 
 
     /* Tests for $this->generateTestUrls().  They serve mainly as a double-check
-     * and to aid refactoring and updating of the code in this test class. */
+       and to aid refactoring and updating of the code in this test class. */
 
     /**
      * @dataProvider generateTestUrls
