@@ -241,6 +241,11 @@ final class ApacheConfigurationTest extends TestCase {
      * may not be worth keeping this test up-to-date.  testGenerateTestUrlsSimple()
      * is a very easy to maintain test, and can continue to provide a basic
      * double-check even if this test is dropped.
+     *
+     * Also, during development the first eyeball-check failed to detect a serious
+     * error (stage hosts were redirecting to dev canonical hosts).  The
+     * testGenerateTestUrlsSimple() catches errors like that.  Better to have
+     * multiple checks.
      */
     public function testGenerateTestUrls() {
         $expectedTestUrls =
