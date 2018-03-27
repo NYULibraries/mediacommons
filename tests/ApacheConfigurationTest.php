@@ -200,7 +200,7 @@ final class ApacheConfigurationTest extends TestCase {
      * and to aid refactoring and updating of the code in this test class. * /
 
     /**
-     * @dataProvider generateTestUrlsSimple
+     * @dataProvider generateTestUrls
      *
      * Simple verification that testGenerateTestUrls is specifying correct canonical
      * URLs for dev, stage, and prod URLs.
