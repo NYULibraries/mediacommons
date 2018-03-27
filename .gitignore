@@ -47,3 +47,5 @@ builds/*
 temp/*
 !temp/.commit-empty-dir
 
+# Composer stuff
+vendor/

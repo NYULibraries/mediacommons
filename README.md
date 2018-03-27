@@ -70,3 +70,42 @@ Flag | Description
 --- | ---
 h | Show brief help
 c | Specify the configuration file to use (e.g., -c example.conf).
+
+
+Run tests
+============
+
+Install composer: https://getcomposer.org/
+
+Install dependencies:
+
+     composer install
+     
+Run all tests:
+
+     vendor/phpunit/phpunit/phpunit tests/
+     
+Run Apache redirect tests only:
+
+     vendor/phpunit/phpunit/phpunit --filter "testRedirect" \
+         ApacheConfigurationTest tests/ApacheConfigurationTest.php
+ 
+Run simple test of the internal data provider for the redirect tests:
+
+     vendor/phpunit/phpunit/phpunit --filter "testGenerateTestUrlsSimple" \
+         ApacheConfigurationTest tests/ApacheConfigurationTest.php
+          
+Run comprehensive test of the internal data provider for the redirect tests:
+
+     vendor/phpunit/phpunit/phpunit --filter "testGenerateTestUrls$" \
+         ApacheConfigurationTest tests/ApacheConfigurationTest.php
+          
+Run both simple and comprehensive tests of the internal data provider for the redirect tests:
+
+     vendor/phpunit/phpunit/phpunit --filter "testGenerateTestUrls" \
+             ApacheConfigurationTest tests/ApacheConfigurationTest.php
+
+Run all tests in ApacheConfigurationTest:
+
+     vendor/phpunit/phpunit/phpunit tests/ApacheConfigurationTest.php
+ 
