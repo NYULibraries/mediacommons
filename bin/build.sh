@@ -211,16 +211,13 @@ if [ ! $SIMULATE ] ; then if is_drupal_online ; then echo "Successful: Drupal is
 if [ -f $BUILD_DIR/$BUILD_NAME/sites/default/settings.php ] ; then
   chmod 777 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php ;
   if [ $? ] ; then echo "Successful: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; else die ${LINENO} "test" "Fail: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; fi ;
-
-echo "// NO trailing slash! Autopopulated." >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-echo "// See build .conf to change value on build." >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-echo "define('BUILD_BASE_ROOT_URL', '${BUILD_BASE_ROOT_URL}');" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-echo "// Apache Solr module requieres $base_url" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-cat ${BUILD_APP_ROOT}/bin/baseurl.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-
-# Set Apache Solr environment (URL) and overwrite the one in database.
-echo "\$conf['apachesolr_environments']['solr']['url'] = '${MEDIACOMMONS_APACHESOLR_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-
+  echo "// NO trailing slash! Autopopulated." >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+  echo "// See build .conf to change value on build." >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+  echo "define('BUILD_BASE_ROOT_URL', '${BUILD_BASE_ROOT_URL}');" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+  echo "// Apache Solr module requieres $base_url" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+  cat ${BUILD_APP_ROOT}/bin/baseurl.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+  # Set Apache Solr environment (URL) and overwrite the one in database.
+  # echo "\$conf['apachesolr_environments']['solr']['url'] = '${MEDIACOMMONS_APACHESOLR_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
 fi ;
 
 if [ -f $BUILD_DIR/$BUILD_NAME/sites/default ] ; then

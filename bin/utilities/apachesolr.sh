@@ -33,10 +33,10 @@ done
 . $CONF_FILE
 
 # Apache Solr module requieres $base_url
-echo "\$base_url = '${BASE_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+# echo "\$base_url = '${BASE_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
 
 # Set Apache Solr environment (URL) and overwrite the one in database.
-echo "\$conf['apachesolr_environments']['solr']['url'] = '${MEDIACOMMONS_APACHESOLR_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+# echo "\$conf['apachesolr_environments']['solr']['url'] = '${MEDIACOMMONS_APACHESOLR_URL}';" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
 
 # while working in my VM
 

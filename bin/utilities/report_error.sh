@@ -49,7 +49,7 @@ for BUILD_NAME in `ls -1 | xargs -l readlink`
                 ${DRUSH} status --root=$BUILD_DIR/$BUILD_NAME --user=1 | mail -s "[${TODAY}] Fail - ${BUILD_NAME}" $EMAIL
             fi
         else
-          ${DRUSH}  status --root=$BUILD_DIR/$BUILD_NAME --user=1 | mail -s "[${TODAY}] Fail - ${BUILD_NAME}" $EMAIL
+          ${DRUSH} status --root=$BUILD_DIR/$BUILD_NAME --user=1 | mail -s "[${TODAY}] Fail - ${BUILD_NAME}" $EMAIL
         fi
     fi
 done
