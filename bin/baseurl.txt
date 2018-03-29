@@ -1,6 +1,20 @@
 
 $server_request_scheme = 'http';
 
+// cli [HOSTNAME]
+if (drupal_is_cli()) {
+  $hosts = array(
+    'devmc2.dlib.nyu.edu' => 'dev.mediacommons.org',
+    'stagemc2.dlib.nyu.edu' => 'stage.mediacommons.org',
+    'mc2.dlib.nyu.edu' => 'mediacommons.org',
+  );  
+  $server_name = $hosts[$_SERVER['HOSTNAME']];
+}
+// no cli [SERVER_NAME]
+else {
+  $server_name = $_SERVER['SERVER_NAME'];
+}
+
 if (
   (!empty($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == 'https') 
   || 
@@ -12,6 +26,4 @@ if (
   $server_request_scheme = 'https';
 }
 
-$base_url = $server_request_scheme . '://' . $_SERVER['SERVER_NAME'] . BUILD_BASE_ROOT_URL;
-
-
+$base_url = $server_request_scheme . '://' . $server_name . BUILD_BASE_ROOT_URL;
