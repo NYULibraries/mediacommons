@@ -7,6 +7,8 @@ source $MEDIACOMMONS/bin/$(basename $0 .sh)_common.sh
 
 DRUSH=$MEDIACOMMONS/bin/drush
 
+DRUSH_CRON_SUCCESS='Cron run successful.'
+
 function usage() {
     script_name=$(basename $0)
 
@@ -266,6 +268,34 @@ function do_database_grants() {
     done
 }
 
+function run_drush_cron_for_all_sites() {
+    # Set Solr URL
+    # https://jira.nyu.edu/jira/browse/MC-294
+    for site in "${selected_sites[@]}"
+    do
+        cd $MEDIACOMMONS/builds/$site
+        drushCommand="${DRUSH} cron --user=1"
+        drushOutput=$( $drushCommand 2>&1 )
+        if [[ $? -ne 0 ]] || [[ ! $drushOutput =~ $DRUSH_CRON_SUCCESS ]]
+        then
+            cat <<EOF >&2
+=============================================
+
+ERROR: \`${drushCommand}\` failed for ${site}.
+
+drush output: "${drushOutput}"
+
+Run drush cron manually:
+
+    cd ${MEDIACOMMONS}/builds/${site}
+    ${drushCommand}"
+
+=============================================
+EOF
+        fi
+    done
+}
+
 while getopts d:ef:u: opt
 do
     case $opt in
@@ -310,6 +340,8 @@ copy_database_dumps
 recreate_databases
 
 do_database_grants
+
+run_drush_cron_for_all_sites
 
 # This string tells the expect script wrapper that refresh run has completed.
 echo $SCRIPT_RUN_COMPLETE
