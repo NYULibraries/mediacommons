@@ -1,0 +1,10 @@
+
+$hostname = gethostname();
+
+if (isset($baseurl_hosts[$hostname])) {
+  $base_url = $baseurl_hosts[$hostname];
+}
+
+if (isset($apachesolr_environments_hosts[$hostname])) {
+  $conf['apachesolr_environments']['solr']['url'] = $apachesolr_environments_hosts[$hostname];
+}

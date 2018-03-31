@@ -86,7 +86,6 @@ projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
-    echo ${project}
     # -l run in legacy mode
     # -e environment we are building
     # -k use cookies to share databases
