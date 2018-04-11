@@ -35,6 +35,12 @@ done
 
 [ ! `grep -q 'DRUPAL_ROOT' ${BUILD_DIR}/${BUILD_BASE_NAME}/index.php` ] || die ${LINENO} "error" "${BUILD_DIR}/${BUILD_BASE_NAME} not a Drupal installation folder"
 
+if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/.htaccess ]]; then
+  mv ${BUILD_DIR}/${BUILD_BASE_NAME}/.htaccess ${BUILD_DIR}/${BUILD_BASE_NAME}/.htaccess.off
+  # but no one should read it (unless super user)
+  chmod 000 ${BUILD_DIR}/${BUILD_BASE_NAME}/.htaccess.off
+fi
+
 if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/robots.txt ]]; then
   mv ${BUILD_DIR}/${BUILD_BASE_NAME}/robots.txt ${BUILD_DIR}/${BUILD_BASE_NAME}/robots.txt.bk
 fi
