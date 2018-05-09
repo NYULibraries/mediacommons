@@ -139,10 +139,12 @@ if [ ! -d $BUILD_DIR ] ; then if [ ! $SIMULATE ] ; then eval $STEP_1 ; else tell
 # read password from configuration file; if not available or empty adding $TODAY as a temporary password
 if [ -z ${DRUPAL_ACCOUNT_PASS} -a ${DRUPAL_ACCOUNT_PASS}=="" ]; then DRUPAL_ACCOUNT_PASS=${TODAY} ; fi ;
 
-echo "Prepare new site using ${MAKE_FILE}." ;
+echo "Prepare new site using ${MAKE_FILE}."
 
 # Step 2: Download and prepare for the installation using make file
-STEP_2="${DRUSH} ${DEBUG} make --prepare-install -y ${MAKE_FILE} ${BUILD_DIR}/${BUILD_NAME} --uri=${BASE_URL} --environment=${ENVIRONMENT} --strict=0" ;
+STEP_2="${DRUSH} ${DEBUG} make --prepare-install -y ${MAKE_FILE} ${BUILD_DIR}/${BUILD_NAME} --strict=0" ;
+
+#  = array(${APACHESOLR_URL_ARRAY});" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
 
 # drush make --prepare-install command will fail with error
 # "Base path [PATH] already exists." if ${BUILD_DIR}/${BUILD_NAME} already exists.
@@ -166,6 +168,41 @@ if [ ! $SIMULATE ] ; then eval $STEP_2 ; else tell ${LINENO} 2 "${STEP_2}" ; fi 
 if [ $? ] ; then echo "Successful: Downloaded and prepared for the installation using make ${MAKE_FILE} and cofiguration ${CONF_FILE}." ; else die ${LINENO} 2 "Fail: Download and prepare for the installation using make make ${MAKE_FILE} and cofiguration ${CONF_FILE}." ; fi ;
 
 if [ ! $SIMULATE ] ; then [ -d $BUILD_DIR/$BUILD_NAME ] || die ${LINENO} 2 "Unable to install new site, build ${BUILD_DIR}/${BUILD_NAME} does not exist." ; fi
+
+echo "
+
+// NO trailing slash! Autopopulated.
+// See build .conf to change value on build.
+
+function __host_root() { 
+  \$hostname = gethostname();
+  \$hosts = ${BASE_URL_ARRAY};
+  if (isset(\$hosts[\$hostname])) {
+    return \$hosts[\$hostname];
+  }
+}
+
+function __host_apachesolr() { 
+  \$hostname = gethostname();
+  \$hosts = ${APACHESOLR_URL_ARRAY};
+  if (isset(\$hosts[\$hostname])) {
+    return \$hosts[\$hostname];
+  }
+}
+
+\$host_root_url = __host_root();
+\$host_apachesolr = __host_apachesolr();
+
+if (\$host_root_url) {
+  // Apache Solr module requieres base_url
+  \$base_url = \$host_root_url;
+}
+
+if (\$host_apachesolr) {
+  \$conf['apachesolr_environments']['solr']['url'] = \$host_apachesolr;
+}
+
+" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/default.settings.php
 
 # link to the latest build if BUILD_BASE_NAME it's different from BUILD_NAME
 if [ ! $SIMULATE ] ; then
@@ -210,13 +247,7 @@ if [ ! $SIMULATE ] ; then if is_drupal_online ; then echo "Successful: Drupal is
 
 if [ -f $BUILD_DIR/$BUILD_NAME/sites/default/settings.php ] ; then
   chmod 777 $BUILD_DIR/$BUILD_NAME/sites/default/settings.php ;
-  if [ $? ] ; then echo "Successful: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; else die ${LINENO} "test" "Fail: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; fi ;
-  echo "// NO trailing slash! Autopopulated." >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-  echo "// See build .conf to change value on build." >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-  echo "\$baseurl_hosts = array(${BASE_URL_ARRAY});" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-  echo "// Apache Solr module requieres $base_url" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-  echo "\$apachesolr_environments_hosts = array(${APACHESOLR_URL_ARRAY});" >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
-  cat ${BUILD_APP_ROOT}/bin/settings.txt >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/settings.php
+  if [ $? ] ; then echo "Successful: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; else die ${LINENO} "test" "Fail: Change ${BUILD_DIR}/${BUILD_NAME}/sites/default/settings.php permission to 777." ; fi ;  
 fi ;
 
 if [ -f $BUILD_DIR/$BUILD_NAME/sites/default ] ; then
@@ -274,15 +305,15 @@ if [ ! $SIMULATE ] ;
 fi ;
 
 # Step 9: Set custume modules
-STEP_9="${DIR}/utilities/enable_modules.sh -c ${CONF_FILE}"
+# STEP_9="${DIR}/utilities/enable_modules.sh -c ${CONF_FILE}"
 
-if [ ! $SIMULATE ] ;
-  then
-    eval $STEP_9 ;
-    if [ $? ] ; then echo "Successful: Assing list of modules to enable for this specific site." ; else die ${LINENO} 9 "Fail: Assing list of modules to enable for this specific site." ; fi ;
-  else
-    tell ${LINENO} 9 "${STEP_9}" ;
-fi;
+# if [ ! $SIMULATE ] ;
+#   then
+    # eval $STEP_9 ;
+    # if [ $? ] ; then echo "Successful: Assing list of modules to enable for this specific site." ; else die ${LINENO} 9 "Fail: Assing list of modules to enable for this specific site." ; fi ;
+  # else
+    # tell ${LINENO} 9 "${STEP_9}" ;
+# fi;
 
 if [ ! $SIMULATE ] ;
   then
