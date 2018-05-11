@@ -108,6 +108,8 @@ done
 
 ${BUILD_APP_ROOT}/bin/utilities/solr.sh -c ${BUILD_APP_ROOT}/configs/build.conf
 
+${BUILD_APP_ROOT}/bin/utilities/cron.sh -c ${BUILD_APP_ROOT}/configs/build.conf
+
 ${BUILD_APP_ROOT}/bin/utilities/mcblocks.sh -c ${BUILD_APP_ROOT}/configs/build.conf
 
 ${BUILD_APP_ROOT}/bin/utilities/patches.sh -c ${BUILD_APP_ROOT}/configs/build.conf
