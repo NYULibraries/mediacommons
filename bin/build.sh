@@ -174,11 +174,25 @@ echo "
 // NO trailing slash! Autopopulated.
 // See build .conf to change value on build.
 
-function __host_root() { 
+define('MEDIACOMMONS_PROJECT', '${BUILD_NAME}');
+
+function __host_sites() {
+  \$host = __host_root();
+  return ${HOST_SITES};
+}
+
+function __host_root() {
   \$hostname = gethostname();
   \$hosts = ${BASE_URL_ARRAY};
   if (isset(\$hosts[\$hostname])) {
     return \$hosts[\$hostname];
+  }
+}
+
+function __host_baseurl() {
+  \$sites = __host_sites();
+  if (\$sites && isset(\$sites[MEDIACOMMONS_PROJECT])) { 
+    return \$sites[MEDIACOMMONS_PROJECT];
   }
 }
 
@@ -190,11 +204,11 @@ function __host_apachesolr() {
   }
 }
 
-\$host_root_url = __host_root();
+\$host_root_url = __host_baseurl();
 \$host_apachesolr = __host_apachesolr();
-
+  
+// Apache Solr module requieres base_url
 if (\$host_root_url) {
-  // Apache Solr module requieres base_url
   \$base_url = \$host_root_url;
 }
 
