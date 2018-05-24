@@ -1,0 +1,22 @@
+
+function __host_root() {
+  $hostname = gethostname();
+  $hosts = array(__HOSTROOT__);
+  if (isset($hosts[$hostname])) {
+    return $hosts[$hostname];
+  }
+}
+
+function __projects() {
+  return array(__PROJECTS__);
+}
+
+$hostname = gethostname();
+
+if (isset($baseurl_hosts[$hostname])) {
+  $base_url = $baseurl_hosts[$hostname];
+}
+
+if (isset($apachesolr_environments_hosts[$hostname])) {
+  $conf['apachesolr_environments']['solr']['url'] = $apachesolr_environments_hosts[$hostname];
+}

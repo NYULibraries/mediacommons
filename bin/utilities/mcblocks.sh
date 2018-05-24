@@ -46,17 +46,15 @@ echo $$ > ${TEMP_DIR}/mcblocks.pid
 
 if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
 
-# Mark all the documents in the site
-${DRUSH} -d -y mc-init-fieldguide --root=${BUILD_APP_ROOT}/builds/mediacommons
+${DRUSH} -d -y init-fieldguide --root=${BUILD_APP_ROOT}/builds/mediacommons
 
 projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
-    ${DRUSH} -d -y mc-init-fieldguide --root=${BUILD_APP_ROOT}/builds/${project}
+    ${DRUSH} -d -y init-fieldguide --root=${BUILD_APP_ROOT}/builds/${project}
 done
 
 rm -f ${TEMP_DIR}/mcblocks.pid
 
 exit 0
-

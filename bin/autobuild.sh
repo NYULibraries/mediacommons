@@ -1,15 +1,15 @@
 #!/bin/bash
 
 die () {
-  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}";
+  echo "file: ${0} | line: ${1} | step: ${2} | message: ${3}"
   if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
     rm -f ${TEMP_DIR}/autobuild.pid
   fi
-  exit 1;
+  exit 1
 }
 
 tell () {
-  echo "file: ${0} | line: ${1} | step: ${2} | command: ${3}";
+  echo "file: ${0} | line: ${1} | step: ${2} | command: ${3}"
 }
 
 ENVIRONMENT="development"
@@ -59,7 +59,7 @@ done
 # load configuration file
 . $CONF_FILE
 
-if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi ;
+if [ -z ${DRUSH+x} ]; then die ${LINENO} "test" "Fail: Drush is not set"; fi;
 
 # Check if process it's running
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
@@ -86,7 +86,6 @@ projects=(${PROJECTS})
 
 for project in ${projects[*]}
   do
-    echo ${project}
     # -l run in legacy mode
     # -e environment we are building
     # -k use cookies to share databases
@@ -106,6 +105,8 @@ for project in ${projects[*]}
         echo ${LINENO} "build" "Fail: Build ${project}"
     fi
 done
+
+${BUILD_APP_ROOT}/bin/utilities/cron.sh -c ${BUILD_APP_ROOT}/configs/build.conf
 
 ${BUILD_APP_ROOT}/bin/utilities/solr.sh -c ${BUILD_APP_ROOT}/configs/build.conf
 
