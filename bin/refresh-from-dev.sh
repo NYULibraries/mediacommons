@@ -296,6 +296,52 @@ EOF
     done
 }
 
+function rebuild_solr_indexes() {
+    local confFile=$MEDIACOMMONS/configs/build.conf
+    local solrScriptCommand="$MEDIACOMMONS/bin/utilities/solr.sh -c $confFile"
+
+    if [ -e $confFile ]
+    then
+        solrScriptCommandOutput=$( $solrScriptCommand 2>&1 )
+    else
+      cat <<EOF >&2
+=============================================
+
+ERROR: Can't run \`${solrScriptCommand}\` because ${confFile} does not exist.
+
+Rebuild the Solr indexes manually:
+
+    # Delete Apache Solr index
+    # Replace [MEDIACOMMONS_APACHESOLR_URL] with URL to appropriate Solr
+    # Example: http://localhost:8983/solr/mediacommons
+    curl "[MEDIACOMMONS_APACHESOLR_URL]/update?stream.body=<delete><query>*:*</query></delete>&commit=true&wt=json"
+
+    # Mark all the documents in the site
+    ${DRUSH} -y solr-mark-all --root=${MEDIACOMMONS}/builds/mediacommons
+
+    # Run index off all documents
+    ${DRUSH} -y solr-index --root=${MEDIACOMMONS}/builds/mediacommons
+
+    ${DRUSH} -y solr-metadata --root=${MEDIACOMMONS}/builds/mediacommons
+
+    for project in $( printf '%s ' "${selected_sites[@]}" )
+    do
+        # Mark all the documents in the site
+        ${DRUSH} -y solr-mark-all --root=${MEDIACOMMONS}/builds/${project}
+        # Run index off all documents
+        ${DRUSH} -y solr-index --root=${MEDIACOMMONS}/builds/${project}
+    done
+
+    for project in $( printf '%s ' "${selected_sites[@]}" )
+    do
+        ${DRUSH} -d -y solr-metadata --root=${MEDIACOMMONS}/builds/${project}
+    done
+
+=============================================
+EOF
+    fi
+}
+
 while getopts d:ef:u: opt
 do
     case $opt in
@@ -342,6 +388,8 @@ recreate_databases
 do_database_grants
 
 run_drush_cron_for_all_sites
+
+rebuild_solr_indexes
 
 # This string tells the expect script wrapper that refresh run has completed.
 echo $SCRIPT_RUN_COMPLETE
