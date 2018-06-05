@@ -114,6 +114,8 @@ ${BUILD_APP_ROOT}/bin/utilities/mcblocks.sh -c ${BUILD_APP_ROOT}/configs/build.c
 
 ${BUILD_APP_ROOT}/bin/utilities/patches.sh -c ${BUILD_APP_ROOT}/configs/build.conf
 
+${BUILD_APP_ROOT}/bin/utilities/crondb.sh -c ${BUILD_APP_ROOT}/configs/build.conf
+
 if [[ -f ${TEMP_DIR}/autobuild.pid ]]; then
   rm -f ${TEMP_DIR}/autobuild.pid
 fi
