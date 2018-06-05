@@ -43,3 +43,4 @@ for project in ${projects[*]}
 done
 
 exit 0
+
