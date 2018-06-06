@@ -216,6 +216,10 @@ if (\$host_apachesolr) {
   \$conf['apachesolr_environments']['solr']['url'] = \$host_apachesolr;
 }
 
+\$databases['default']['default']['charset'] = 'utf8mb4';
+
+\$databases['default']['default']['collation'] = 'utf8mb4_general_ci';
+
 " >> ${BUILD_DIR}/${BUILD_BASE_NAME}/sites/default/default.settings.php
 
 # link to the latest build if BUILD_BASE_NAME it's different from BUILD_NAME
