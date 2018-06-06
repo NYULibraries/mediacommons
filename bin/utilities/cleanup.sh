@@ -37,8 +37,6 @@ done
 
 if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/.htaccess ]]; then
   mv ${BUILD_DIR}/${BUILD_BASE_NAME}/.htaccess ${BUILD_DIR}/${BUILD_BASE_NAME}/.htaccess.off
-  # but no one should read it (unless super user)
-  chmod 000 ${BUILD_DIR}/${BUILD_BASE_NAME}/.htaccess.off
 fi
 
 if [[ -f ${BUILD_DIR}/${BUILD_BASE_NAME}/robots.txt ]]; then
