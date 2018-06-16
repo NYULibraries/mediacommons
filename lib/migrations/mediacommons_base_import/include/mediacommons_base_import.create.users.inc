@@ -1,6 +1,5 @@
 <?php
 
-
 function _update_profile_fields() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   try {
@@ -360,7 +359,7 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
     	try {
     		if ($fields_map[$key]['type'] == 'text_textfield') {
           try {
-            $this_field->set(substr(utf8_encode($field_value), 0, $fields_map[$key]['settings']['max_length']));
+            $this_field->set(substr($field_value, 0, $fields_map[$key]['settings']['max_length']));
           }
           catch (EntityMetadataWrapperException $exc) {
             drush_print_r($exc->getTraceAsString());
@@ -368,7 +367,7 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
         }
         else if ($fields_map[$key]['type'] == 'link_field') {
           try {
-            $this_field->set(array('url' => utf8_encode($field_value)));
+            $this_field->set(array('url' => $field_value));
           }
           catch (EntityMetadataWrapperException $exc ) {
             drush_print_r($exc->getTraceAsString());
@@ -376,7 +375,7 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
         }
     		else if ($fields_map[$key]['type'] == 'text_textarea') {
     			try {
-            $this_field->set(array('value' => utf8_encode($field_value), 'format' => 'filtered_html'));
+            $this_field->set(array('value' => $field_value, 'format' => 'filtered_html'));
     			}
     			catch (EntityMetadataWrapperException $exc) {
             drush_print_r($exc->getTraceAsString());
@@ -384,7 +383,7 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
     	    }
     			else if ($fields_map[$key]['type'] == 'telephone_default') {
             try {
-    					  $this_field->set(utf8_encode($field_value));
+    					  $this_field->set($field_value);
     				  }
     					catch (EntityMetadataWrapperException $exc) {
                 drush_print_r($exc->getTraceAsString());
@@ -392,7 +391,7 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
     				}
     				else if ($fields_map[$key]['type'] == 'email_textfield') {
     					try {
-    					  $this_field->set(utf8_encode($field_value));
+    					  $this_field->set($field_value);
     				  }
     					catch (EntityMetadataWrapperException $exc) {
                 drush_print_r($exc->getTraceAsString());
@@ -403,7 +402,7 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
                 $this_field->set($field_value);
               }
     				  elseif ($fields_map[$key]['field'] === 'field_organization') {
-    					  $field_value = trim(utf8_encode($field_value));
+    					  $field_value = trim($field_value);
     						/** Organizations */
     						$vocabulary = taxonomy_vocabulary_machine_name_load('organizations');
     						/** Does the vocabulary organizations exist */
@@ -440,7 +439,7 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
     						$vocabulary = taxonomy_vocabulary_machine_name_load ( 'state' );
     						/** Does the vocabulary organizations exist */
     						if ( $vocabulary ) {
-    						  $field_value = trim (utf8_encode($field_value));
+    						  $field_value = trim ($field_value);
     							$query = new EntityFieldQuery;
     							$term = $query
     							  ->entityCondition('entity_type', 'taxonomy_term')
@@ -459,7 +458,7 @@ function mediacommons_base_import_migrate_profile_fields(&$account, $olduser) {
       		$vocabulary = taxonomy_vocabulary_machine_name_load('country');
       		/** Does the vocabulary organizations exist */
       		if ($vocabulary) {
-      		  $field_value = trim (utf8_encode($field_value));
+      		  $field_value = trim ($field_value);
       		  $query = new EntityFieldQuery;
       		  $term = $query->entityCondition('entity_type', 'taxonomy_term')->propertyCondition('name', $field_value)->propertyCondition('vid', $vocabulary->vid)->execute();
       		  if ($term) {
