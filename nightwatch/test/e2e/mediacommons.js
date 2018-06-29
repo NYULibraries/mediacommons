@@ -8,6 +8,13 @@ module.exports = {
     });
   },
 
+  'MC-442 - Can reach clean URLs' : function (browser) {
+    const request = require('request');
+    request('http://mediacommons.local/users/ana-cabral-martins', function (error, response) {
+      browser.assert.equal(response.statusCode, 200);
+    });
+  },
+
   'MC-442 - Can visit clean URLs' : function (browser) {
     browser
       .assert.urlEquals("http://mediacommons.local/users/ana-cabral-martins")
@@ -21,20 +28,6 @@ module.exports = {
         console.log('[perform]: Finished Test:', client.currentTest.name)
       })
       .end();
-  }
+  }   
 
-  
-    
-
-
-
-      
-
-    // part two:
-    //browser
-    //  .assert.containsText('body', 'dwyl.com') // assert body contains text
-    //  .saveScreenshot(conf.imgpath(browser) + 'dwyl.png')
-    //  .end();
-
-   //  }
   };
