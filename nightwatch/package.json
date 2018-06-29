@@ -30,6 +30,7 @@
     "env2": "^2.1.1",
     "mime-types": "^2.1.13",
     "nodemon": "^1.11.0",
+    "request": "^2.87.0",
     "selenium-server": "^3.8.1"
   },
   "keywords": [

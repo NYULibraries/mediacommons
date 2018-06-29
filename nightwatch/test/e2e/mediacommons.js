@@ -11,7 +11,7 @@ module.exports = {
   'MC-442 - Can reach clean URLs' : function (browser) {
     const request = require('request');
     request('http://mediacommons.local/users/ana-cabral-martins', function (error, response) {
-      browser.assert.equal(response.statusCode, 200);
+      browser.assert.equal(response.statusCode, 500);
     });
   },
 
