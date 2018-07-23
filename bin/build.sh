@@ -178,13 +178,15 @@ define('MEDIACOMMONS_PROJECT', '${BUILD_NAME}');
 
 function __host_sites() {
   \$host = __host_root();
-  return ${HOST_SITES};
+  \$GLOBALS['mc_sites'] = \$mc_sites = ${HOST_SITES};
+  return \$mc_sites;
 }
 
 function __host_root() {
-  \$hostname = gethostname();
+  \$hostname = php_uname('n');
   \$hosts = ${BASE_URL_ARRAY};
   if (isset(\$hosts[\$hostname])) {
+    \$GLOBALS['mc_umbrella_baseurl'] = \$hosts[\$hostname];
     return \$hosts[\$hostname];
   }
 }
@@ -192,6 +194,7 @@ function __host_root() {
 function __host_baseurl() {
   \$sites = __host_sites();
   if (\$sites && isset(\$sites[MEDIACOMMONS_PROJECT])) { 
+    \$GLOBALS['mc_site_baseurl'] = \$sites[MEDIACOMMONS_PROJECT];
     return \$sites[MEDIACOMMONS_PROJECT];
   }
 }
