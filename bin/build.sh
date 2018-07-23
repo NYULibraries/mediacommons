@@ -200,7 +200,7 @@ function __host_baseurl() {
 }
 
 function __host_apachesolr() { 
-  \$hostname = gethostname();
+  \$hostname = php_uname('n');
   \$hosts = ${APACHESOLR_URL_ARRAY};
   if (isset(\$hosts[\$hostname])) {
     return \$hosts[\$hostname];
