@@ -7,7 +7,7 @@
     "node": ">=4.4.6"
   },
   "scripts": {
-    "test": "nightwatch --env default"
+    "test": "export DISPLAY=:10 && nightwatch --env default"
   },
   "repository": {
     "type": "git",
