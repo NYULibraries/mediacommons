@@ -172,7 +172,13 @@ if [ ! $SIMULATE ] ; then [ -d $BUILD_DIR/$BUILD_NAME ] || die ${LINENO} 2 "Unab
 echo "
 
 // NO trailing slash! Autopopulated.
-// See build .conf to change value on build.
+
+// Configure stage and prod to turn off warning messages
+// https://jira.nyu.edu/jira/browse/MC-453
+if (strpos(php_uname('n'), 'devmc') === false) {
+  // Turn off all error reporting
+  error_reporting(0);
+}
 
 define('MEDIACOMMONS_PROJECT', '${BUILD_NAME}');
 
