@@ -1,18 +1,33 @@
 diff --git a/apachesolr_search.module b/apachesolr_search.module
-index c6858e9..0bb26f7 100644
+index 7cc0d0c..8d2b98c 100644
 --- a/apachesolr_search.module
 +++ b/apachesolr_search.module
-@@ -1521,10 +1521,11 @@ function apachesolr_search_preprocess_search_results(&$variables) {
+@@ -1523,14 +1523,25 @@ function apachesolr_search_preprocess_search_results(&$variables) {
+       $variables['description'] = '';
        return NULL;
      }
-     $total = $variables['response']->response->numFound;
-+    $start = (int) $variables['response']->response->start + 1; // https://jira.nyu.edu/jira/browse/MC-377
+-    $total = $variables['response']->response->numFound;
++
      $params = $variables['query']->getParams();
--
-+    $params['start'] = $start; // wrong numbers... module bug. https://jira.nyu.edu/jira/browse/MC-375
+ 
++    $total = $variables['response']->response->numFound;
++
++    $params['start'] = $start = (int) $variables['response']->response->start + 1; // https://jira.nyu.edu/jira/browse/MC-377
++
++    $params['end'] = $end = (int) $start + $params['rows'] - 1;
++    
++    if ($end > $total) {
++      $params['end'] = $end = $total; 
++    }
++
      $variables['description'] = t('Showing items @start through @end of @total.', array(
 -      '@start' => $params['start'] + 1,
-+      '@start' => $params['start'], // https://jira.nyu.edu/jira/browse/MC-377
-       '@end' => $params['start'] + $params['rows'] - 1,
+-      '@end' => $params['start'] + $params['rows'] - 1,
++      '@start' => $params['start'],
++      '@end' => $end,
        '@total' => $total,
      ));
++
+     // Redefine the pager if it was missing
+     pager_default_initialize($total, $params['rows']);
+     $variables['pager'] = theme('pager', array('tags' => NULL));
